@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 - 순수 JSON 형식으로만 출력할 것 (마크다운이나 다른 형식 없이):
 
 {
-  "questions": [
+  "quizzes": [
     {
       "id": 1,
       "question": "질문 내용",
