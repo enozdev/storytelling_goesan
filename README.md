@@ -1,7 +1,5 @@
-
 # AI_quiz_walk_goesan
-산막이옛길 ai 퀴즈 산책 프로그램입니다.
-
+산막이옛길 AI 퀴즈 산책 프로그램입니다.
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
