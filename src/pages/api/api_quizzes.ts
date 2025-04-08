@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 {
   "quizzes": [
     {
-      "id": 1,
+      "id": 1부터 10까지 증가하는 숫자,
       "question": "질문 내용",
       "options": {
         "A": "보기 A 내용",

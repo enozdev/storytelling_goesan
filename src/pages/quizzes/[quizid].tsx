@@ -110,7 +110,6 @@ export default function QuizDetail() {
             value={`/quizes/${question.id}`}
             size={200}
             level="H"
-            includeMargin={true}
           />
         </div>
       </div>
