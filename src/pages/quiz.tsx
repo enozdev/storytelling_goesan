@@ -21,11 +21,15 @@ export default function Quiz() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // 페이지 로드 시 저장된 퀴즈 불러오기
+  // 페이지 로드 시 저장된 퀴즈와 주제 불러오기
   useEffect(() => {
     const savedQuestions = localStorage.getItem('quizQuestions');
+    const savedTopic = localStorage.getItem('quizTopic');
     if (savedQuestions) {
       setQuizzes(JSON.parse(savedQuestions));
+    }
+    if (savedTopic) {
+      setTopic(savedTopic);
     }
   }, []);
 
@@ -33,12 +37,13 @@ export default function Quiz() {
     try {
       setError("");
       setIsLoading(true);
-      const res = await fetch("/api/geminiAPI", {
+      const res = await fetch("/api/api_quizzes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({  
           message: topic,
-          options: []
+          options: [],
+          conversationHistory: JSON.parse(localStorage.getItem('conversationHistory') || '[]'),
         }),
       });
 
@@ -50,8 +55,13 @@ export default function Quiz() {
         setQuizzes([]);
       } else if (data.quizzes) {
         setQuizzes(data.quizzes);
-        // 퀴즈 데이터를 localStorage에 저장
+        // 퀴즈 데이터와 주제를 localStorage에 저장
         localStorage.setItem('quizQuestions', JSON.stringify(data.quizzes));
+        localStorage.setItem('quizTopic', topic);
+        // conversationHistory 저장
+        if (data.conversationHistory) {
+          localStorage.setItem('conversationHistory', JSON.stringify(data.conversationHistory));
+        }
       } else if (data.text) {
         setError(data.text);
         setQuizzes([]);
@@ -71,7 +81,9 @@ export default function Quiz() {
   // 저장된 퀴즈 삭제 함수
   const clearSavedQuestions = () => {
     localStorage.removeItem('quizQuestions');
+    localStorage.removeItem('quizTopic');
     setQuizzes([]);
+    setTopic("");
   };
 
   return (
@@ -109,6 +121,10 @@ export default function Quiz() {
           onClick={clearSavedQuestions}
           style= {{ backgroundColor: '#ff4443',
                     color: 'white',
+                    border: 'none',
+                    padding: '3px 8px',
+                    borderRadius: '2px',
+                    cursor: 'pointer'
                   }}
         >
           저장된 퀴즈 삭제
@@ -144,12 +160,17 @@ export default function Quiz() {
                 value={`/quizzes/${q.id}`}
                 size={100}
                 level="H"
-                includeMargin={true}
               />
             </div>
+            <button 
+              style={{cursor: 'pointer'}}
+            >
+              문제 재생성하기
+            </button>
           </div>
         ))}
       </div>
+      <button style={{cursor: 'pointer'}}>인쇄하기</button>
     </div>
   );
 }

@@ -28,6 +28,45 @@ export default function QuizDetail() {
     }
   }, [quizid]);
 
+  const regenerateQuestion = async () => {
+    try {
+      const response = await fetch('/api/api_quiz', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          quizId: quizid,
+          message: localStorage.getItem('quizTopic'),
+          conversationHistory: JSON.parse(localStorage.getItem('conversationHistory') || '[]'),
+        }),
+      });
+      
+
+      if (!response.ok) {
+        throw new Error('문제 재생성에 실패했습니다.');
+      }
+
+      const data = await response.json();
+      console.log("API 응답:", data);
+      const newQuestion = data.quizzes[0];
+      
+      // 로컬 스토리지 업데이트
+      const savedQuizzes = localStorage.getItem('quizQuestions');
+      if (savedQuizzes) {
+        const quizzes: Quiz[] = JSON.parse(savedQuizzes);
+        const updatedQuizzes = quizzes.map(q =>
+          q.id === Number(quizid) ? newQuestion : q
+        );
+        localStorage.setItem('quizQuestions', JSON.stringify(updatedQuizzes));
+        setQuestion(newQuestion);
+      }
+    } catch (error) {
+      console.error('문제 재생성 중 오류 발생:', error);
+      alert('문제 재생성에 실패했습니다.');
+    }
+  };
+  
   if (!question) {
     return <div>문제를 찾을 수 없습니다.</div>;
   }
@@ -36,6 +75,12 @@ export default function QuizDetail() {
     <div style={{ padding: 20 }}>
       <h1>문제 {question.id}</h1>
       <div style={{ marginBottom: 20 }}>
+        <button 
+          style={{cursor: 'pointer'}}
+          onClick={regenerateQuestion}
+        >
+          문제 재생성하기
+        </button>
         <h2>질문</h2>
         <p>{question.question}</p>
       </div>
