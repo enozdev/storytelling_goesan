@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model QuizDB {
+  quizID    Int      @id @default(autoincrement())
+  quizIP    String   @db.VarChar(100)
+  quizQR    String  
+  quizQ     String
+  quizAA    String
+  quizAB    String
+  quizAC    String
+  quizAD    String
+  quizAns   String
+}
+
+model adminLogin {
+  ID        Int      @id @default(autoincrement()) 
+  adminID   String   @db.VarChar(20)
+  adminPWD  String   @db.VarChar(20)
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  adminID   String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([adminID])
+}
