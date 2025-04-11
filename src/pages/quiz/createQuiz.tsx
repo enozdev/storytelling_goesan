@@ -87,7 +87,7 @@ export default function Quiz() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 20, width: '40%', margin: '0 auto' }}>
       <h1>괴산 문제 생성기</h1>
       <input
         type="text"
@@ -142,7 +142,7 @@ export default function Quiz() {
               borderRadius: 5,
               cursor: 'pointer'
             }}
-            onClick={() => router.push(`/quizzes/${q.id}`)}
+            onClick={() => router.push(`/quiz/my_quiz/${q.id}`)}
           >
             <h3>문제 {q.id}</h3>
             <p><strong>질문:</strong> {q.question}</p>
@@ -157,7 +157,7 @@ export default function Quiz() {
             <p><strong>정답:</strong> {q.answer}</p>
             <div style={{ marginTop: 10, textAlign: 'center' }}>
               <QRCodeSVG 
-                value={`/quizzes/${q.id}`}
+                value={`/quiz/my_quiz/${q.id}`}
                 size={100}
                 level="H"
               />
