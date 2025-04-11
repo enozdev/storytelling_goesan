@@ -1,37 +1,27 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// 보호된 페이지 목록
-const protectedPaths = [
-  '/quizList',
-];
-
 export async function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname;
-  
-  // 보호된 페이지에 접근하는 경우에만 인증 체크
-  if (protectedPaths.some(protectedPath => path.startsWith(protectedPath))) {
-    const adminSession = request.cookies.get('adminSession')?.value;
+  const url = request.nextUrl;
+  console.log('Middleware triggered for path:', url.pathname);
 
-    if (!adminSession) {
+  // 정확한 경로만 보호
+  if (url.pathname === '/quiz/quizList') {
+    const sessionId = request.cookies.get('adminSession')?.value;
+    console.log('Session ID from cookie:', sessionId);
+
+    if (!sessionId) {
+      console.log('No session found, redirecting to login');
       return NextResponse.redirect(new URL('/adminLogin', request.url));
     }
 
-    try {
-      const sessionData = JSON.parse(adminSession);
-      if (Date.now() > sessionData.expiresAt) {
-        // 세션이 만료된 경우
-        return NextResponse.redirect(new URL('/adminLogin', request.url));
-      }
-    } catch (error) {
-      // 세션 데이터가 유효하지 않은 경우
-      return NextResponse.redirect(new URL('/adminLogin', request.url));
-    }
+    // 세션이 있는 경우에만 진행
+    return NextResponse.next();
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/quizList/:path*'],
+  matcher: '/quiz/quizList',
 }; 
