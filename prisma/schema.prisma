@@ -31,7 +31,7 @@ model adminLogin {
   adminPWD  String   @db.VarChar(20)
 }
 
-model Session {
+model session {
   id        String   @id @default(uuid())
   adminID   String
   expiresAt DateTime

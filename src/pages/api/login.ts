@@ -22,15 +22,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const sessionData = {
-    adminID: admin.adminID,
-    loggedIn: true,
-    expiresAt: Date.now() + SESSION_DURATION
-  };
+  // 기존 세션 삭제
+  await prisma.session.deleteMany({
+    where: { adminID: admin.adminID }
+  });
 
-  console.log(sessionData);
+  // 새 세션 생성
+  const session = await prisma.session.create({
+    data: {
+      adminID: admin.adminID,
+      expiresAt: new Date(Date.now() + SESSION_DURATION)
+    }
+  });
 
-  res.setHeader('Set-Cookie', `adminSession=${JSON.stringify(sessionData)}; Path=/; Max-Age=${SESSION_DURATION/1000}; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
+  // 쿠키에는 세션 ID만 저장
+  res.setHeader('Set-Cookie', `adminSession=${session.id}; Path=/; Max-Age=${SESSION_DURATION/1000}; SameSite=Strict${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
 
   return res.status(200).json({ 
     message: "Login successful",
