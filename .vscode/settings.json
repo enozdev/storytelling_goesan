@@ -1,0 +1,28 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma",
+    "editor.formatOnSave": true
+  },
+  "prisma.format.quickFix": true,
+  "prisma.format.quickFixMissingFields": true,
+  "prisma.format.quickFixMissingAttributes": true,
+  "prisma.format.quickFixMissingArguments": true,
+  "prisma.format.quickFixMissingTypes": true
+}
