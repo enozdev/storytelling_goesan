@@ -1,16 +1,19 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextApiRequest, NextApiResponse } from "next";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!process.env.GEMINI_API_KEY) {  // ts error 방지
+  if (!process.env.GEMINI_API_KEY) {
+    // ts error 방지
     return res.status(500).json({ error: "GEMINI_API_KEY is not defined" });
   }
 
@@ -20,7 +23,7 @@ export default async function handler(
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
   if (!quizId) {
-    return res.status(400).json({ error: 'quizId is required' });
+    return res.status(400).json({ error: "quizId is required" });
   }
 
   // "괴산"만 허용
@@ -62,32 +65,35 @@ export default async function handler(
 }
 `;
 
-  const updatedHistory = [...conversationHistory, { role: "user", parts: [{ text: prompt }] }];
-
+  const updatedHistory = [
+    ...conversationHistory,
+    { role: "user", parts: [{ text: prompt }] },
+  ];
 
   try {
     const result = await model.generateContent({ contents: updatedHistory });
     const response = await result.response;
     const text = response.text();
 
-    
     try {
-      const cleanJson = text.replace(/```json\n?|\n?```/g, '').trim();
+      const cleanJson = text.replace(/```json\n?|\n?```/g, "").trim();
       const jsonResponse = JSON.parse(cleanJson);
-      
-      const finalHistory = [...updatedHistory, { role: "model", parts: [{ text: JSON.stringify(jsonResponse) }] }];
+
+      const finalHistory = [
+        ...updatedHistory,
+        { role: "model", parts: [{ text: JSON.stringify(jsonResponse) }] },
+      ];
 
       res.status(200).json({
         ...jsonResponse,
-        conversationHistory: finalHistory
+        conversationHistory: finalHistory,
       });
-
     } catch (error) {
-      console.error('JSON 파싱 에러:', error);
-      res.status(500).json({ error: '문제 생성 중 오류가 발생했습니다.' });
+      console.error("JSON 파싱 에러:", error);
+      res.status(500).json({ error: "문제 생성 중 오류가 발생했습니다." });
     }
   } catch (error) {
-    console.error('API 호출 에러:', error);
-    res.status(500).json({ error: '문제 생성 중 오류가 발생했습니다.' });
+    console.error("API 호출 에러:", error);
+    res.status(500).json({ error: "문제 생성 중 오류가 발생했습니다." });
   }
 }

@@ -13,27 +13,47 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model QuizDB {
-  quizID    Int      @id @default(autoincrement())
-  quizIP    String   @db.VarChar(100)
-  quizQR    String  
-  quizQ     String
-  quizAA    String
-  quizAB    String
-  quizAC    String
-  quizAD    String
-  quizAns   String
+model QuizSet {
+  id        Int      @id @default(autoincrement())
+  title     String // 문제 세트 제목
+  topic     String // 주제 (예: 괴산의 역사)
+  quizzes   Quiz[] // 1:N 관계
+  createdAt DateTime @default(now())
+  createdBy String // 생성자 IP
+}
+
+model Quiz {
+  id            Int      @id @default(autoincrement())
+  quizSetId     Int // QuizSet 외래키
+  quizSet       QuizSet  @relation(fields: [quizSetId], references: [id]) // quizSet 객체 가리킴
+  question      String   @db.Text
+  options       Option[] // 1:N 관계
+  answer        String // 정답 (A, B, C, D 중 하나)
+  questionOrder Int
+
+  @@index([quizSetId])
+}
+
+model Option {
+  id      Int    @id @default(autoincrement())
+  quizId  Int // Quiz 외래키
+  quiz    Quiz   @relation(fields: [quizId], references: [id]) // quiz 객체 가리킴
+  letter  String @db.Char(1) // A, B, C, D
+  content String @db.Text
+  qrCode  String // QR 코드 URL
+
+  @@index([quizId])
 }
 
 model adminLogin {
-  ID        Int      @id @default(autoincrement()) 
-  adminID   String   @db.VarChar(20)
-  adminPWD  String   @db.VarChar(20)
+  ID       Int    @id @default(autoincrement())
+  adminID  String @db.VarChar(20)
+  adminPWD String @db.VarChar(20)
 }
 
 model session {
   id        String   @id @default(uuid())
-  adminID   String
+  adminID   String   @db.VarChar(20) // 관리자 ID 
   expiresAt DateTime
   createdAt DateTime @default(now())
 
