@@ -23,26 +23,19 @@ model QuizSet {
 }
 
 model Quiz {
-  id            Int      @id @default(autoincrement())
-  quizSetId     Int // QuizSet 외래키
-  quizSet       QuizSet  @relation(fields: [quizSetId], references: [id]) // quizSet 객체 가리킴
-  question      String   @db.Text
-  options       Option[] // 1:N 관계
+  id            Int     @id @default(autoincrement())
+  quizSetId     Int // QuizSet 외래키 
+  quizSet       QuizSet @relation(fields: [quizSetId], references: [id]) // quizSet 객체 가리킴
+  question      String  @db.Text
+  optionA       String  @db.Text
+  optionB       String  @db.Text
+  optionC       String  @db.Text
+  optionD       String  @db.Text
   answer        String // 정답 (A, B, C, D 중 하나)
+  qrCode        String // QR 코드 URL
   questionOrder Int
 
   @@index([quizSetId])
-}
-
-model Option {
-  id      Int    @id @default(autoincrement())
-  quizId  Int // Quiz 외래키
-  quiz    Quiz   @relation(fields: [quizId], references: [id]) // quiz 객체 가리킴
-  letter  String @db.Char(1) // A, B, C, D
-  content String @db.Text
-  qrCode  String // QR 코드 URL
-
-  @@index([quizId])
 }
 
 model adminLogin {
