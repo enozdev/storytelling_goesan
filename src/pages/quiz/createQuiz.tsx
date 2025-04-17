@@ -1,5 +1,33 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import QuizForm from "../../components/quiz/QuizForm";
+import QuizList from "../../components/quiz/QuizList";
+import LatestQuizList from "../../components/quiz/LatestQuizList";
+
+// localStorage 48시간 만료 함수 => localStorage에는 chatpgt 대화기록 존재
+const setWithExpiry = (
+  key: string,
+  value: any,
+  expiryInHours: number = 144
+) => {
+  const item = {
+    value,
+    expiry: new Date().getTime() + expiryInHours * 60 * 60 * 1000,
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+};
+
+const getWithExpiry = (key: string) => {
+  const itemStr = localStorage.getItem(key);
+  if (!itemStr) return null;
+
+  const item = JSON.parse(itemStr);
+  if (new Date().getTime() > item.expiry) {
+    localStorage.removeItem(key);
+    return null;
+  }
+  return item.value;
+};
 
 interface Quiz {
   id: number;
@@ -10,6 +38,7 @@ interface Quiz {
   optionD: string;
   answer: string;
   questionOrder: number;
+  qrCode: string;
 }
 
 interface QuizSet {
@@ -22,17 +51,17 @@ interface QuizSet {
 
 export default function Quiz() {
   const router = useRouter();
-  const [topic, setTopic] = useState("");
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [latestQuizSet, setLatestQuizSet] = useState<QuizSet | null>(null);
+  const [topic, setTopic] = useState("");
+  const [teamName, setTeamName] = useState("");
 
   useEffect(() => {
     const fetchLatestQuiz = async () => {
-      // 퀴즈 최신 목록 불러오기
       try {
-        const response = await fetch("/api/latestQuiz");
+        const response = await fetch("/api/getLastestQuiz");
         if (!response.ok) {
           throw new Error("퀴즈를 불러오는데 실패했습니다.");
         }
@@ -46,23 +75,26 @@ export default function Quiz() {
     fetchLatestQuiz();
   }, []);
 
-  // Gemini API로 퀴즈 생성
-  const generateQuizzes = async () => {
+  const generateQuizzes = async (inputTopic: string) => {
     try {
       setError("");
       setIsLoading(true);
+      setTopic(inputTopic);
 
-      if (!topic.trim()) {
+      if (!inputTopic.trim()) {
         setError("주제를 입력해주세요.");
         setIsLoading(false);
         return;
       }
 
-      const response = await fetch("/api/api_quizzes", {
+      const conversationHistory = getWithExpiry("geminiConversation") || [];
+
+      const response = await fetch("/api/gptQuizzes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: topic,
+          message: inputTopic,
+          conversationHistory,
         }),
       });
 
@@ -72,11 +104,14 @@ export default function Quiz() {
 
       const data = await response.json();
 
+      if (data.conversationHistory) {
+        setWithExpiry("geminiConversation", data.conversationHistory, 144);
+      }
+
       if (!data.quizzes || !Array.isArray(data.quizzes)) {
         throw new Error("퀴즈 데이터 형식이 올바르지 않습니다.");
       }
 
-      // Gemini API 응답을 DB에 저장하도록 형식 변환
       const convertedQuizzes = data.quizzes.map((quiz: any) => ({
         id: quiz.id,
         question: quiz.question,
@@ -86,6 +121,7 @@ export default function Quiz() {
         optionD: quiz.options.D,
         answer: quiz.answer,
         questionOrder: quiz.questionOrder,
+        qrCode: quiz.qrCode,
       }));
 
       setQuizzes(convertedQuizzes);
@@ -99,16 +135,10 @@ export default function Quiz() {
     }
   };
 
-  const handleSubmit = async () => {
+  const saveQuizSet = async () => {
     try {
       setError("");
       setIsLoading(true);
-
-      if (!topic.trim()) {
-        setError("주제를 입력해주세요.");
-        setIsLoading(false);
-        return;
-      }
 
       if (quizzes.length === 0) {
         setError(
@@ -118,13 +148,13 @@ export default function Quiz() {
         return;
       }
 
-      // 1. QuizSet 생성
-      const quizSetRes = await fetch("/api/quizSet", {
+      const quizSetRes = await fetch("/api/saveQuizSet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: `${topic} 퀴즈 세트`,
           topic: topic,
+          teamName: teamName,
         }),
       });
 
@@ -134,9 +164,8 @@ export default function Quiz() {
 
       const quizSet = await quizSetRes.json();
 
-      // 2. 각 퀴즈 생성
       const quizPromises = quizzes.map(async (quiz, index) => {
-        const quizRes = await fetch("/api/quiz", {
+        const quizRes = await fetch("/api/saveQuiz", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -148,7 +177,7 @@ export default function Quiz() {
             optionD: quiz.optionD,
             answer: quiz.answer,
             questionOrder: index + 1,
-            qrCode: `/quiz/my_quiz/${quiz.id}`,
+            qrCode: quiz.qrCode,
           }),
         });
 
@@ -163,10 +192,8 @@ export default function Quiz() {
 
       alert("퀴즈가 성공적으로 저장되었습니다!");
       setQuizzes([]);
-      setTopic("");
 
-      // 최신 퀴즈 목록 새로고침
-      const latestResponse = await fetch("/api/latestQuiz");
+      const latestResponse = await fetch("/api/getLastestQuiz");
       if (!latestResponse.ok) {
         throw new Error("최신 퀴즈를 불러오는데 실패했습니다.");
       }
@@ -182,91 +209,23 @@ export default function Quiz() {
     }
   };
 
-  const handleViewLatestQuiz = () => {
-    router.push("/quiz/latest");
-  };
-
   return (
     <div style={{ padding: 20, width: "40%", margin: "0 auto" }}>
       <h1>괴산 문제 생성기</h1>
-      <input
-        type="text"
-        value={topic}
-        onChange={(e) => setTopic(e.target.value)}
-        placeholder="예: 괴산의 역사, 괴산의 특산물"
-        style={{ width: "100%", padding: 10, fontSize: 16 }}
+
+      <QuizForm
+        onSubmit={generateQuizzes}
+        isLoading={isLoading}
+        teamName={teamName}
+        onTeamNameChange={setTeamName}
       />
-      <div style={{ marginTop: 10, display: "flex", gap: 10 }}>
-        <button onClick={generateQuizzes} disabled={isLoading}>
-          {isLoading ? "생성중..." : "AI로 문제 생성하기"}
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading || quizzes.length === 0}
-        >
-          문제 저장하기
-        </button>
-      </div>
 
       {error && <div style={{ color: "red" }}>{error}</div>}
 
-      {quizzes.map((quiz, index) => (
-        <div
-          key={index}
-          style={{ marginTop: 20, padding: 15, border: "1px solid #ddd" }}
-        >
-          <h3>문제 {index + 1}</h3>
-          <p>
-            <strong>질문:</strong> {quiz.question}
-          </p>
-          <div>
-            <strong>보기:</strong>
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              <li>A. {quiz.optionA}</li>
-              <li>B. {quiz.optionB}</li>
-              <li>C. {quiz.optionC}</li>
-              <li>D. {quiz.optionD}</li>
-            </ul>
-          </div>
-          <p>
-            <strong>정답:</strong> {quiz.answer}
-          </p>
-        </div>
-      ))}
+      <QuizList quizzes={quizzes} onSave={saveQuizSet} isLoading={isLoading} />
 
-      {latestQuizSet && (
-        <div
-          style={{ marginTop: 40, borderTop: "2px solid #ddd", paddingTop: 20 }}
-        >
-          <h2>최근 저장된 퀴즈</h2>
-          <h3>{latestQuizSet.title}</h3>
-          <p>주제: {latestQuizSet.topic}</p>
-          <p>생성일: {new Date(latestQuizSet.createdAt).toLocaleString()}</p>
-
-          {latestQuizSet.quizzes.map((quiz) => (
-            <div
-              key={quiz.id}
-              style={{ marginTop: 20, padding: 15, border: "1px solid #ddd" }}
-            >
-              <h3>문제 {quiz.questionOrder}</h3>
-              <p>
-                <strong>질문:</strong> {quiz.question}
-              </p>
-              <div>
-                <strong>보기:</strong>
-                <ul style={{ listStyle: "none", padding: 0 }}>
-                  <li>A. {quiz.optionA}</li>
-                  <li>B. {quiz.optionB}</li>
-                  <li>C. {quiz.optionC}</li>
-                  <li>D. {quiz.optionD}</li>
-                </ul>
-              </div>
-              <p>
-                <strong>정답:</strong> {quiz.answer}
-              </p>
-            </div>
-          ))}
-        </div>
+      {quizzes.length === 0 && latestQuizSet && (
+        <LatestQuizList quizSet={latestQuizSet} />
       )}
     </div>
   );

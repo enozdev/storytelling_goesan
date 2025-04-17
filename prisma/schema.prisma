@@ -16,6 +16,7 @@ datasource db {
 model QuizSet {
   id        Int      @id @default(autoincrement())
   title     String // 문제 세트 제목
+  teamName  String // 팀명
   topic     String // 주제 (예: 괴산의 역사)
   quizzes   Quiz[] // 1:N 관계
   createdAt DateTime @default(now())

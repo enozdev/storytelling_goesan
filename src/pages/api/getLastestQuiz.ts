@@ -1,3 +1,5 @@
+// 가장 최근 퀴즈 세트를 가져오는 API
+
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 
@@ -24,7 +26,7 @@ export default async function handler(
     });
 
     if (!latestQuizSet) {
-      return res.status(404).json({ message: "No quiz set found" });
+      return res.status(200).json(null);
     }
 
     return res.status(200).json(latestQuizSet);

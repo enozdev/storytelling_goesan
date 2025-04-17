@@ -1,12 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextApiResponse, NextApiRequest } from "next";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!process.env.GEMINI_API_KEY) {  // ts error 방지
+  if (!process.env.GEMINI_API_KEY) {
+    // ts error 방지
     return res.status(500).json({ error: "GEMINI_API_KEY is not defined" });
   }
 
@@ -15,13 +19,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-   // "괴산"만 허용
+  // "괴산"만 허용
   if (!message.includes("괴산")) {
     return res.status(200).json({ text: "그건 알맞지 않은 질문이에요!" });
   }
 
-  const prompt = 
-`너는 대한민국 충청북도 괴산군에 대한 '${message}' 주제를 바탕으로 문제를 생성할 거야.
+  const prompt = `너는 대한민국 충청북도 괴산군에 대한 '${message}' 주제를 바탕으로 문제를 생성할 거야.
 
 절대로 상상하거나 추측하지 말고, 반드시 신뢰할 수 있는 실제 정보(정부 자료, 위키백과 등)만 사용해.
 정보가 확실하지 않으면 그에 대한 문제를 만들지 말고 건너뛰어.
@@ -53,7 +56,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 `;
 
-  const updatedHistory = [...conversationHistory, { role: "user", parts: [{ text: prompt }] }];
+  const updatedHistory = [
+    ...conversationHistory,
+    { role: "user", parts: [{ text: prompt }] },
+  ];
 
   try {
     const result = await model.generateContent({
@@ -62,24 +68,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const response = await result.response;
     const text = response.text();
-    
+
     try {
       // 마크다운 형식 제거
-      const cleanJson = text.replace(/```json\n?|\n?```/g, '').trim();
+      const cleanJson = text.replace(/```json\n?|\n?```/g, "").trim();
       const jsonResponse = JSON.parse(cleanJson);
-      
+
       // 응답을 대화 기록에 추가
-      const finalHistory = [...updatedHistory, { role: "model", parts: [{ text: JSON.stringify(jsonResponse) }] }];
-      
+      const finalHistory = [
+        ...updatedHistory,
+        { role: "model", parts: [{ text: JSON.stringify(jsonResponse) }] },
+      ];
+
       res.status(200).json({
         ...jsonResponse,
-        conversationHistory: finalHistory
+        conversationHistory: finalHistory,
       });
-
     } catch (parseError) {
       res.status(200).json({ text });
     }
-
   } catch (error) {
     console.error("Gemini API Error:", error);
     res.status(500).json({ error: "Failed to fetch from Gemini API" });
