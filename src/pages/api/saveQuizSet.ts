@@ -11,7 +11,7 @@ export default async function handler(
   }
 
   try {
-    const { title, topic } = req.body;
+    const { title, topic, teamName } = req.body;
     const clientIp = getClientIp(req);
 
     if (!title || !topic) {
@@ -22,6 +22,7 @@ export default async function handler(
       data: {
         title,
         topic,
+        teamName: teamName || null,
         createdBy: clientIp,
       },
     });
