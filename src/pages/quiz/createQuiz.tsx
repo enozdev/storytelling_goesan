@@ -61,7 +61,7 @@ export default function Quiz() {
   useEffect(() => {
     const fetchLatestQuiz = async () => {
       try {
-        const response = await fetch("/api/getLastestQuiz");
+        const response = await fetch("/api/quiz-set/last");
         if (!response.ok) {
           throw new Error("퀴즈를 불러오는데 실패했습니다.");
         }
@@ -89,7 +89,7 @@ export default function Quiz() {
 
       const conversationHistory = getWithExpiry("geminiConversation") || [];
 
-      const response = await fetch("/api/gptQuizzes", {
+      const response = await fetch("/api/quiz-set/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +148,7 @@ export default function Quiz() {
         return;
       }
 
-      const quizSetRes = await fetch("/api/saveQuizSet", {
+      const quizSetRes = await fetch("/api/quiz-set/saveDB", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -165,7 +165,7 @@ export default function Quiz() {
       const quizSet = await quizSetRes.json();
 
       const quizPromises = quizzes.map(async (quiz, index) => {
-        const quizRes = await fetch("/api/saveQuiz", {
+        const quizRes = await fetch("/api/quiz/saveDB", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -193,7 +193,7 @@ export default function Quiz() {
       alert("퀴즈가 성공적으로 저장되었습니다!");
       setQuizzes([]);
 
-      const latestResponse = await fetch("/api/getLastestQuiz");
+      const latestResponse = await fetch("/api/quiz-set/last");
       if (!latestResponse.ok) {
         throw new Error("최신 퀴즈를 불러오는데 실패했습니다.");
       }

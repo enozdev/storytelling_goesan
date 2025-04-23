@@ -1,3 +1,5 @@
+////////////////// 아직 개발 미완료 ////////////////////
+
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient } from "@prisma/client";
 

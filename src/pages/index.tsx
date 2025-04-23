@@ -2,7 +2,7 @@ import router from "next/router";
 
 export default function Home() {
   const handleLogout = () => {
-    fetch("/api/logout", {
+    fetch("/api/auth/logout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
