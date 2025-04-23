@@ -1,3 +1,5 @@
+////////////////// 아직 개발 미완료 ////////////////////
+
 import { useRouter } from "next/router";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";

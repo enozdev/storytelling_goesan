@@ -15,7 +15,7 @@ const QuizList = () => {
   useEffect(() => {
     const fetchQuizSets = async () => {
       try {
-        const response = await fetch("/api/getAllQuizzes");
+        const response = await fetch("/api/quiz/all");
         if (!response.ok) {
           throw new Error("퀴즈 세트를 불러오는데 실패했습니다.");
         }
