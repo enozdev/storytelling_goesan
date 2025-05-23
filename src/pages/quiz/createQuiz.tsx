@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import QuizForm from "../../components/quiz/QuizForm";
-import QuizList from "../../components/quiz/QuizList";
-import LatestQuizList from "../../components/quiz/LatestQuizList";
+import QuizList from "../../components/quiz/QuizSet";
+import LatestQuizList from "../../components/quiz/LatestQuizSet";
 
 // localStorage 48시간 만료 함수 => localStorage에는 chatpgt 대화기록 존재
 const setWithExpiry = (

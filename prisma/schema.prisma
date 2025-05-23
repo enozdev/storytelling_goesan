@@ -44,12 +44,3 @@ model adminLogin {
   adminID  String @db.VarChar(20)
   adminPWD String @db.VarChar(20)
 }
-
-model session {
-  id        String   @id @default(uuid())
-  adminID   String   @db.VarChar(20) // 관리자 ID 
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([adminID])
-}
