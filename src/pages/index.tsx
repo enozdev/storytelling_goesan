@@ -17,7 +17,7 @@ export default function Home() {
           퀴즈 생성
         </button>
 
-        <button onClick={() => router.push("/adminLogin")}>
+        <button onClick={() => router.push("/admin/login")}>
           관리자 로그인
         </button>
         <button onClick={handleLogout}>관리자 로그아웃</button>
