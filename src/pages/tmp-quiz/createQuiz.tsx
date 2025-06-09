@@ -3,9 +3,8 @@ import { useRouter } from "next/router";
 import QuizForm from "../../components/quiz/QuizForm";
 import QuizList from "../../components/quiz/QuizSet";
 import LatestQuizList from "../../components/quiz/LatestQuizSet";
-import { HomeIcon } from "@heroicons/react/24/solid";
 
-// localStorage 48시간 만료 함수
+// localStorage 48시간 만료 함수 => localStorage에는 chatpgt 대화기록 존재
 const setWithExpiry = (
   key: string,
   value: any,
@@ -59,22 +58,22 @@ export default function Quiz() {
   const [topic, setTopic] = useState("");
   const [teamName, setTeamName] = useState("");
 
-  // useEffect(() => {
-  //   const fetchLatestQuiz = async () => {
-  //     try {
-  //       const response = await fetch("/api/quiz-set/last");
-  //       if (!response.ok) {
-  //         throw new Error("퀴즈를 불러오는데 실패했습니다.");
-  //       }
-  //       const data = await response.json();
-  //       setLatestQuizSet(data);
-  //     } catch (err) {
-  //       console.error("퀴즈 로딩 에러:", err);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchLatestQuiz = async () => {
+      try {
+        const response = await fetch("/api/quiz-set/last");
+        if (!response.ok) {
+          throw new Error("퀴즈를 불러오는데 실패했습니다.");
+        }
+        const data = await response.json();
+        setLatestQuizSet(data);
+      } catch (err) {
+        console.error("퀴즈 로딩 에러:", err);
+      }
+    };
 
-  //   fetchLatestQuiz();
-  // }, []);
+    fetchLatestQuiz();
+  }, []);
 
   const generateQuizzes = async (inputTopic: string) => {
     try {
@@ -195,6 +194,9 @@ export default function Quiz() {
       setQuizzes([]);
 
       const latestResponse = await fetch("/api/quiz-set/last");
+      if (!latestResponse.ok) {
+        throw new Error("최신 퀴즈를 불러오는데 실패했습니다.");
+      }
       const latestData = await latestResponse.json();
       setLatestQuizSet(latestData);
     } catch (err) {
@@ -208,43 +210,23 @@ export default function Quiz() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-4 py-6 flex flex-col items-center">
-      <h1 className="text-2xl font-bold text-green-700 mb-4">
-        괴산 문제 생성기
-      </h1>
+    <div style={{ padding: 20, width: "40%", margin: "0 auto" }}>
+      <h1>괴산 문제 생성기</h1>
 
-      <div className="w-full max-w-md space-y-6">
-        <QuizForm
-          onSubmit={generateQuizzes}
-          isLoading={isLoading}
-          teamName={teamName}
-          onTeamNameChange={setTeamName}
-        />
+      <QuizForm
+        onSubmit={generateQuizzes}
+        isLoading={isLoading}
+        teamName={teamName}
+        onTeamNameChange={setTeamName}
+      />
 
-        {error && (
-          <div className="text-red-500 text-sm font-medium">{error}</div>
-        )}
+      {error && <div style={{ color: "red" }}>{error}</div>}
 
-        <QuizList
-          quizzes={quizzes}
-          onSave={saveQuizSet}
-          isLoading={isLoading}
-        />
+      <QuizList quizzes={quizzes} onSave={saveQuizSet} isLoading={isLoading} />
 
-        {quizzes.length === 0 && latestQuizSet && (
-          <LatestQuizList quizSet={latestQuizSet} />
-        )}
-      </div>
-
-      <div className="mt-10 w-full max-w-md mx-auto">
-        <button
-          onClick={() => router.push("/")}
-          className="w-full py-3 bg-yellow-500 text-white rounded-xl text-lg font-bold shadow hover:bg-yellow-600 transition flex items-center justify-center gap-2"
-        >
-          <HomeIcon className="w-6 h-6" />
-          홈으로 돌아가기
-        </button>
-      </div>
+      {quizzes.length === 0 && latestQuizSet && (
+        <LatestQuizList quizSet={latestQuizSet} />
+      )}
     </div>
   );
 }
