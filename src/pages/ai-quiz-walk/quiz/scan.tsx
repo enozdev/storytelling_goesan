@@ -25,7 +25,7 @@ export default function Scan() {
         </button>
 
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/ai-quiz-walk")}
           className="w-full py-3 border-2 border-gray-300 bg-gray-50 text-gray-700 rounded-lg text-base font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 transition"
         >
           <HomeIcon className="w-6 h-6 text-gray-500" />

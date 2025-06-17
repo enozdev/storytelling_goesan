@@ -14,7 +14,7 @@ export default function Home() {
   const handleQuizStart = () => {
     setIsAnimating(true);
     setTimeout(() => {
-      router.push("/quiz/createQuiz");
+      router.push("/ai-quiz-walk/quiz/createQuiz");
     }, 1500);
   };
 
@@ -73,7 +73,7 @@ export default function Home() {
         {/* QR 버튼 */}
         <button
           className="w-full py-4 bg-yellow-400 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-yellow-500 transition flex items-center justify-center gap-3"
-          onClick={() => router.push("/quiz/scan")}
+          onClick={() => router.push("/ai-quiz-walk/quiz/scan")}
         >
           <SparklesIcon className="w-6 h-6 text-white" />
           QR 보물찾기
@@ -82,7 +82,7 @@ export default function Home() {
         {/* 랭킹 버튼 */}
         <button
           className="w-full py-4 border-2 border-green-600 text-green-700 rounded-2xl text-xl font-bold shadow hover:bg-green-50 transition"
-          onClick={() => router.push("/user/rank")}
+          onClick={() => router.push("/ai-quiz-walk/user/rank")}
         >
           랭킹 보기
         </button>
@@ -90,7 +90,7 @@ export default function Home() {
         {/* 로그인 버튼 */}
         <button
           className="w-full py-4 border-2 border-gray-300 text-gray-700 bg-gray-50 rounded-2xl text-xl font-bold shadow hover:bg-gray-100 transition"
-          onClick={() => router.push("/user/login")}
+          onClick={() => router.push("/ai-quiz-walk/user/login")}
         >
           로그인 / 회원가입
         </button>

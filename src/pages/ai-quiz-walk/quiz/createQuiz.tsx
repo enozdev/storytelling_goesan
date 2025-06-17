@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import QuizForm from "../../components/quiz/QuizForm";
-import QuizList from "../../components/quiz/QuizSet";
-import LatestQuizList from "../../components/quiz/LatestQuizSet";
+import QuizForm from "@/components/ai-quiz-walk/quiz/QuizForm";
+import QuizList from "@/components/ai-quiz-walk/quiz/QuizSet";
+import LatestQuizList from "@/components/ai-quiz-walk/quiz/LatestQuizSet";
 import { HomeIcon } from "@heroicons/react/24/solid";
 
 // localStorage 48시간 만료 함수
@@ -238,7 +238,7 @@ export default function Quiz() {
 
       <div className="mt-10 w-full max-w-md mx-auto">
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/ai-quiz-walk")}
           className="w-full py-3 bg-yellow-500 text-white rounded-xl text-lg font-bold shadow hover:bg-yellow-600 transition flex items-center justify-center gap-2"
         >
           <HomeIcon className="w-6 h-6" />

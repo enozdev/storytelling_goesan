@@ -44,7 +44,7 @@ export default function Rank() {
       {/* 하단 홈 버튼 */}
       <div className="mt-10 w-full max-w-md mx-auto">
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/ai-quiz-walk")}
           className="w-full py-3 bg-yellow-500 text-white rounded-xl text-lg font-bold shadow hover:bg-yellow-600 transition flex items-center justify-center gap-2"
         >
           <HomeIcon className="w-6 h-6" />
