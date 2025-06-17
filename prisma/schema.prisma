@@ -39,6 +39,12 @@ model Quiz {
   @@index([quizSetId])
 }
 
+model userLogin {
+  idx      Int    @id @default(autoincrement())
+  userName String @db.VarChar(20)
+  userPWD  String @db.VarChar(20)
+}
+
 model adminLogin {
   ID       Int    @id @default(autoincrement())
   adminID  String @db.VarChar(20)

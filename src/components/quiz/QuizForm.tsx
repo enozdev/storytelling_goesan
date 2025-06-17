@@ -23,18 +23,8 @@ export default function QuizForm({
   return (
     <div style={{ marginBottom: 20 }}>
       <form onSubmit={handleSubmit}>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 10 }}
-          className="mb-4"
-        >
-          <input
-            value={teamName}
-            onChange={(e) => onTeamNameChange(e.target.value)}
-            placeholder="팀명"
-            style={{ width: "100%", padding: "10px 10px", fontSize: 16 }}
-            disabled={isLoading}
-            className="border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+        <div className="text-2xl mb-4 items-center flex flex-col">
+          괴산깜돌특별팀
         </div>
         <input
           type="text"
