@@ -1,6 +1,10 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { CpuChipIcon, SparklesIcon } from "@heroicons/react/24/solid";
+import {
+  CpuChipIcon,
+  LightBulbIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 export default function Home() {
@@ -11,12 +15,12 @@ export default function Home() {
     setIsAnimating(true);
     setTimeout(() => {
       router.push("/quiz/createQuiz");
-    }, 1500); // 애니메이션 길이 1.5초
+    }, 1500);
   };
 
   return (
     <div className="h-screen bg-white relative overflow-hidden flex flex-col justify-between px-4 pt-12 pb-6 text-gray-800">
-      {/* 배경 */}
+      {/* 배경 이미지 */}
       <div className="absolute inset-0 z-0 bg-[url('/images/bg-ai-network.png')] bg-cover bg-center opacity-10" />
 
       {/* 애니메이션 오버레이 */}
@@ -32,7 +36,7 @@ export default function Home() {
       {/* 헤더 */}
       <header className="relative z-10 text-center mb-6">
         <div className="flex justify-center items-center gap-3 text-green-800">
-          <CpuChipIcon className="w-8 h-8 text-green-800" />
+          <CpuChipIcon className="w-8 h-8" />
           <h1 className="text-3xl font-extrabold">괴산 산막이 옛길 퀴즈</h1>
         </div>
         <p className="text-lg text-gray-600 mt-2">
@@ -40,7 +44,7 @@ export default function Home() {
         </p>
       </header>
 
-      {/* 이미지 */}
+      {/* 대표 이미지 */}
       <main className="relative z-10 w-full flex-grow flex items-center justify-center mb-6">
         <div className="w-full h-64 rounded-2xl overflow-hidden shadow-lg relative">
           <Image
@@ -53,30 +57,40 @@ export default function Home() {
         </div>
       </main>
 
-      {/* 버튼 */}
+      {/* 버튼 영역 */}
       <footer className="relative z-10 w-full space-y-4">
+        {/* AI 퀴즈 버튼 */}
         <button
           className="w-full py-4 bg-green-600 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-3"
           onClick={handleQuizStart}
         >
-          <SparklesIcon className="w-6 h-6" />
-          AI 퀴즈 생성하기
+          <LightBulbIcon className="w-6 h-6 text-neon-yellow animate-flicker" />
+          <span className={isAnimating ? "animate-pulse" : ""}>
+            AI 퀴즈 생성하기
+          </span>
         </button>
+
+        {/* QR 버튼 */}
         <button
-          className="w-full py-4 border-2 border-green-600 text-green-700 rounded-2xl text-xl font-bold shadow hover:bg-green-50 transition"
+          className="w-full py-4 bg-yellow-400 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-yellow-500 transition flex items-center justify-center gap-3"
           onClick={() => router.push("/quiz/scan")}
         >
-          퀴즈 QR 스캔하기
+          <SparklesIcon className="w-6 h-6 text-white" />
+          QR 보물찾기
         </button>
+
+        {/* 랭킹 버튼 */}
         <button
           className="w-full py-4 border-2 border-green-600 text-green-700 rounded-2xl text-xl font-bold shadow hover:bg-green-50 transition"
-          onClick={() => router.push("/rank")}
+          onClick={() => router.push("/user/rank")}
         >
-          랭킹보기
+          랭킹 보기
         </button>
+
+        {/* 로그인 버튼 */}
         <button
           className="w-full py-4 border-2 border-gray-300 text-gray-700 bg-gray-50 rounded-2xl text-xl font-bold shadow hover:bg-gray-100 transition"
-          onClick={() => router.push("/admin/login")}
+          onClick={() => router.push("/user/login")}
         >
           로그인 / 회원가입
         </button>

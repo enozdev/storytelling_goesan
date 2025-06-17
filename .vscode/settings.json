@@ -24,5 +24,8 @@
   "prisma.format.quickFixMissingFields": true,
   "prisma.format.quickFixMissingAttributes": true,
   "prisma.format.quickFixMissingArguments": true,
-  "prisma.format.quickFixMissingTypes": true
+  "prisma.format.quickFixMissingTypes": true,
+  "[ignore]": {
+    "editor.defaultFormatter": "foxundermoon.shell-format"
+  }
 }
