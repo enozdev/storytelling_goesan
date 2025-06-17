@@ -64,14 +64,14 @@ export default function signup() {
 
         <div className="space-y-3">
           <button
-            onClick={() => router.push("/user/signup")}
+            onClick={() => router.push("/ai-quiz-walk/user/signup")}
             className="w-full py-3 border-green-600 text-green-700 rounded-lg font-semibold shadow hover:bg-green-50 transition"
           >
             회원가입하기
           </button>
 
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/ai-quiz-walk")}
             className="w-full py-3 border-2 border-gray-300 bg-gray-50 text-gray-700 rounded-lg text-base font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 transition"
           >
             <HomeIcon className="w-5 h-5" />
