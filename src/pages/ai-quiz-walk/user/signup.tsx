@@ -15,7 +15,7 @@ const schools = [
   { label: "동인초등학교", value: "동인초등학교" },
 ];
 
-export default function signup() {
+export default function Signup() {
   const router = useRouter();
   const [adminID, setAdminID] = useState("");
   const [adminPWD, setAdminPWD] = useState("");
