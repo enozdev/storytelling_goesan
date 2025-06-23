@@ -18,7 +18,7 @@ export default function Scan() {
 
         <button
           className="w-full py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition flex items-center justify-center gap-2 mb-4"
-          onClick={() => (window.location.href = "/quiz/scan/qr")}
+          onClick={() => router.push("/ai-quiz-walk/quiz/AR")}
         >
           <QrCodeIcon className="w-6 h-6" />
           QR 코드 스캔하기

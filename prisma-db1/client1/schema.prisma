@@ -1,0 +1,50 @@
+generator client1 {
+  provider = "prisma-client-js"
+  output   = "./client1"
+}
+
+datasource db1 {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_1")
+}
+
+model QuizSet {
+  id        Int      @id @default(autoincrement())
+  title     String
+  teamName  String
+  topic     String
+  createdAt DateTime @default(now())
+  createdBy String
+  quizzes   Quiz[]
+}
+
+model Quiz {
+  id            Int     @id @default(autoincrement())
+  quizSetId     Int
+  question      String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  answer        String
+  qrCode        String
+  questionOrder Int
+  quizSet       QuizSet @relation(fields: [quizSetId], references: [id])
+
+  @@index([quizSetId])
+}
+
+model admin {
+  ID       Int    @id(map: "adminLogin_pkey") @default(autoincrement())
+  adminID  String @db1.VarChar(20)
+  adminPWD String @db1.VarChar(20)
+}
+
+model user {
+  idx              Int       @id(map: "userLogin_pkey") @default(autoincrement())
+  group            String    @db1.VarChar(255)
+  userTeamName     String    @db1.VarChar(255)
+  userTeamPassword String    @db1.VarChar(255)
+  access_at        DateTime? @db1.Timestamp(6)
+  created_at       DateTime? @default(now()) @db1.Timestamp(6)
+}
