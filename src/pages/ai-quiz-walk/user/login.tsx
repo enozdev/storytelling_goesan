@@ -8,7 +8,7 @@ export default function Login() {
   const [adminPWD, setAdminPWD] = useState("");
 
   const handleUserLogin = async () => {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch("/api/ai-quiz-walk/auth/user/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ adminID, adminPWD }),

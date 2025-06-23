@@ -6,7 +6,19 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db1:pull": "prisma db pull --schema=prisma-db1/schema.prisma",
+    "db2:pull": "prisma db pull --schema=prisma-db2/schema.prisma",
+    "db1:push": "prisma db push --schema=prisma-db1/schema.prisma",
+    "db2:push": "prisma db push --schema=prisma-db2/schema.prisma",
+    "db1:generate": "prisma generate --schema=prisma-db1/schema.prisma",
+    "db2:generate": "prisma generate --schema=prisma-db2/schema.prisma",
+    "db1:migrate": "prisma migrate dev --schema=prisma-db1/schema.prisma",
+    "db2:migrate": "prisma migrate dev --schema=prisma-db2/schema.prisma",
+    "db1:studio": "prisma studio --schema=prisma-db1/schema.prisma",
+    "db2:studio": "prisma studio --schema=prisma-db2/schema.prisma",
+    "db1:reset": "prisma migrate reset --force --schema=prisma-db1/schema.prisma",
+    "db2:reset": "prisma migrate reset --force --schema=prisma-db2/schema.prisma"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
@@ -18,6 +30,7 @@
     "@types/qrcode.react": "^1.0.5",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cookies-next": "^5.1.0",
     "eslint": "9.23.0",
@@ -32,6 +45,7 @@
     "typescript": "5.8.2"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "prisma": "^6.6.0",
