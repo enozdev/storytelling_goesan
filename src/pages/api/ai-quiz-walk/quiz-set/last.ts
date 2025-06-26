@@ -1,7 +1,7 @@
 // 가장 최근 퀴즈 세트를 가져오는 API
 
 import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/backend/prisma";
 
 export default async function handler(
   req: NextApiRequest,

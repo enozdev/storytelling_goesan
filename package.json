@@ -6,19 +6,7 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint",
-    "db1:pull": "prisma db pull --schema=prisma-db1/schema.prisma",
-    "db2:pull": "prisma db pull --schema=prisma-db2/schema.prisma",
-    "db1:push": "prisma db push --schema=prisma-db1/schema.prisma",
-    "db2:push": "prisma db push --schema=prisma-db2/schema.prisma",
-    "db1:generate": "prisma generate --schema=prisma-db1/schema.prisma",
-    "db2:generate": "prisma generate --schema=prisma-db2/schema.prisma",
-    "db1:migrate": "prisma migrate dev --schema=prisma-db1/schema.prisma",
-    "db2:migrate": "prisma migrate dev --schema=prisma-db2/schema.prisma",
-    "db1:studio": "prisma studio --schema=prisma-db1/schema.prisma",
-    "db2:studio": "prisma studio --schema=prisma-db2/schema.prisma",
-    "db1:reset": "prisma migrate reset --force --schema=prisma-db1/schema.prisma",
-    "db2:reset": "prisma migrate reset --force --schema=prisma-db2/schema.prisma"
+    "lint": "next lint"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
