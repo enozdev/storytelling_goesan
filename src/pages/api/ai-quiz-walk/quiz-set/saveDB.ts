@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "@/lib/prisma";
+import prisma from "@/lib/backend/prisma";
 import { getClientIp } from "@/lib/getClientIp";
 
 export default async function handler(
