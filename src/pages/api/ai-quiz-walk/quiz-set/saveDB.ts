@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/backend/prisma";
-import { getClientIp } from "@/lib/getClientIp";
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,26 +9,24 @@ export default async function handler(
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  try {
-    const { title, topic, teamName } = req.body;
-    const clientIp = getClientIp(req);
+  // try {
+  //   const { title, topic, teamName } = req.body;
 
-    if (!title || !topic) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+  //   if (!title || !topic) {
+  //     return res.status(400).json({ message: "Missing required fields" });
+  //   }
 
-    const quizSet = await prisma.quizSet.create({
-      data: {
-        title,
-        topic,
-        teamName: teamName || null,
-        createdBy: clientIp,
-      },
-    });
+  //   const quizSet = await prisma.quizSet.create({
+  //     data: {
+  //       title,
+  //       topic,
+  //       teamName: teamName || null,
+  //     },
+  //   });
 
-    return res.status(201).json(quizSet);
-  } catch (error) {
-    console.error("Error creating quiz set:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  //   return res.status(201).json(quizSet);
+  // } catch (error) {
+  //   console.error("Error creating quiz set:", error);
+  //   return res.status(500).json({ message: "Internal server error" });
+  // }
 }
