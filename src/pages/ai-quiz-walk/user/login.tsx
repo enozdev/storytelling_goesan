@@ -25,7 +25,11 @@ export default function Login() {
     const response = await fetch("/api/auth/adminLogin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminID, adminPWD }),
+      body: JSON.stringify({
+        private_key: process.env.PRIVATE_KEY,
+        adminID,
+        adminPWD,
+      }),
     });
   };
 
