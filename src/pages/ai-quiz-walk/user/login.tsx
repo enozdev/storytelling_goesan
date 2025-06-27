@@ -4,14 +4,14 @@ import { LockClosedIcon, HomeIcon } from "@heroicons/react/24/solid";
 
 export default function Login() {
   const router = useRouter();
-  const [adminID, setAdminID] = useState("");
-  const [adminPWD, setAdminPWD] = useState("");
+  const [userTeamName, setUserTeamName] = useState("");
+  const [userTeamPassword, setUserTeamPassword] = useState("");
 
   const handleUserLogin = async () => {
     const response = await fetch("/api/auth/user/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adminID, adminPWD }),
+      body: JSON.stringify({ userTeamName, userTeamPassword }),
     });
 
     if (response.ok) {
@@ -26,9 +26,8 @@ export default function Login() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        private_key: process.env.PRIVATE_KEY,
-        adminID,
-        adminPWD,
+        userTeamName,
+        userTeamPassword,
       }),
     });
   };
@@ -47,13 +46,13 @@ export default function Login() {
             type="text"
             placeholder="팀 이름"
             className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-base"
-            onChange={(e) => setAdminID(e.target.value)}
+            onChange={(e) => setUserTeamName(e.target.value)}
           />
           <input
             type="password"
             placeholder="비밀번호"
             className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-base"
-            onChange={(e) => setAdminPWD(e.target.value)}
+            onChange={(e) => setUserTeamPassword(e.target.value)}
           />
         </div>
 
