@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         "neon-yellow": "#FFFF33",
+        "neon-green": "#00FF00",
       },
       keyframes: {
         flicker: {
