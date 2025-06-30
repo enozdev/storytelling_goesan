@@ -6,12 +6,20 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      success: false,
+      errorCode: "E0002",
+      error: "허용되지 않은 메서드입니다.",
+    });
   }
 
   if (!process.env.GEMINI_API_KEY) {
     // ts error 방지
-    return res.status(500).json({ error: "GEMINI_API_KEY is not defined" });
+    return res.status(500).json({
+      success: false,
+      errorCode: "E0009",
+      error: "API_KEY가 존재하지 않습니다.",
+    });
   }
 
   const { message, options, conversationHistory = [] } = req.body;
@@ -32,9 +40,9 @@ export default async function handler(
 
 다음 조건을 반드시 지켜:
 
-- '${message}'을 기반으로 한 4지선다형 문제를 10개 만들어줘
+- '${message}'을 기반으로 한 4지선다형 문제를 7개 만들어줘
 - 각 문제는 질문, 보기(A~D), 정답이 포함되어야 함
-- 난이도는 다양하게 구성해줘
+- 난이도는 초등학생 고학년 아이들이 풀 수 있을 정도로 만들어줘. 그렇다고 너무 쉬워서는 안돼.
 - 허구의 정보, 추측, 상상력은 절대 금지
 - 이전에 생성했던 문제와는 다른 문제를 만들어줘
 - 순수 JSON 형식으로만 출력할 것 (마크다운이나 다른 형식 없이):
@@ -42,7 +50,7 @@ export default async function handler(
 {
   "quizzes": [
     {
-      "id": 1부터 10까지 증가하는 숫자,
+      "id": 1부터 7까지 증가하는 숫자,
       "question": "질문 내용",
       "options": {
         "A": "보기 A 내용",

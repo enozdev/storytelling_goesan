@@ -2,6 +2,7 @@ import { signAccessToken, signRefreshToken } from "@/lib/backend/jwt";
 import { NextApiRequest, NextApiResponse } from "next";
 import bcrypt, { compare } from "bcrypt";
 import { PrismaClient } from "@prisma/client";
+import { ref } from "process";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 10;
@@ -54,6 +55,9 @@ export default async function handler(
 
     const now = new Date();
 
+    const accessToken = signAccessToken({ userTeamName });
+    const refreshToken = signRefreshToken({ userTeamName });
+
     await prisma.user.update({
       where: { idx: user.idx },
       data: {
@@ -61,13 +65,9 @@ export default async function handler(
       },
     });
 
-    const accessToken = signAccessToken({ userTeamName });
-    const refreshToken = signRefreshToken({ userTeamName });
-
     return res.status(200).json({
       success: true,
       accessToken,
-      refreshToken,
       userTeamName,
       userTeamCreatedAt: now.toISOString(),
     });

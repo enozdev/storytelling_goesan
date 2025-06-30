@@ -14,20 +14,14 @@ interface Quiz {
 
 interface QuizListProps {
   quizzes: Quiz[];
-  onSave: () => void;
   isLoading: boolean;
 }
 
-export default function QuizList({
-  quizzes,
-  onSave,
-  isLoading,
-}: QuizListProps) {
+export default function QuizSet({ quizzes, isLoading }: QuizListProps) {
   return (
     <div>
       {quizzes.length > 0 && (
         <button
-          onClick={onSave}
           disabled={isLoading}
           style={{ marginTop: 20, padding: "10px 20px" }}
         >

@@ -5,6 +5,8 @@ import { IncomingMessage, ServerResponse } from "http";
 import fs from "fs";
 import path from "path";
 
+const prisma = new PrismaClient();
+
 export const config = {
   api: {
     bodyParser: false,
@@ -33,7 +35,7 @@ function renameUploadedFile(
   const ext = path.extname(originalName);
   const newName = `${userId}_${Date.now()}${randomUppercaseString(20)}${ext}`;
 
-  const uploadBasePath = `./public/uploads/${content_id}/`;
+  const uploadBasePath = `./public/uploads/ar_video/`;
 
   if (!fs.existsSync(uploadBasePath)) {
     fs.mkdirSync(uploadBasePath, { recursive: true });
@@ -56,15 +58,13 @@ export default async function handler(
   req: IncomingMessage,
   res: ServerResponse
 ) {
-  const prisma = new PrismaClient();
-
   if (req.method !== "POST") {
     res.statusCode = 405;
     res.setHeader("Content-Type", "application/json");
     res.end(
       JSON.stringify({
         success: false,
-        errorCode: "E0003",
+        errorCode: "E0002",
         error: "허용되지 않은 메서드입니다.",
       })
     );
@@ -72,7 +72,7 @@ export default async function handler(
   }
 
   const form = formidable({
-    uploadDir: "./public/uploads",
+    uploadDir: "./public/uploads/ar_video",
     keepExtensions: true,
     multiples: true,
     maxFileSize: 200 * 1024 * 1024, // 최대 200MB
@@ -95,24 +95,24 @@ export default async function handler(
   });
 
   form.parse(req, async (err, fields, files) => {
-    if (
-      !fields.private_key ||
-      (Array.isArray(fields.private_key)
-        ? fields.private_key[0] !== process.env.PRIVATE_KEY
-        : fields.private_key !== process.env.PRIVATE_KEY)
-    ) {
-      res.statusCode = 400;
-      res.end(
-        JSON.stringify({
-          success: false,
-          errorCode: "E0001",
-          error: "유효하지 않은 접근입니다.",
-        })
-      );
-      return;
-    }
+    // if (
+    //   !fields.private_key ||
+    //   (Array.isArray(fields.private_key)
+    //     ? fields.private_key[0] !== process.env.PRIVATE_KEY
+    //     : fields.private_key !== process.env.PRIVATE_KEY)
+    // ) {
+    //   res.statusCode = 400;
+    //   res.end(
+    //     JSON.stringify({
+    //       success: false,
+    //       errorCode: "E0001",
+    //       error: "유효하지 않은 접근입니다.",
+    //     })
+    //   );
+    //   return;
+    // }
 
-    if (!fields.user_id || !fields.content_id) {
+    if (!fields.user_id) {
       res.statusCode = 400;
       res.end(
         JSON.stringify({
@@ -129,7 +129,7 @@ export default async function handler(
       res.end(
         JSON.stringify({
           success: false,
-          errorCode: "E0998",
+          errorCode: "E9998",
           error: "파일 업로드 중 오류가 발생하였습니다.",
           detail: err,
         })
@@ -161,7 +161,7 @@ export default async function handler(
         }
       });
 
-      const max_idx = await prisma.participate_raw.findFirst({
+      const max_idx = await prisma.ar_video.findFirst({
         orderBy: {
           idx: "desc",
         },
@@ -171,10 +171,9 @@ export default async function handler(
       const new_idx = (max_idx?.idx ?? 0) + 1;
 
       // 신규 참가 데이터 생성
-      await prisma.participate_raw.create({
+      await prisma.ar_video.create({
         data: {
           idx: new_idx,
-          content_id: parseInt(fields.content_id[0]),
           user_id: parseInt(fields.user_id[0]),
           file_data: JSON.stringify(renamedFiles),
         },
@@ -185,7 +184,6 @@ export default async function handler(
       res.end(
         JSON.stringify({
           message: "파일 업로드 완료",
-          content_id: parseInt(fields.content_id[0]),
           user_id: parseInt(fields.user_id[0]),
           files: renamedFiles,
         })
@@ -195,7 +193,7 @@ export default async function handler(
       res.end(
         JSON.stringify({
           success: false,
-          errorCode: "E0999",
+          errorCode: "E9999",
           error: "네트워크 오류가 발생했습니다.",
           detail: error,
         })
