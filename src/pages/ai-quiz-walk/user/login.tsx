@@ -15,7 +15,7 @@ export default function Login() {
     });
 
     if (response.ok) {
-      router.push("/ai-quiz-walk/quiz/quizList");
+      router.push("/ai-quiz-walk/quiz/createQuiz");
     } else {
       alert("로그인 실패");
     }
