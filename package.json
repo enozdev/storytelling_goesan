@@ -23,6 +23,7 @@
     "cookies-next": "^5.1.0",
     "eslint": "9.23.0",
     "eslint-config-next": "15.2.4",
+    "formidable": "^3.5.4",
     "iron-session": "^8.0.4",
     "jsonwebtoken": "^9.0.2",
     "next": "15.2.4",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/formidable": "^3.4.5",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
     "prisma": "^6.6.0",

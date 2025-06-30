@@ -52,3 +52,11 @@ model group {
   idx    Int    @id(map: "group_pk") @default(autoincrement())
   school String @db.VarChar
 }
+
+model participate_raw {
+  idx        Int       @id(map: "participate_raw_pk") @default(autoincrement())
+  content_id Int
+  user_id    Int
+  file_data  String?   @db.VarChar
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+}
