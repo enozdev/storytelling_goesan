@@ -14,7 +14,7 @@ export default function Home() {
   const handleQuizStart = () => {
     setIsAnimating(true);
     setTimeout(() => {
-      router.push("/ai-quiz-walk/quiz/createQuiz");
+      router.push("/ai-quiz-walk/quiz/create");
     }, 1500);
   };
 
