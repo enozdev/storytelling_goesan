@@ -32,3 +32,5 @@ kill -9 [pid] // 프로세스 제거  -> next-server의 첫번째 인덱스
 
 forever start start.js // forever 실행
 ```
+
+현재 storytelling_goesan은 next-server version 15.2.4 입니다.
