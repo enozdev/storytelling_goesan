@@ -222,7 +222,7 @@ export default function Quiz() {
 
       {error && <div style={{ color: "red" }}>{error}</div>}
 
-      <QuizList quizzes={quizzes} onSave={saveQuizSet} isLoading={isLoading} />
+      {/* <QuizList quizzes={quizzes} onSave={saveQuizSet} isLoading={isLoading} /> */}
 
       {quizzes.length === 0 && latestQuizSet && (
         <LatestQuizList quizSet={latestQuizSet} />
