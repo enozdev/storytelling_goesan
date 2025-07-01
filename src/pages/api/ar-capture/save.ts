@@ -25,11 +25,7 @@ function randomUppercaseString(length: number = 6): string {
 }
 
 // 파일명 변경 함수
-function renameUploadedFile(
-  file: FormidableFile,
-  content_id: number,
-  userId: string
-) {
+function renameUploadedFile(file: FormidableFile, userId: string) {
   const oldPath = file.filepath;
   const originalName = file.originalFilename || "unknown";
   const ext = path.extname(originalName);
@@ -95,29 +91,29 @@ export default async function handler(
   });
 
   form.parse(req, async (err, fields, files) => {
-    // if (
-    //   !fields.private_key ||
-    //   (Array.isArray(fields.private_key)
-    //     ? fields.private_key[0] !== process.env.PRIVATE_KEY
-    //     : fields.private_key !== process.env.PRIVATE_KEY)
-    // ) {
-    //   res.statusCode = 400;
-    //   res.end(
-    //     JSON.stringify({
-    //       success: false,
-    //       errorCode: "E0001",
-    //       error: "유효하지 않은 접근입니다.",
-    //     })
-    //   );
-    //   return;
-    // }
+    if (
+      !fields.private_key ||
+      (Array.isArray(fields.private_key)
+        ? fields.private_key[0] !== process.env.PRIVATE_KEY
+        : fields.private_key !== process.env.PRIVATE_KEY)
+    ) {
+      res.statusCode = 400;
+      res.end(
+        JSON.stringify({
+          success: false,
+          errorCode: "E0001",
+          error: "유효하지 않은 접근입니다.",
+        })
+      );
+      return;
+    }
 
     if (!fields.user_id) {
       res.statusCode = 400;
       res.end(
         JSON.stringify({
           success: false,
-          errorCode: "E0004",
+          errorCode: "E0003",
           error: "요청 본문에 필수 입력값이 누락되었습니다.",
         })
       );
@@ -156,7 +152,7 @@ export default async function handler(
           const contentId = parseInt(
             !Array.isArray(fields.content_id) ? "0" : fields.content_id[0]
           );
-          const newName = renameUploadedFile(file, contentId, userId);
+          const newName = renameUploadedFile(file, userId);
           renamedFiles.push(newName);
         }
       });
