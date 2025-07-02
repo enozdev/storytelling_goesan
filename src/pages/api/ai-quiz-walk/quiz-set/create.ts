@@ -17,7 +17,7 @@ export default async function handler(
     // ts error 방지
     return res.status(500).json({
       success: false,
-      errorCode: "E0009",
+      errorCode: "E9997",
       error: "API_KEY가 존재하지 않습니다.",
     });
   }
