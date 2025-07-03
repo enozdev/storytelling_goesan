@@ -7,14 +7,14 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { private_key } = req.body;
-  if (!private_key || private_key !== process.env.PRIVATE_KEY) {
-    return res.status(401).json({
-      success: false,
-      errorCode: "E0001",
-      error: "유효하지 않은 접근입니다.",
-    });
-  }
+  // const { private_key } = req.body;
+  // if (!private_key || private_key !== process.env.PRIVATE_KEY) {
+  //   return res.status(401).json({
+  //     success: false,
+  //     errorCode: "E0001",
+  //     error: "유효하지 않은 접근입니다.",
+  //   });
+  // }
 
   if (req.method !== "POST") {
     return res.status(405).json({
