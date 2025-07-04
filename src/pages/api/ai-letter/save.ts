@@ -31,7 +31,7 @@ function renameUploadedFile(file: FormidableFile, userId: string) {
   const ext = path.extname(originalName);
   const newName = `${userId}_${Date.now()}${randomUppercaseString(20)}${ext}`;
 
-  const uploadBasePath = `./public/uploads/0/`;
+  const uploadBasePath = `./public/uploads/1/`;
 
   if (!fs.existsSync(uploadBasePath)) {
     fs.mkdirSync(uploadBasePath, { recursive: true });
@@ -68,7 +68,7 @@ export default async function handler(
   }
 
   const form = formidable({
-    uploadDir: "./public/uploads/0",
+    uploadDir: "./public/uploads/1",
     keepExtensions: true,
     multiples: true,
     maxFileSize: 200 * 1024 * 1024, // 최대 200MB

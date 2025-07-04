@@ -62,12 +62,10 @@ export default async function handler(
     });
 
     const accessToken = signAccessToken({ userTeamName });
-    const refreshToken = signRefreshToken({ userTeamName });
 
     return res.status(200).json({
       success: true,
       accessToken,
-      refreshToken,
       user_id: user.idx,
       userTeamName,
       userTeamCreatedAt: now.toISOString(),

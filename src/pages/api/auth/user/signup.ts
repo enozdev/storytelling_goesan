@@ -56,7 +56,6 @@ export default async function handler(
       success: true,
       user: {
         idx: newUser.idx,
-
         userTeamName: newUser.userTeamName,
         createdAt: newUser.created_at,
       },
