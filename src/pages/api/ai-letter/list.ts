@@ -25,8 +25,8 @@ export default async function handler(
   }
 
   try {
-    const { user_id } = req.body;
-    if (!user_id) {
+    const { user_id, contents_id } = req.body;
+    if (!user_id || !contents_id) {
       return res.status(400).json({
         success: false,
         errorCode: "E0003",
@@ -40,12 +40,14 @@ export default async function handler(
       : NaN;
 
     // 인덱스 가져오기
-    const user = await prisma.ar_video.findMany({
+    const user = await prisma.participate.findMany({
       where: {
         user_id: userId,
+        contents_id: contents_id,
       },
       select: {
         idx: true,
+        contents_id: true,
         user_id: true,
         file_data: true,
         created_at: true,

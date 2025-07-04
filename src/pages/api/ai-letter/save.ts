@@ -134,6 +134,7 @@ export default async function handler(
     }
 
     const userId = String(fields.user_id || "anonymous");
+    const contentsId = 1;
 
     // ✅ 업로드된 파일들 리스트 가져오기
     const uploadedFiles = files.file; // 'file' 필드는 Postman/브라우저의 name="file" input
@@ -148,16 +149,12 @@ export default async function handler(
     try {
       fileArray.forEach((file) => {
         if (file) {
-          // Ensure file is not undefined
-          const contentId = parseInt(
-            !Array.isArray(fields.content_id) ? "0" : fields.content_id[0]
-          );
           const newName = renameUploadedFile(file, userId);
           renamedFiles.push(newName);
         }
       });
 
-      const max_idx = await prisma.ar_video.findFirst({
+      const max_idx = await prisma.participate.findFirst({
         orderBy: {
           idx: "desc",
         },
@@ -167,9 +164,10 @@ export default async function handler(
       const new_idx = (max_idx?.idx ?? 0) + 1;
 
       // 신규 참가 데이터 생성
-      await prisma.ar_video.create({
+      await prisma.participate.create({
         data: {
           idx: new_idx,
+          contents_id: contentsId,
           user_id: parseInt(fields.user_id[0]),
           file_data: JSON.stringify(renamedFiles),
         },
@@ -181,6 +179,7 @@ export default async function handler(
         JSON.stringify({
           message: "파일 업로드 완료",
           user_id: parseInt(fields.user_id[0]),
+          contents_id: contentsId,
           files: renamedFiles,
         })
       );
