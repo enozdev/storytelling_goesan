@@ -17,15 +17,14 @@ export default function Result() {
         body: JSON.stringify({
           private_key: process.env.PRIVATE_KEY,
           user_id: user_id,
-          contents_id: 0,
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        // data가 배열이고 각 file_data가 JSON string이므로 파싱 필요
+        // user 배열의 각 file_data를 파싱해서 videos에 넣기
         let allVideos: string[] = [];
-        if (Array.isArray(data)) {
-          data.forEach((item: any) => {
+        if (data && Array.isArray(data.user)) {
+          data.user.forEach((item: any) => {
             try {
               const files = JSON.parse(item.file_data);
               if (Array.isArray(files)) {
@@ -50,7 +49,7 @@ export default function Result() {
         {videos.map((filename: string, idx: number) => (
           <video
             key={idx}
-            src={`/uploads/0/${filename}`}
+            src={`/public/uploads/0/${filename}`}
             controls
             width={320}
             style={{ marginBottom: 16 }}

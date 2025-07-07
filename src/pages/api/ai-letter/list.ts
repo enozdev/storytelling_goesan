@@ -26,7 +26,7 @@ export default async function handler(
 
   try {
     const { user_id, contents_id } = req.body;
-    if (!user_id || !contents_id) {
+    if (!user_id) {
       return res.status(400).json({
         success: false,
         errorCode: "E0003",
@@ -43,7 +43,7 @@ export default async function handler(
     const user = await prisma.participate.findMany({
       where: {
         user_id: userId,
-        contents_id: contents_id,
+        contents_id: 1,
       },
       select: {
         idx: true,
