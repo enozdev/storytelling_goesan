@@ -17,6 +17,7 @@ export default function Result() {
         body: JSON.stringify({
           private_key: process.env.PRIVATE_KEY,
           user_id: user_id,
+          contents_id: 0,
         }),
       });
       if (res.ok) {
@@ -49,7 +50,7 @@ export default function Result() {
         {videos.map((filename: string, idx: number) => (
           <video
             key={idx}
-            src={`/public/uploads/0/${filename}`}
+            src={`/api/file_serving?file_data=${filename}&contents_id=0`}
             controls
             width={320}
             style={{ marginBottom: 16 }}

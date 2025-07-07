@@ -14,9 +14,9 @@ const mimeTypes: Record<string, string> = {
 };
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { file_data, content_id } = req.query;
+  const { file_data, contents_id } = req.query;
 
-  if (!file_data || !content_id) {
+  if (!file_data || !contents_id) {
     res.status(400).send("요청 파라미터가 필요합니다.");
     return;
   }
@@ -25,7 +25,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     process.cwd(),
     "public",
     "uploads",
-    String(content_id),
+    String(contents_id),
     String(file_data)
   );
   const ext = path.extname(filePath).toLowerCase();
