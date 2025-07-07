@@ -55,7 +55,7 @@ export default async function handler(
     return res.status(201).json({
       success: true,
       user: {
-        idx: newUser.idx,
+        user_id: newUser.idx,
         userTeamName: newUser.userTeamName,
         createdAt: newUser.created_at,
       },
