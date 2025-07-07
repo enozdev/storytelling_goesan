@@ -9,7 +9,7 @@ export default function Result() {
     const fetchUser = async () => {
       if (!router.isReady) return;
       const { user_id } = router.query;
-      const res = await fetch(`/api/ar-capture/list`, {
+      const res = await fetch(`/api/0/list`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -17,7 +17,6 @@ export default function Result() {
         body: JSON.stringify({
           private_key: process.env.PRIVATE_KEY,
           user_id: user_id,
-          contents_id: 0,
         }),
       });
       if (res.ok) {
@@ -48,13 +47,25 @@ export default function Result() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
         {videos.length === 0 && <div>영상이 없습니다.</div>}
         {videos.map((filename: string, idx: number) => (
-          <video
-            key={idx}
-            src={`/uploads/0/${filename}`}
-            controls
-            width={320}
-            style={{ marginBottom: 16 }}
-          />
+          <div key={idx}>
+            <video
+              src={`/uploads/0/${filename}`}
+              controls
+              width={320}
+              style={{ marginBottom: 16 }}
+            />
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "1rem",
+                wordBreak: "break-all",
+                fontSize: "0.9rem",
+                color: "#666",
+              }}
+            >
+              {filename}
+            </div>
+          </div>
         ))}
       </div>
     </div>
