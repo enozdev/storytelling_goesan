@@ -6,15 +6,47 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // useEffect(() => {
+  //   // 페이지가 로드되면 로그인 상태를 확인
+  //   const checkLoginStatus = async () => {
+  //     const isLoggedIn = await handleCheckLogin();
+  //     if (!isLoggedIn) {
+  //       router.push("/ai-quiz-walk/user/signup");
+  //     }
+  //   };
+  //   checkLoginStatus();
+  // }, [router]);
+
+  const handleCheckLogin = async () => {
+    const res = await fetch("/api/user/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        return true; // 로그인 상태
+      } else {
+        return false; // 로그인 필요
+      }
+    } else {
+      console.error("로그인 상태 확인 실패");
+      return false; // 로그인 필요로 간주
+    }
+  };
+
   const handleQuizStart = () => {
     setIsAnimating(true);
     setTimeout(() => {
-      router.push("/ai-quiz-walk/quiz/create");
+      router.push("/ai-quiz-walk/indoor/quiz/create");
     }, 1500);
   };
 
@@ -40,25 +72,37 @@ export default function Home() {
           <h1 className="text-3xl font-extrabold">괴산 산막이 옛길 퀴즈</h1>
         </div>
         <p className="text-lg text-gray-600 mt-2">
-          AI가 나만의 퀴즈를 만들어드려요
+          AI와 함께하는 산막이 옛길 탐방 퀴즈
         </p>
       </header>
 
       {/* 대표 이미지 */}
-      <main className="relative z-10 w-full flex-grow flex items-center justify-center mb-6">
-        <div className="w-full h-64 rounded-2xl overflow-hidden shadow-lg relative">
+      <main className="relative z-10 w-full flex-grow flex flex-col items-center justify-center mb-6">
+        <div className="w-full max-w-2xl h-64 rounded-2xl overflow-hidden shadow-lg relative mb-4">
           <Image
-            src="/goesan_ex2.jpg"
+            src="/goesan_image.png"
             alt="산막이 옛길 대표 이미지"
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: "cover" }}
+            priority
+            sizes="(max-width: 768px) 100vw, 700px"
+          />
+        </div>
+
+        <div className="w-full max-w-2xl mx-auto mb-6 rounded-2xl overflow-hidden shadow-lg relative">
+          <Image
+            src="/map.png"
+            alt="산막이 옛길 이미지"
+            width={700}
+            height={300}
+            style={{ objectFit: "cover", width: "100%", height: "250px" }}
             priority
           />
         </div>
       </main>
 
       {/* 버튼 영역 */}
-      <footer className="relative z-10 w-full space-y-4">
+      <footer className="relative w-full space-y-4">
         {/* AI 퀴즈 버튼 */}
         <button
           className="w-full py-4 bg-green-600 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-3"
@@ -68,31 +112,6 @@ export default function Home() {
           <span className={isAnimating ? "animate-pulse" : ""}>
             AI 퀴즈 생성하기
           </span>
-        </button>
-
-        {/* QR 버튼 */}
-        <button
-          className="w-full py-4 bg-yellow-400 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-yellow-500 transition flex items-center justify-center gap-3"
-          onClick={() => router.push("/ai-quiz-walk/quiz/scan")}
-        >
-          <SparklesIcon className="w-6 h-6 text-white" />
-          QR 보물찾기
-        </button>
-
-        {/* 랭킹 버튼 */}
-        <button
-          className="w-full py-4 border-2 border-green-600 text-green-700 rounded-2xl text-xl font-bold shadow hover:bg-green-50 transition"
-          onClick={() => router.push("/ai-quiz-walk/user/rank")}
-        >
-          랭킹 보기
-        </button>
-
-        {/* 로그인 버튼 */}
-        <button
-          className="w-full py-4 border-2 border-gray-300 text-gray-700 bg-gray-50 rounded-2xl text-xl font-bold shadow hover:bg-gray-100 transition"
-          onClick={() => router.push("/ai-quiz-walk/user/login")}
-        >
-          로그인 / 회원가입
         </button>
       </footer>
     </div>
