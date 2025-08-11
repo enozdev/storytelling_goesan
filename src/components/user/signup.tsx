@@ -52,17 +52,17 @@ export default function UserSignup() {
   };
 
   return (
-    <div className="h-screen bg-gradient-to-b from-green-100 to-white flex flex-col justify-center items-center px-6 text-gray-800">
+    <div className="h-screen bg-gradient-to-b from-cyan-100 to-white flex flex-col justify-center items-center px-6 text-gray-800">
       {isSignupSuccess && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-80 text-center">
-            <h2 className="text-xl font-semibold text-green-600 mb-4">
+            <h2 className="text-xl font-semibold text-cyan-600 mb-4">
               팀 등록 완료!
             </h2>
             <p className="text-gray-700 mb-6">로그인 페이지로 이동합니다.</p>
             <button
               onClick={() => router.push("/ai-quiz-walk/user/login")}
-              className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition"
+              className="w-full bg-cyan-500 text-white py-2 rounded-lg hover:bg-cyan-600 transition"
             >
               확인
             </button>
@@ -72,14 +72,14 @@ export default function UserSignup() {
 
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md space-y-6">
         <div className="text-center">
-          <div className="flex justify-center items-center gap-2 mb-1 text-green-700">
+          <div className="flex justify-center items-center gap-2 mb-1 text-cyan-700">
             <h1 className="text-3xl font-bold">팀 등록하기</h1>
           </div>
         </div>
 
         <div className="space-y-4">
           <select
-            className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-base"
+            className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 text-base"
             defaultValue=""
             onChange={(e) => setSelectedGroup(e.target.value)}
           >
@@ -97,13 +97,13 @@ export default function UserSignup() {
           <input
             type="text"
             placeholder="팀 이름"
-            className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-base"
+            className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 text-base"
             onChange={(e) => setUserTeamName(e.target.value)}
           />
           <input
             type="password"
             placeholder="비밀번호"
-            className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-base"
+            className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 text-base"
             onChange={(e) => setUserTeamPassword(e.target.value)}
           />
         </div>
@@ -111,7 +111,7 @@ export default function UserSignup() {
         <div className="space-y-3">
           <button
             onClick={handleUserSignup}
-            className="w-full py-3 bg-green-600 text-white rounded-lg text-base font-semibold hover:bg-green-700 transition"
+            className="w-full py-3 bg-cyan-600 text-white rounded-lg text-base font-semibold hover:bg-cyan-700 transition"
           >
             등록하기
           </button>
@@ -126,14 +126,6 @@ export default function UserSignup() {
           >
             팀 로그인
           </button>
-
-          {/* <button 
-            onClick={() => router.push("/ai-quiz-walk")}
-            className="w-full py-3 border-2 border-gray-300 bg-gray-50 text-gray-700 rounded-lg text-base font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 transition"
-          >
-            <HomeIcon className="w-5 h-5" />
-            홈으로
-          </button> */}
 
           <button
             onClick={() => router.push("/ai-quiz-walk/admin/login")}

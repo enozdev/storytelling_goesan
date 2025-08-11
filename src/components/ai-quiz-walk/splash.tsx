@@ -16,7 +16,7 @@ export default function SplashApp1({
 
   if (showSplash) {
     return (
-      <div className="w-screen h-screen bg-gradient-to-br from-green-400 via-emerald-500 to-green-600 flex flex-col items-center justify-center">
+      <div className="w-screen h-screen bg-gradient-to-br from-green-300 via-emerald-400 to-green-500 flex flex-col items-center justify-center">
         <div className="animate-fade-in-up text-center">
           <div className="mb-4">
             <img

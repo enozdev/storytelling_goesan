@@ -6,42 +6,10 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
-import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(false);
-
-  // useEffect(() => {
-  //   // 페이지가 로드되면 로그인 상태를 확인
-  //   const checkLoginStatus = async () => {
-  //     const isLoggedIn = await handleCheckLogin();
-  //     if (!isLoggedIn) {
-  //       router.push("/ai-quiz-walk/user/signup");
-  //     }
-  //   };
-  //   checkLoginStatus();
-  // }, [router]);
-
-  const handleCheckLogin = async () => {
-    const res = await fetch("/api/user/check", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success) {
-        return true; // 로그인 상태
-      } else {
-        return false; // 로그인 필요
-      }
-    } else {
-      console.error("로그인 상태 확인 실패");
-      return false; // 로그인 필요로 간주
-    }
-  };
 
   const handleQuizStart = () => {
     setIsAnimating(true);
