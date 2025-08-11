@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { apiClient } from "@/lib/apiClient";
 import { LockClosedIcon, HomeIcon } from "@heroicons/react/24/solid";
 
 export default function UserLogin() {
@@ -9,14 +8,14 @@ export default function UserLogin() {
   const [userTeamPassword, setUserTeamPassword] = useState("");
 
   const handleUserLogin = async () => {
-    const response = await apiClient("/api/auth/user/login", {
+    const response = await fetch("/api/auth/user/login", {
       method: "POST",
       body: JSON.stringify({ userTeamName, userTeamPassword }),
     });
 
     if (response.ok) {
-      const { token } = await response.json();
-      localStorage.setItem("userToken", token); // 자동 요청을 위해 저장
+      const { accessToken } = await response.json();
+      localStorage.setItem("accessToken", accessToken);
 
       router.push(
         router.query.redirect ? String(router.query.redirect) : "/ai-quiz-walk"
@@ -29,7 +28,10 @@ export default function UserLogin() {
   const handleAdminLogin = async () => {
     const response = await fetch("/api/auth/admin/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
       body: JSON.stringify({
         userTeamName,
         userTeamPassword,

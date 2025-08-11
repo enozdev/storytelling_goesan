@@ -12,8 +12,8 @@ export default function AiQuizWalkIndex() {
     "focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 " +
     "active:scale-[0.99] transition-transform";
 
-  const indoorEndDate = new Date("2025-08-05ST00:00:00Z");
-  const outdoorStartDate = new Date("2025-09-12T00:00:00Z");
+  const indoorEndDate = new Date("2025-09-13T00:00:00Z");
+  const outdoorStartDate = new Date("2025-09-13T00:00:00Z");
   const today = new Date();
   today.setHours(0, 0, 0, 0); // 오늘 날짜의 시간 부분을 00:00:00으로 설정
 
@@ -36,7 +36,7 @@ export default function AiQuizWalkIndex() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
     });
     if (res.ok) {

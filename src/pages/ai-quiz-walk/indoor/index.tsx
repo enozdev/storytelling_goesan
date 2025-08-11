@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <div className="h-screen bg-white relative overflow-hidden flex flex-col justify-between px-4 pt-12 pb-6 text-gray-800">
       {/* 배경 이미지 */}
-      <div className="absolute inset-0 z-0 bg-[url('/images/bg-ai-network.png')] bg-cover bg-center opacity-10" />
+      <div className="absolute inset-0 z-0 bg-cover bg-center opacity-10" />
 
       {/* 애니메이션 오버레이 */}
       {isAnimating && (
