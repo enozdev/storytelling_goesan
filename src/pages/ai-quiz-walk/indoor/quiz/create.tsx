@@ -53,6 +53,13 @@ export default function Quiz() {
   const [latestQuizSet, setLatestQuizSet] = useState<QuizSet | null>(null);
   const [topic, setTopic] = useState("");
   const [teamName, setTeamName] = useState("");
+  const [userTeamName, setUserTeamName] = useState<string>("팀 이름 없음");
+
+  useEffect(() => {
+    const storedTeamName =
+      localStorage.getItem("userTeamName") || "팀 이름 없음";
+    setUserTeamName(storedTeamName);
+  }, []);
 
   const generateQuizzes = async (inputTopic: string) => {
     try {
@@ -76,6 +83,9 @@ export default function Quiz() {
           // conversationHistory,
         }),
       });
+
+      const userTeamName =
+        localStorage.getItem("userTeamName") || "팀 이름 없음";
 
       if (!response.ok) {
         throw new Error("퀴즈 생성 실패");
@@ -121,27 +131,33 @@ export default function Quiz() {
       {/* 상단 영역 */}
       <div className="w-full max-w-md flex flex-col items-center">
         <h1 className="text-3xl font-bold text-green-700 mb-3">
-          괴산 문제 생성기
+          괴산 AI 문제 생성기
         </h1>
-
         <p className="text-md text-gray-600 text-center mb-8">
-          만들고 싶은 퀴즈의 내용을 아래에 자유롭게 작성해보세요.
+          만들고 싶은 퀴즈의 내용을 자유롭게 작성해보세요.
         </p>
-
-        <QuizForm
-          onSubmit={generateQuizzes}
-          isLoading={isLoading}
-          teamName={teamName}
-          onTeamNameChange={setTeamName}
-        />
-
-        {error && <div style={{ color: "red" }}>{error}</div>}
-
-        <QuizSet quizzes={quizzes} isLoading={isLoading} />
-
-        {quizzes.length === 0 && latestQuizSet && (
-          <LatestQuizList quizSet={latestQuizSet} />
-        )}
+        <div style={{ marginBottom: 20 }}>
+          <div className="text-2xl mb-4 items-center flex flex-col">
+            {userTeamName}
+          </div>
+          <input
+            type="text"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder="예: 괴산의 역사, 괴산의 특산물"
+            style={{ width: "100%", padding: "10px 10px", fontSize: 16 }}
+            disabled={isLoading}
+            className="border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{ marginTop: 10, padding: "10px 20px" }}
+            className="w-full py-3 bg-green-600 text-white rounded-lg text-base font-semibold hover:bg-green-700 transition"
+          >
+            {isLoading ? "생성중..." : "AI로 문제 생성하기"}
+          </button>
+        </div>
       </div>
     </div>
   );

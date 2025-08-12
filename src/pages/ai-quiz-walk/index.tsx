@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"; // App Router라면 navigation 사용
 import { useEffect } from "react";
 
 export default function AiQuizWalkIndex() {
@@ -15,13 +15,12 @@ export default function AiQuizWalkIndex() {
   const indoorEndDate = new Date("2025-09-13T00:00:00Z");
   const outdoorStartDate = new Date("2025-09-13T00:00:00Z");
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // 오늘 날짜의 시간 부분을 00:00:00으로 설정
+  today.setHours(0, 0, 0, 0);
 
   const isIndoorEnabled = today <= indoorEndDate;
   const isOutdoorEnabled = today >= outdoorStartDate;
 
   useEffect(() => {
-    // 페이지가 로드되면 로그인 상태를 확인
     const checkLoginStatus = async () => {
       const isLoggedIn = await handleCheckLogin();
       if (!isLoggedIn) {
@@ -39,17 +38,23 @@ export default function AiQuizWalkIndex() {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
     });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success) {
-        return true; // 로그인 상태
-      } else {
-        return false; // 로그인 필요
-      }
-    } else {
+    if (!res.ok) {
       console.error("로그인 상태 확인 실패");
-      return false; // 로그인 필요로 간주
+      return false;
     }
+    const data = await res.json();
+    return !!data?.success;
+  };
+
+  // 실제 로그아웃 동작
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => {});
+    } catch {}
+    // 클라이언트 토큰/세션 제거
+    localStorage.removeItem("accessToken");
+    // 로그아웃 후 로그인 페이지로 이동
+    router.push("/ai-quiz-walk/user/login");
   };
 
   return (
@@ -160,6 +165,15 @@ export default function AiQuizWalkIndex() {
           </section>
         </main>
       </div>
+
+      {/* 좌하단 고정 로그아웃 버튼 */}
+      <button
+        className="fixed left-5 bottom-5 px-4 py-3 rounded-lg text-base font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 transition shadow"
+        onClick={handleLogout}
+        aria-label="로그아웃"
+      >
+        로그아웃
+      </button>
     </div>
   );
 }

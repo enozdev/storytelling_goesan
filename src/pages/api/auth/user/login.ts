@@ -66,7 +66,7 @@ export default async function handler(
     return res.status(200).json({
       success: true,
       accessToken,
-      user_id: user.idx,
+      idx: user.idx,
       userTeamName,
       userTeamCreatedAt: now.toISOString(),
     });
