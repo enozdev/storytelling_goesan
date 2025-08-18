@@ -28,7 +28,7 @@ export default function Home() {
         <div className="absolute inset-0 z-50 bg-white flex flex-col items-center justify-center animate-fadeOut">
           <SparklesIcon className="w-16 h-16 text-green-600 animate-pulse" />
           <p className="mt-4 text-2xl font-bold text-green-700 animate-bounce">
-            AI 퀴즈 생성 중...
+            AI 퀴즈 생성하러 가는 중...
           </p>
         </div>
       )}
@@ -70,16 +70,23 @@ export default function Home() {
       </main>
 
       {/* 버튼 영역 */}
-      <footer className="relative w-full space-y-4">
+      <footer className="relative w-full space-y-2">
         {/* AI 퀴즈 버튼 */}
         <button
-          className="w-full py-4 bg-green-600 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-3"
+          className="w-full py-3 bg-green-600 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-3"
           onClick={handleQuizStart}
         >
           <LightBulbIcon className="w-6 h-6 text-neon-yellow animate-flicker" />
           <span className={isAnimating ? "animate-pulse" : ""}>
             AI 퀴즈 생성하기
           </span>
+        </button>
+        <button
+          className="w-full py-3 bg-gray-200 text-gray-800 rounded-2xl text-xl font-bold shadow-lg hover:bg-gray-300 transition flex items-center justify-center gap-3"
+          onClick={() => router.push("/ai-quiz-walk/indoor/quiz/list")}
+        >
+          <SparklesIcon className="w-6 h-6 text-gray-600" />
+          <span>저장된 문제 보기</span>
         </button>
       </footer>
     </div>

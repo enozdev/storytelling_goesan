@@ -1,6 +1,7 @@
 // src/components/user/LoginForm.tsx
 import { useState } from "react";
 import { LockClosedIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/router";
 
 type Props = {
   onUserLogin: (payload: {
@@ -21,6 +22,7 @@ export default function LoginForm({
 }: Props) {
   const [userTeamName, setUserTeamName] = useState("");
   const [userTeamPassword, setUserTeamPassword] = useState("");
+  const router = useRouter();
 
   const handleUser = async () => {
     await onUserLogin({ userTeamName, userTeamPassword });
@@ -63,6 +65,13 @@ export default function LoginForm({
             className="w-full py-3 bg-green-600 text-white rounded-lg text-base font-semibold hover:bg-green-700 transition disabled:opacity-60"
           >
             {isLoading ? "로그인 중..." : "로그인"}
+          </button>
+
+          <button
+            onClick={() => router.push("/ai-quiz-walk/user/signup")}
+            className="w-full py-3 border-2 border-gray-100 bg-gray-100 text-green-700 rounded-lg font-semibold shadow hover:bg-green-100 transition"
+          >
+            팀 등록하기
           </button>
 
           <button

@@ -1,164 +1,235 @@
-import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import QuizForm from "@/components/ai-quiz-walk/quiz/QuizForm";
-import QuizSet from "@/components/ai-quiz-walk/quiz/QuizSet";
-import LatestQuizList from "@/components/ai-quiz-walk/quiz/LatestQuizSet";
+import { useState, useMemo } from "react";
+import { useQuizSession } from "@/store/quizSession";
+import type {
+  Difficulty,
+  SessionQuestion,
+  Question,
+} from "@/lib/frontend/quiz/types";
 
-// localStorage 48시간 만료 함수 => localStorage에는 chatpgt 대화기록 존재
-const setWithExpiry = (key: string, value: any, expiryInHours: number = 1) => {
-  const item = {
-    value,
-    expiry: new Date().getTime() + expiryInHours * 60 * 60 * 1000,
-  };
-  localStorage.setItem(key, JSON.stringify(item));
-};
-
-const getWithExpiry = (key: string) => {
-  const itemStr = localStorage.getItem(key);
-  if (!itemStr) return null;
-
-  const item = JSON.parse(itemStr);
-  if (new Date().getTime() > item.expiry) {
-    localStorage.removeItem(key);
-    return null;
-  }
-  return item.value;
-};
-
-interface Quiz {
-  id: number;
-  question: string;
-  optionA: string;
-  optionB: string;
-  optionC: string;
-  optionD: string;
-  answer: string;
-  questionOrder: number;
-  qrCode: string;
-}
-
-interface QuizSet {
-  id: number;
-  title: string;
-  topic: string;
-  quizzes: Quiz[];
-  createdAt: string;
-}
-
-export default function Quiz() {
+export default function NewQuestionPage() {
   const router = useRouter();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [latestQuizSet, setLatestQuizSet] = useState<QuizSet | null>(null);
+  const { sessionId, items, maxCount, addItem } = useQuizSession();
   const [topic, setTopic] = useState("");
-  const [teamName, setTeamName] = useState("");
-  const [userTeamName, setUserTeamName] = useState<string>("팀 이름 없음");
+  const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const storedTeamName =
-      localStorage.getItem("userTeamName") || "팀 이름 없음";
-    setUserTeamName(storedTeamName);
-  }, []);
+  const generated = items.length;
+  const progressPct = Math.round((generated / Math.max(maxCount, 1)) * 100);
+  const remaining = maxCount - items.length;
 
-  const generateQuizzes = async (inputTopic: string) => {
+  // 주제 추천 목록
+  const suggestedChips = useMemo(
+    () => [
+      "괴산의 역사",
+      "괴산의 지형과 산",
+      "괴산의 특산물",
+      "괴산의 축제",
+      "괴산의 문화유산",
+      "산막이 옛길의 유래",
+    ],
+    []
+  );
+
+  const canGenerate = topic.trim().length > 0 && !isLoading && remaining > 0;
+
+  const onChip = (chip: string) => setTopic(chip);
+
+  // 문제 생성 핸들러
+  const onGenerate = async () => {
+    if (!canGenerate) return;
+    setIsLoading(true);
     try {
-      setError("");
-      setIsLoading(true);
-      setTopic(inputTopic);
-
-      if (!inputTopic.trim()) {
-        setError("주제를 입력해주세요.");
-        setIsLoading(false);
+      const res = await fetch("/api/ai-quiz-walk/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, difficulty }),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        alert(j?.error ?? "문제 생성에 실패했습니다.");
         return;
       }
 
-      const conversationHistory = getWithExpiry("geminiConversation") || [];
-
-      const response = await fetch("/api/ai-quiz-walk/quiz-set/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: inputTopic,
-          // conversationHistory,
-        }),
-      });
-
-      const userTeamName =
-        localStorage.getItem("userTeamName") || "팀 이름 없음";
-
-      if (!response.ok) {
-        throw new Error("퀴즈 생성 실패");
-      }
-
-      const data = await response.json();
-
-      if (data.conversationHistory) {
-        setWithExpiry("geminiConversation", data.conversationHistory, 144);
-      }
-
-      if (!data.quizzes || !Array.isArray(data.quizzes)) {
-        throw new Error("퀴즈 데이터 형식이 올바르지 않습니다.");
-      }
-
-      console.log(data.quizzes);
-
-      const convertedQuizzes = data.quizzes.map((quiz: any) => ({
-        id: quiz.id,
-        question: quiz.question,
-        optionA: quiz.options.A,
-        optionB: quiz.options.B,
-        optionC: quiz.options.C,
-        optionD: quiz.options.D,
-        answer: quiz.answer,
-        questionOrder: quiz.questionOrder,
-        qrCode: quiz.qrCode,
-      }));
-
-      setQuizzes(convertedQuizzes);
-    } catch (err) {
-      console.error("퀴즈 생성 에러:", err);
-      setError(
-        err instanceof Error ? err.message : "퀴즈 생성 중 오류가 발생했습니다."
-      );
+      const data = (await res.json()) as Question; // API는 Question 자체를 반환하므로 그대로 사용
+      const qItem: SessionQuestion = {
+        question: data,
+        isRevealed: false,
+        isChosen: false,
+      };
+      const index = addItem(qItem);
+      router.replace(`/ai-quiz-walk/indoor/quiz/${sessionId}/${index}`);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && canGenerate) onGenerate();
+  };
+
   return (
-    <div className="min-h-screen bg-white px-4 py-10 flex flex-col justify-between items-center">
-      {/* 상단 영역 */}
-      <div className="w-full max-w-md flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-green-700 mb-3">
-          괴산 AI 문제 생성기
-        </h1>
-        <p className="text-md text-gray-600 text-center mb-8">
-          만들고 싶은 퀴즈의 내용을 자유롭게 작성해보세요.
-        </p>
-        <div style={{ marginBottom: 20 }}>
-          <div className="text-2xl mb-4 items-center flex flex-col">
-            {userTeamName}
+    <main
+      className="min-h-[100dvh] bg-gradient-to-b from-white to-slate-50"
+      style={{ WebkitTapHighlightColor: "transparent" }}
+    >
+      <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/90 border-b">
+        <div className="mx-auto max-w-4xl px-5 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 font-semibold">
+              山
+            </span>
+            <div className="leading-tight">
+              <h1 className="text-lg font-bold tracking-tight">
+                산막이 옛길 · AI 문제 생성기
+              </h1>
+              <p className="text-xs text-slate-500">
+                주제 작성 → 문제 생성 → 다음 페이지에서 풀이
+              </p>
+            </div>
           </div>
-          <input
-            type="text"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="예: 괴산의 역사, 괴산의 특산물"
-            style={{ width: "100%", padding: "10px 10px", fontSize: 16 }}
-            disabled={isLoading}
-            className="border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <button
-            type="submit"
-            disabled={isLoading}
-            style={{ marginTop: 10, padding: "10px 20px" }}
-            className="w-full py-3 bg-green-600 text-white rounded-lg text-base font-semibold hover:bg-green-700 transition"
-          >
-            {isLoading ? "생성중..." : "AI로 문제 생성하기"}
-          </button>
         </div>
-      </div>
-    </div>
+      </header>
+
+      <section className="mx-auto max-w-4xl px-5 py-6 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
+        <div className="rounded-2xl border bg-white shadow-sm p-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+                AI와 함께하는 퀴즈 산책,
+                <br />
+                어떤 문제를 만들까요?
+              </h2>
+              <p className="text-slate-600 mt-1">
+                주제를 입력하고, AI가 문제를 생성해드립니다.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            {/* 추천 칩 */}
+            <div className="flex flex-wrap gap-2 -m-1">
+              {suggestedChips.map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => onChip(chip)}
+                  className={`m-1 px-3 py-2 rounded-full border text-sm min-h-10 active:scale-[0.98] transition ${
+                    topic === chip
+                      ? "bg-emerald-600 border-emerald-600 text-white shadow"
+                      : "bg-white hover:bg-slate-50"
+                  }`}
+                  aria-pressed={topic === chip}
+                >
+                  {topic === chip ? "✓ " : "# "}
+                  {chip}
+                </button>
+              ))}
+            </div>
+
+            {/* 입력 */}
+            <label className="block text-sm font-medium text-slate-700">
+              주제(키워드)
+            </label>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              onKeyDown={onKeyDown}
+              placeholder="예: 괴산의 역사, 산막이 옛길의 유래 등"
+              className="w-full rounded-xl border px-4 py-3 text-slate-800 shadow-inner outline-none focus:ring-4 focus:ring-emerald-100"
+              inputMode="text"
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              enterKeyHint="go"
+            />
+
+            {/* 난이도 + 남은 수 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <label className="text-sm font-medium text-slate-700">
+                  난이도
+                </label>
+                <div className="flex gap-2">
+                  {(
+                    [
+                      { key: "easy", label: "하" },
+                      { key: "medium", label: "중" },
+                      { key: "hard", label: "상" },
+                    ] as const
+                  ).map((d) => (
+                    <button
+                      key={d.key}
+                      type="button"
+                      onClick={() => setDifficulty(d.key)}
+                      className={`flex-1 rounded-xl border px-3 py-3 text-sm min-h-12 ${
+                        difficulty === d.key
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-white hover:bg-slate-50"
+                      }`}
+                      aria-pressed={difficulty === d.key}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <label className="text-sm font-medium text-slate-700">
+                  생성된 문제 수
+                </label>
+
+                <div className="rounded-xl border bg-slate-50 px-3 py-3">
+                  <div className="mb-2 flex items-center justify-between text-xs text-slate-600">
+                    <span>
+                      {generated} / {maxCount}
+                    </span>
+                    <span>{progressPct}%</span>
+                  </div>
+
+                  <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+                    <div
+                      role="progressbar"
+                      aria-label="생성 진행률"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={progressPct}
+                      className="h-full bg-emerald-600 transition-[width] duration-500"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 생성 버튼 */}
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onGenerate}
+                disabled={!canGenerate}
+                className={`inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-4 focus:ring-emerald-100 min-h-12 ${
+                  canGenerate
+                    ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
+                    : "bg-slate-200 text-slate-500 cursor-not-allowed"
+                }`}
+                aria-disabled={!canGenerate}
+                aria-label="문제 생성하기"
+              >
+                <span className="inline-flex items-center gap-2">
+                  🧠 문제 생성하기
+                </span>
+              </button>
+
+              <p className="hidden sm:block text-sm text-slate-500">
+                생성 후, 다음 페이지에서 직접 풀고 정답을 확인합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

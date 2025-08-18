@@ -78,22 +78,6 @@ export default function UserSignup() {
         </div>
 
         <div className="space-y-4">
-          <select
-            className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 text-base"
-            defaultValue=""
-            onChange={(e) => setSelectedGroup(e.target.value)}
-          >
-            <option value="" disabled>
-              학교를 선택해 주세요.
-            </option>
-            {groupList.map((group) => (
-              <option key={group.idx} value={group.school}>
-                {group.school}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-4">
           <input
             type="text"
             placeholder="팀 이름"

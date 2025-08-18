@@ -22,7 +22,7 @@ export function useAuth() {
 
       // 저장은 여기서 수행 (원하면 호출부로 이동 가능)
       localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("idx", String(data.idx));
+      localStorage.setItem("user_id", String(data.idx));
       localStorage.setItem("userTeamName", dto.userTeamName);
 
       return data;
