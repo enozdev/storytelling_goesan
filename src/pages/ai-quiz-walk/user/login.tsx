@@ -1,3 +1,5 @@
+"use client";
+
 // src/pages/user/login.tsx
 import { useRouter } from "next/router";
 import LoginForm from "@/components/user/LoginForm";

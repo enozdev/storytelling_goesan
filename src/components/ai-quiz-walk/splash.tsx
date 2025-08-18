@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type Props = {
   children: React.ReactNode;
@@ -35,10 +36,13 @@ export default function SplashApp({
       <div className="w-full max-w-xs px-6">
         {/* 로고 */}
         <div className="mx-auto mb-4 h-20 w-20 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/20">
-          <img
+          <Image
             src={logoSrc}
             alt="로고"
-            className="h-full w-full object-cover"
+            width={80}
+            height={80}
+            className="h-full w-full object-cover rounded-full"
+            priority
           />
         </div>
 
@@ -60,7 +64,6 @@ export default function SplashApp({
       {/* 부드러운 페이드 인 */}
       <style jsx>{`
         :global(body) {
-          /* 스플래시 동안 스크롤 방지(필요 시) */
           overflow: hidden;
         }
         .fixed {
