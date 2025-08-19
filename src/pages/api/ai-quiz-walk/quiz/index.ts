@@ -1,4 +1,4 @@
-// DUMMY API
+// DUMMY API //
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { Question } from "@/lib/frontend/quiz/types";
@@ -20,9 +20,9 @@ export default function handler(
   const options = ["보기1", "보기2", "보기3", "보기4"];
   const question: Question = {
     id: crypto.randomUUID(),
-    q: `${topic}에 대한 문제를 풀어보세요.`,
+    question: `${topic}에 대한 문제를 풀어보세요.`,
     options,
-    a: options[0],
+    answer: options[0],
     difficulty,
     topic,
   };

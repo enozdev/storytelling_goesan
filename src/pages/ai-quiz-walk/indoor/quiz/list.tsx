@@ -12,10 +12,6 @@ export default function SummaryPage() {
 
   const hasAny = generated > 0;
 
-  const startNew = () => {
-    router.push("/ai-quiz-walk/indoor/quiz/new");
-  };
-
   return (
     <main className="mx-auto max-w-4xl px-5 py-8 pb-[max(2rem,env(safe-area-inset-bottom))]">
       {/* 헤더 + 진행률 */}
@@ -53,7 +49,10 @@ export default function SummaryPage() {
         {!hasAny ? (
           <div className="rounded-2xl border p-6 bg-white text-slate-700">
             아직 생성된 문제가 없습니다.{" "}
-            <button onClick={startNew} className="underline underline-offset-4">
+            <button
+              onClick={() => router.push("/ai-quiz-walk/indoor/quiz/create")}
+              className="underline underline-offset-4"
+            >
               새 문제 만들기
             </button>
           </div>
@@ -82,7 +81,7 @@ export default function SummaryPage() {
                     </div>
 
                     {/* 문제/선지 */}
-                    <p className="font-medium mt-3">{it.question.q}</p>
+                    <p className="font-medium mt-3">{it.question.question}</p>
                     <ul className="list-disc pl-5 text-sm mt-2 text-slate-700 space-y-0.5">
                       {it.question.options.map((o: string, i: number) => (
                         <li key={i}>{o}</li>
@@ -91,7 +90,9 @@ export default function SummaryPage() {
 
                     <p className="text-sm text-emerald-700 mt-2">
                       정답:{" "}
-                      <span className="font-semibold">{it.question.a}</span>{" "}
+                      <span className="font-semibold">
+                        {it.question.answer}
+                      </span>{" "}
                       <span className="text-slate-500">
                         (내 답안: {it.userAnswer ?? "—"})
                       </span>

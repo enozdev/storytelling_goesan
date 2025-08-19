@@ -1,13 +1,13 @@
 // =====================================
-// src/lib/quiz/types.ts (객관식 고정)
+// src/lib/frontend/quiz/types.ts (객관식 고정)
 // =====================================
 export type Difficulty = "easy" | "medium" | "hard";
 
 export interface Question {
   id: string;
-  q: string; // 문제 텍스트
+  question: string; // 문제 텍스트
   options: string[]; // 4지선다 등
-  a: string; // 정답(옵션 텍스트)
+  answer: string; // 정답(옵션 텍스트)
   difficulty: Difficulty;
   topic: string;
 }

@@ -65,7 +65,7 @@ export default function AiQuizWalkIndex() {
           <h1 className="text-4xl font-extrabold leading-tight text-green-700">
             괴산 산막이 옛길 <br /> AI 퀴즈 산책
           </h1>
-          <p className="text-base text-gray-600 text-xl">
+          <p className="text-base text-gray-600">
             AI와 함께하는 몰입형 학습 경험
           </p>
         </header>

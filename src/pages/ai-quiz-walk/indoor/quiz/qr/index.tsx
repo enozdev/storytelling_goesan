@@ -38,9 +38,9 @@ export default function QrTempPage() {
         v: 1,
         topic: it.question.topic,
         difficulty: it.question.difficulty,
-        q: it.question.q,
+        question: it.question.question,
         options: it.question.options,
-        a: it.question.a,
+        answer: it.question.answer,
       };
       const d = toB64Url(JSON.stringify(payload));
       const url = `${origin}/ai-quiz-walk/indoor/quiz/qr/open?d=${encodeURIComponent(
@@ -113,7 +113,7 @@ export default function QrTempPage() {
                   <div className="min-w-0">
                     <p className="text-xs text-slate-500">#{s.idx}</p>
                     <h2 className="text-sm font-semibold leading-5 text-slate-900 line-clamp-2">
-                      {s.q}
+                      {s.question}
                     </h2>
                     <p className="text-xs text-slate-500 mt-1">
                       주제: {s.topic} · 난이도: {s.difficulty}

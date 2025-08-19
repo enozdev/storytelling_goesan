@@ -39,7 +39,7 @@ export default function NewQuestionPage() {
     if (!canGenerate) return;
     setIsLoading(true);
     try {
-      const res = await fetch("/api/ai-quiz-walk/quiz", {
+      const res = await fetch("/api/ai-quiz-walk/quiz/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topic, difficulty }),

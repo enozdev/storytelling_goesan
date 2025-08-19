@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router"; // Page Router
 import { useQuizSession } from "@/store/quizSession";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import type { Question, SessionQuestion } from "@/lib/frontend/quiz/types";
 
 export default function PlayPage() {
   const router = useRouter();
-  // reveal, choose 제거
   const { sessionId, items, setAnswer, maxCount } = useQuizSession();
 
   const { sessionId: sidParam, index: indexParam } = router.query;
 
-  // ✅ 모든 훅은 컴포넌트 최상단에서 호출
+  // 모든 훅은 컴포넌트 최상단에서 호출
   const idx = useMemo<number>(() => {
     if (Array.isArray(indexParam)) return Number(indexParam[0]);
     if (typeof indexParam === "string") return Number(indexParam);
@@ -19,7 +19,7 @@ export default function PlayPage() {
 
   const [localAnswer, setLocalAnswer] = useState<string>("");
   const [regenerating, setRegenerating] = useState<boolean>(false);
-  // ✅ 제출 여부 로컬 상태로 관리
+  // 제출 여부 로컬 상태로 관리
   const [submitted, setSubmitted] = useState<boolean>(false);
 
   // idx/세션 검증 및 초기 답안 로드
@@ -28,13 +28,13 @@ export default function PlayPage() {
 
     // 세션 불일치 시 요약으로 이동
     if (typeof sidParam === "string" && sidParam !== sessionId) {
-      router.replace("/ai-quiz-walk/indoor/quiz/summary");
+      router.replace("/ai-quiz-walk/indoor/quiz/list");
       return;
     }
 
     // 인덱스 범위 벗어나면 요약으로 이동
     if (!Number.isFinite(idx) || idx < 0 || idx >= items.length) {
-      router.replace("/ai-quiz-walk/indoor/quiz/summary");
+      router.replace("/ai-quiz-walk/indoor/quiz/list");
       return;
     }
 
@@ -48,7 +48,7 @@ export default function PlayPage() {
   // 제출 버튼 활성화
   const isSubmitEnabled = localAnswer.length > 0;
 
-  // ✅ 훅 이후에 조건부 렌더링 수행 (훅 호출 순서 불변)
+  // 훅 이후에 조건부 렌더링 수행 (훅 호출 순서 불변)
   const notReady =
     !router.isReady || !Number.isFinite(idx) || idx < 0 || idx >= items.length;
 
@@ -62,11 +62,11 @@ export default function PlayPage() {
   const onSubmit = () => {
     if (!isSubmitEnabled) return;
     setAnswer(idx, localAnswer);
-    setSubmitted(true); // ✅ 정답 노출/저장 버튼 활성화
+    setSubmitted(true); // 정답 노출/저장 버튼 활성화
   };
 
   const onChoose = async () => {
-    // ✅ choose 제거: DB 저장만 수행 후 이동
+    // choose 제거: DB 저장만 수행 후 이동
     const it = items[idx];
     try {
       const res = await fetch("/api/user/question/save", {
@@ -75,9 +75,9 @@ export default function PlayPage() {
         body: JSON.stringify({
           topic: it.question.topic,
           difficulty: it.question.difficulty,
-          q: it.question.q,
+          q: it.question.question,
           options: it.question.options,
-          a: it.question.a,
+          a: it.question.answer,
           userAnswer: localAnswer,
         }),
         credentials: "include",
@@ -100,10 +100,37 @@ export default function PlayPage() {
     }
   };
 
-  const onRegenerate = () => {
-    if (!submitted || regenerating) return; // ✅ 제출 후에만 재생성 허용
+  const onRegenerate = async () => {
+    if (!submitted || regenerating) return; // 제출 후에만 재생성 허용
     setRegenerating(true);
-    router.push("/ai-quiz-walk/indoor/quiz/create");
+    try {
+      const result = await fetch("/api/ai-quiz-walk/quiz/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: item.question.topic,
+          difficulty: item.question.difficulty,
+        }),
+      });
+      if (!result.ok) {
+        const err = await result.json().catch(() => ({}));
+        alert(err?.error ?? "문제 생성에 실패했습니다.");
+        return;
+      }
+
+      const data = (await result.json()) as Question;
+      const regeneratedItem: SessionQuestion = {
+        question: data,
+      };
+      const newIndex = items.length; // 새 문제는 항상 마지막에 추가
+
+      router.replace(`/ai-quiz-walk/indoor/quiz/${sessionId}/${newIndex}`);
+      router.push(`/ai-quiz-walk/indoor/quiz/${sessionId}/${newIndex}`);
+    } catch (error) {
+      console.error("문제 재생성 실패:", error);
+      alert("문제 재생성 중 오류가 발생했습니다.");
+      setRegenerating(false);
+    }
   };
 
   return (
@@ -118,7 +145,7 @@ export default function PlayPage() {
       </header>
 
       <div className="rounded-2xl border p-6 bg-white">
-        <p className="font-medium mb-4">{item.question.q}</p>
+        <p className="font-medium mb-4">{item.question.question}</p>
 
         <ul className="space-y-2 mb-4">
           {item.question.options.map((opt: string, i: number) => (
@@ -137,7 +164,6 @@ export default function PlayPage() {
           ))}
         </ul>
 
-        {/* ✅ 제출 전/후 UI는 동일, 조건만 submitted로 변경 */}
         {!submitted ? (
           <button
             disabled={!isSubmitEnabled}
@@ -153,7 +179,8 @@ export default function PlayPage() {
         ) : (
           <div className="mt-2 rounded-xl bg-emerald-50 border border-emerald-200 p-4">
             <p className="text-emerald-800">
-              정답: <span className="font-semibold">{item.question.a}</span>
+              정답:{" "}
+              <span className="font-semibold">{item.question.answer}</span>
             </p>
             <p className="text-slate-600 mt-1">
               내 답안: {localAnswer || "(미입력)"}
