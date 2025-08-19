@@ -1,6 +1,5 @@
-// =====================================
-// pages/api/ai-quiz-walk/quiz/index.ts (Page Router API, 객관식 고정 더미)
-// =====================================
+// DUMMY API
+
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { Question } from "@/lib/frontend/quiz/types";
 
@@ -24,7 +23,6 @@ export default function handler(
     q: `${topic}에 대한 문제를 풀어보세요.`,
     options,
     a: options[0],
-    format: "객관식" as const,
     difficulty,
     topic,
   };

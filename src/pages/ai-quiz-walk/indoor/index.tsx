@@ -67,28 +67,26 @@ export default function Home() {
             priority
           />
         </div>
-      </main>
 
-      {/* 버튼 영역 */}
-      <footer className="relative w-full space-y-2">
-        {/* AI 퀴즈 버튼 */}
-        <button
-          className="w-full py-3 bg-green-600 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-3"
-          onClick={handleQuizStart}
-        >
-          <LightBulbIcon className="w-6 h-6 text-neon-yellow animate-flicker" />
-          <span className={isAnimating ? "animate-pulse" : ""}>
-            AI 퀴즈 생성하기
-          </span>
-        </button>
-        <button
-          className="w-full py-3 bg-gray-200 text-gray-800 rounded-2xl text-xl font-bold shadow-lg hover:bg-gray-300 transition flex items-center justify-center gap-3"
-          onClick={() => router.push("/ai-quiz-walk/indoor/quiz/list")}
-        >
-          <SparklesIcon className="w-6 h-6 text-gray-600" />
-          <span>저장된 문제 보기</span>
-        </button>
-      </footer>
+        <div className="relative w-full space-y-2">
+          <button
+            className="w-full py-3 bg-green-600 text-white rounded-2xl text-xl font-bold shadow-lg hover:bg-green-700 transition flex items-center justify-center gap-3"
+            onClick={handleQuizStart}
+          >
+            <LightBulbIcon className="w-6 h-6 text-neon-yellow animate-flicker" />
+            <span className={isAnimating ? "animate-pulse" : ""}>
+              AI 퀴즈 생성하기
+            </span>
+          </button>
+          <button
+            className="w-full py-3 bg-gray-200 text-gray-800 rounded-2xl text-xl font-bold shadow-lg hover:bg-gray-300 transition flex items-center justify-center gap-3"
+            onClick={() => router.push("/ai-quiz-walk/indoor/quiz/list")}
+          >
+            <SparklesIcon className="w-6 h-6 text-gray-600" />
+            <span>저장된 문제 보기</span>
+          </button>
+        </div>
+      </main>
     </div>
   );
 }

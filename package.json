@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.0",
+    "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.14.0",
     "@types/bcryptjs": "^2.4.6",
@@ -36,6 +36,7 @@
     "react-dom": "19.1.0",
     "react-qr-code": "^2.0.18",
     "typescript": "5.8.2",
+    "zod": "^4.0.17",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
