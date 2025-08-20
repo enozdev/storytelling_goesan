@@ -19,18 +19,18 @@ pnpm dev
 ## Command
 
 ```
-cd GeumsanLMS
+cd [파일명]
 git pull
-npm install // 모듈 설치
-npx prisma generate // prisma 생성
-npm run build // 노드 빌드
+npm install                       // 모듈 설치
+npx prisma generate               // prisma 생성
+npm run build                     // 노드 빌드
 
 forever list
-forever stop [forever_idx] // forever 정지
-ps -ef | grep next // 프로세스 조회
-kill -9 [pid] // 프로세스 제거  -> next-server의 첫번째 인덱스
+forever stop [forever_idx]        // forever 정지
+ps -ef | grep next                // 프로세스 조회
+pkill -f "next start -p [포트번호]" // 서버 여러개 켰을 시 next-server 찾기 어려움 -> 이 코드로 자식 kill
+ps -ef | grep next
+kill -9 [pid]                     // 자식이 1인 pid 찾아서 부모 kill
 
-forever start start.js // forever 실행
+forever start start.js            // forever 실행
 ```
-
-현재 storytelling_goesan은 next-server version 15.2.4 입니다.

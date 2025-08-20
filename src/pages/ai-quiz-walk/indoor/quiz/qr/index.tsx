@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { useRouter } from "next/router";
-import { useQuizSession } from "@/store/quizSession";
+import { useQuizSession } from "@/store/useQuizSession";
 
 // URL-safe Base64
 const toB64Url = (input: string) =>
@@ -81,7 +81,9 @@ export default function QrTempPage() {
                 전체 인쇄
               </button>
               <button
-                onClick={() => router.push("/ai-quiz-walk/indoor/quiz/list")}
+                onClick={() =>
+                  router.push("/ai-quiz-walk/indoor/quiz/savedItems")
+                }
                 className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
               >
                 돌아가기
@@ -95,7 +97,7 @@ export default function QrTempPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-700 shadow-sm">
             확정된 문제가 없습니다.{" "}
             <button
-              onClick={() => router.push("/ai-quiz-walk/indoor/quiz/list")}
+              onClick={() => router.push("/ai-quiz-walk/indoor/quiz/create")}
               className="underline underline-offset-4 text-emerald-700 hover:text-emerald-800"
             >
               목록으로

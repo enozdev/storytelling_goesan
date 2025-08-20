@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router"; // Page Router
-import { useQuizSession } from "@/store/quizSession";
+import { useQuizSession } from "@/store/useQuizSession";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import type { Question, SessionQuestion } from "@/lib/frontend/quiz/types";
 
-export default function PlayPage() {
+export default function QuizPagess() {
   const router = useRouter();
   const { sessionId, items, setAnswer, maxCount } = useQuizSession();
 
   const { sessionId: sidParam, index: indexParam } = router.query;
 
-  // 모든 훅은 컴포넌트 최상단에서 호출
   const idx = useMemo<number>(() => {
     if (Array.isArray(indexParam)) return Number(indexParam[0]);
     if (typeof indexParam === "string") return Number(indexParam);
@@ -19,7 +18,6 @@ export default function PlayPage() {
 
   const [localAnswer, setLocalAnswer] = useState<string>("");
   const [regenerating, setRegenerating] = useState<boolean>(false);
-  // 제출 여부 로컬 상태로 관리
   const [submitted, setSubmitted] = useState<boolean>(false);
 
   // idx/세션 검증 및 초기 답안 로드
@@ -32,17 +30,10 @@ export default function PlayPage() {
       return;
     }
 
-    // 인덱스 범위 벗어나면 요약으로 이동
     if (!Number.isFinite(idx) || idx < 0 || idx >= items.length) {
       router.replace("/ai-quiz-walk/indoor/quiz/list");
       return;
     }
-
-    const it = items[idx];
-    const ua = it?.userAnswer ?? "";
-    setLocalAnswer(ua);
-    // 새로고침/복구 시 이미 답이 있으면 제출 상태로 간주
-    setSubmitted(ua.length > 0);
   }, [router.isReady, sidParam, sessionId, idx, items, router]);
 
   // 제출 버튼 활성화
@@ -65,8 +56,9 @@ export default function PlayPage() {
     setSubmitted(true); // 정답 노출/저장 버튼 활성화
   };
 
+  // Not Use Now //
+  // DB 수정 후 사용할 예정 //
   const onChoose = async () => {
-    // choose 제거: DB 저장만 수행 후 이동
     const it = items[idx];
     try {
       const res = await fetch("/api/user/question/save", {
@@ -96,12 +88,13 @@ export default function PlayPage() {
     if (nextIndex < maxCount) {
       router.replace("/ai-quiz-walk/indoor/quiz/create");
     } else {
-      router.replace("/ai-quiz-walk/indoor/quiz/list");
+      router.replace("/ai-quiz-walk/indoor/quiz/draftItems");
     }
   };
 
+  // 재생성 함수 //
   const onRegenerate = async () => {
-    if (!submitted || regenerating) return; // 제출 후에만 재생성 허용
+    if (!submitted || regenerating) return; // 제출 후에만 재생성 허용 조건 유지 시
     setRegenerating(true);
     try {
       const result = await fetch("/api/ai-quiz-walk/quiz/create", {
@@ -112,23 +105,36 @@ export default function PlayPage() {
           difficulty: item.question.difficulty,
         }),
       });
+
       if (!result.ok) {
         const err = await result.json().catch(() => ({}));
         alert(err?.error ?? "문제 생성에 실패했습니다.");
+        setRegenerating(false);
         return;
       }
+      const raw = await result.json();
+      const normalized =
+        "q" in raw
+          ? {
+              // UI가 item.question.question / answer 를 쓰는 경우에 맞춤
+              question: raw.question,
+              options: raw.options,
+              answer: raw.answer,
+              topic: raw.topic,
+              difficulty: raw.difficulty,
+            }
+          : raw;
 
-      const data = (await result.json()) as Question;
-      const regeneratedItem: SessionQuestion = {
-        question: data,
-      };
-      const newIndex = items.length; // 새 문제는 항상 마지막에 추가
+      // 기존 인덱스의 문제를 "교체" (길이 유지 → 개수 증가 없음)
+      useQuizSession.getState().replaceQuestionAt(idx, normalized);
 
-      router.replace(`/ai-quiz-walk/indoor/quiz/${sessionId}/${newIndex}`);
-      router.push(`/ai-quiz-walk/indoor/quiz/${sessionId}/${newIndex}`);
+      // 로컬 제출/선택 상태 초기화 (새 문제니까)
+      setLocalAnswer("");
+      setSubmitted(false);
     } catch (error) {
       console.error("문제 재생성 실패:", error);
       alert("문제 재생성 중 오류가 발생했습니다.");
+    } finally {
       setRegenerating(false);
     }
   };
@@ -225,11 +231,10 @@ export default function PlayPage() {
             {regenerating ? "다시 만드는 중…" : "이 주제로 재생성하기"}
           </button>
 
-          {!submitted && (
-            <p className="w-full text-xs text-slate-500 mt-1">
-              정답 확인 후 확정/재생성할 수 있습니다.
-            </p>
-          )}
+          <p className="w-full text-sm text-slate-500 mt-1">
+            AI는 유사한 문제를 생성할 수도 있어요! <br />
+            그럴땐 주제를 바꾸거나 다시 시도해 보세요.
+          </p>
         </div>
       </div>
     </main>

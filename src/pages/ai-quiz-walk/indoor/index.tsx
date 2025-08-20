@@ -80,7 +80,7 @@ export default function Home() {
           </button>
           <button
             className="w-full py-3 bg-gray-200 text-gray-800 rounded-2xl text-xl font-bold shadow-lg hover:bg-gray-300 transition flex items-center justify-center gap-3"
-            onClick={() => router.push("/ai-quiz-walk/indoor/quiz/list")}
+            onClick={() => router.push("/ai-quiz-walk/indoor/quiz/savedItems")}
           >
             <SparklesIcon className="w-6 h-6 text-gray-600" />
             <span>저장된 문제 보기</span>

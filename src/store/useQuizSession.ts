@@ -9,7 +9,12 @@ interface QuizActions {
   reset: () => void;
   addItem: (q: SessionQuestion) => number;
   setAnswer: (index: number, answer: string) => void;
-  setUserId: (id: string | null) => void; // ✅ 추가
+  setUserId: (id: string | null) => void;
+  /** 현재 인덱스의 문제를 교체(길이 유지, 카운트 증가 X) */
+  replaceQuestionAt: (
+    index: number,
+    nextQuestion: SessionQuestion["question"]
+  ) => void;
 }
 
 export const useQuizSession = create<QuizSessionState & QuizActions>()(
@@ -20,7 +25,11 @@ export const useQuizSession = create<QuizSessionState & QuizActions>()(
       maxCount: 7,
       userId: null,
 
-      reset: () => set({ sessionId: makeId("sess"), items: [] }),
+      reset: () =>
+        set({
+          sessionId: makeId("sess"),
+          items: [],
+        }),
 
       addItem: (q) => {
         const { items, maxCount } = get();
@@ -37,8 +46,24 @@ export const useQuizSession = create<QuizSessionState & QuizActions>()(
         set({ items });
       },
 
-      setUserId: (id) => set({ userId: id }), // ✅ 액션
+      setUserId: (id) => set({ userId: id }),
+
+      replaceQuestionAt: (index, nextQuestion) =>
+        set((s) => {
+          if (index < 0 || index >= s.items.length) return s;
+          const items = s.items.slice();
+
+          items[index] = {
+            ...items[index],
+            question: nextQuestion, // 문제 본문 교체
+            userAnswer: "", // 기존 답안 초기화
+          };
+
+          return { ...s, items };
+        }),
     }),
-    { name: "ai-quiz-walk-indoor-quiz-session" }
+    {
+      name: "ai-quiz-walk-indoor-quiz-session",
+    }
   )
 );

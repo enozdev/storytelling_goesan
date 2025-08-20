@@ -44,7 +44,7 @@ function renameUploadedFile(file: FormidableFile, userId: string) {
 
   fs.renameSync(oldPath, newPath);
 
-  // ✅ 업로드된 파일 권한을 모두 읽을 수 있게 설정 (소유자: rw, 기타: r)
+  // 업로드된 파일 권한을 모두 읽을 수 있게 설정 (소유자: rw, 기타: r)
   fs.chmodSync(newPath, 0o755);
 
   return `${newName}`;

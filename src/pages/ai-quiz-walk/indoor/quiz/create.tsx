@@ -1,12 +1,62 @@
+// /pages/ai-quiz-walk/indoor/quiz/create.tsx
 import { useRouter } from "next/router";
-import { useState, useMemo } from "react";
-import { useQuizSession } from "@/store/quizSession";
-
+import { useState, useMemo, useEffect } from "react";
+import { useQuizSession } from "@/store/useQuizSession";
 import type {
   Difficulty,
   SessionQuestion,
   Question,
 } from "@/lib/frontend/quiz/types";
+
+type HistoryStore = {
+  questions: string[]; // 과거 질문 텍스트 목록
+  fingerprints: string[]; // 중복 판정용 간단 지문
+};
+
+const LS_KEY = "ai-quiz-walk:history";
+
+// 기존 normalize 대체 (ESLint/TS 친화적, \p{} 미사용)
+const normalize = (t: string) =>
+  t
+    .toLowerCase()
+    .normalize("NFKD") // 악센트 분해
+    .replace(/[\u0300-\u036f]/g, "") // 결합 문자 제거
+    .replace(/[\s\u00a0]+/g, " ") // 모든 공백류를 단일 공백으로
+    .replace(/[^a-z0-9\uac00-\ud7a3\s]/g, "") // 한글/영문/숫자/공백만 허용
+    .trim();
+
+function makeFingerprint(q: Question): string {
+  const base = [
+    q.topic ?? "",
+    q.difficulty ?? "",
+    q.question,
+    ...(q.options ?? []),
+    q.answer ?? "",
+  ]
+    .filter(Boolean)
+    .join(" | ");
+  return normalize(base);
+}
+
+function loadHistory(): HistoryStore {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { questions: [], fingerprints: [] };
+    const parsed = JSON.parse(raw) as Partial<HistoryStore>;
+    return {
+      questions: Array.isArray(parsed.questions) ? parsed.questions : [],
+      fingerprints: Array.isArray(parsed.fingerprints)
+        ? parsed.fingerprints
+        : [],
+    };
+  } catch {
+    return { questions: [], fingerprints: [] };
+  }
+}
+
+function saveHistory(next: HistoryStore) {
+  localStorage.setItem(LS_KEY, JSON.stringify(next));
+}
 
 export default function NewQuestionPage() {
   const router = useRouter();
@@ -19,7 +69,15 @@ export default function NewQuestionPage() {
   const progressPct = Math.round((generated / Math.max(maxCount, 1)) * 100);
   const remaining = maxCount - items.length;
 
-  // 주제 추천 목록
+  // SSR 대비: 최초 마운트 후에만 localStorage 접근
+  const [history, setHistory] = useState<HistoryStore>({
+    questions: [],
+    fingerprints: [],
+  });
+  useEffect(() => {
+    setHistory(loadHistory());
+  }, []);
+
   const suggestedChips = useMemo(
     () => [
       "괴산의 역사",
@@ -39,10 +97,13 @@ export default function NewQuestionPage() {
     if (!canGenerate) return;
     setIsLoading(true);
     try {
+      // 최근 50개만 API에 전달 (토큰 절약)
+      const previousQuestions = history.questions.slice(-50);
+
       const res = await fetch("/api/ai-quiz-walk/quiz/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, difficulty }),
+        body: JSON.stringify({ topic, difficulty, previousQuestions }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -50,10 +111,27 @@ export default function NewQuestionPage() {
         return;
       }
 
-      const data = (await res.json()) as Question; // API는 Question 자체를 반환하므로 그대로 사용
-      const qItem: SessionQuestion = {
-        question: data,
+      const data = (await res.json()) as Question;
+
+      // 1) 클라이언트에서 최종 중복 검사
+      const fp = makeFingerprint(data);
+      // if (history.fingerprints.includes(fp)) {
+      //   alert(
+      //     "이미 생성된 문제와 유사합니다. 주제를 바꾸거나 다시 시도해 주세요."
+      //   );
+      //   return;
+      // }
+
+      // 2) localStorage 갱신
+      const nextHistory: HistoryStore = {
+        questions: [...history.questions, data.question],
+        fingerprints: [...history.fingerprints, fp],
       };
+      saveHistory(nextHistory);
+      setHistory(nextHistory);
+
+      // 3) 기존 흐름 유지 (zustand 세션에 추가 + 라우팅)
+      const qItem: SessionQuestion = { question: data };
       const index = addItem(qItem);
       router.replace(`/ai-quiz-walk/indoor/quiz/${sessionId}/${index}`);
     } finally {
@@ -100,7 +178,7 @@ export default function NewQuestionPage() {
           </div>
 
           <div className="mt-6 grid gap-4">
-            {/* 추천 칩 */}
+            {/* 주제 선택 칩 */}
             <div className="flex flex-wrap gap-2 -m-1">
               {suggestedChips.map((chip) => (
                 <button
@@ -154,7 +232,7 @@ export default function NewQuestionPage() {
                     <button
                       key={d.key}
                       type="button"
-                      onClick={() => setDifficulty(d.key)}
+                      onClick={() => setDifficulty(d.key as Difficulty)}
                       className={`flex-1 rounded-xl border px-3 py-3 text-sm min-h-12 ${
                         difficulty === d.key
                           ? "bg-emerald-600 text-white border-emerald-600"

@@ -1,5 +1,5 @@
 // =====================================
-// src/lib/frontend/quiz/types.ts (객관식 고정)
+// src/lib/frontend/quiz/types.ts
 // =====================================
 export type Difficulty = "easy" | "medium" | "hard";
 
