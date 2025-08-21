@@ -1,82 +1,69 @@
-// src/pages/ai-quiz-walk/indoor/quiz/saved.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import useSWR from "swr";
-import SummaryList from "@/components/ai-quiz-walk/quizItems";
+import QuizItems from "@/components/ai-quiz-walk/quizItems";
 import type { SessionQuestion } from "@/lib/frontend/quiz/types";
+import { useQuizSession } from "@/store/useQuizSession";
 
-type ApiItem = {
-  question: {
-    id: string;
-    topic: string;
-    difficulty: string;
-    question?: string; // optional
-    answer?: string; // optional
-    options: string[];
-  };
-  userAnswer?: string;
-};
-type ApiResponse = { items: ApiItem[] };
+type ApiResponse = { items: SessionQuestion[] };
 
-/** 페이지 내부 인라인 fetcher */
-const fetcher = async (url: string): Promise<ApiResponse> => {
-  const res = await fetch(url, { credentials: "include" });
+const postFetcher = async (
+  url: string,
+  payload: unknown
+): Promise<ApiResponse> => {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error ?? "저장된 문제 조회 실패");
+    const msg = await res.text().catch(() => "");
+    throw new Error(`Request failed: ${res.status} ${msg}`);
   }
   return res.json();
 };
 
-function normalizeToSessionQuestion(row: ApiItem): SessionQuestion | null {
-  if (!row.question.question || !row.question.answer) return null; // 누락 시 제외
-
-  return {
-    question: {
-      id: row.question.id,
-      topic: row.question.topic,
-      difficulty: row.question.difficulty as any, // 필요 시 Difficulty로 캐스팅
-      question: row.question.question,
-      options: row.question.options ?? [],
-      answer: row.question.answer ?? "", // 정답이 없으면 빈 문자열
-    },
-    userAnswer: row.userAnswer ?? undefined,
-  };
-}
-
 export default function SavedListPage() {
-  const key = "/api/questions/saved";
-  const { data, error, isLoading, mutate } = useSWR<ApiResponse>(key, fetcher, {
-    revalidateOnFocus: true,
-    shouldRetryOnError: true,
-  });
+  // SSR 이슈 -> localStorage 접근은 클라이언트에서만
+  const [userId, setUserId] = useState<string | null>(null);
+  const { reset } = useQuizSession();
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUserId(localStorage.getItem("user_id"));
+    }
+  }, []);
 
-  if (isLoading) return <div className="p-6">불러오는 중…</div>;
-  if (error)
+  // 리스트 요청
+  const { data, error, isLoading } = useSWR(
+    userId ? ["/api/ai-quiz-walk/quiz/list", { user_id: userId }] : null,
+    ([url, payload]) => postFetcher(url as string, payload),
+    { revalidateOnFocus: false }
+  );
+
+  if (isLoading || userId === null) {
+    return <div className="max-w-2xl mx-auto p-4">불러오는 중…</div>;
+  }
+
+  if (error) {
     return (
-      <div className="p-6 text-red-600">
-        저장된 문제를 불러오지 못했습니다.
+      <div className="max-w-2xl mx-auto p-4 text-red-600">
+        최근 문제를 불러올 수 없습니다.
         <br />
-        <button
-          className="mt-3 underline underline-offset-4"
-          onClick={() => mutate()}
-        >
-          다시 시도
-        </button>
+        <span className="text-sm text-gray-600">
+          {String(error.message ?? error)}
+        </span>
       </div>
     );
+  }
 
-  // ✅ API 응답을 SessionQuestion[]으로 변환
-  const normalizedItems: SessionQuestion[] = (data?.items ?? [])
-    .map(normalizeToSessionQuestion)
-    .filter((x): x is SessionQuestion => x !== null);
+  console.log(data?.items);
 
   return (
-    <SummaryList
+    <QuizItems
       title="저장된 문제 리스트"
-      items={normalizedItems} // ← 타입이 맞으니 에러 사라짐
-      onReset={undefined}
+      items={data?.items ?? []} // API가 SessionQuestion[]을 보장
+      onReset={reset}
       createPath="/ai-quiz-walk/indoor/quiz/create"
-      primaryPath="/ai-quiz-walk/indoor/quiz/saved"
+      isSaved={true}
       primaryLabel="저장된 문제 QR 보기"
     />
   );

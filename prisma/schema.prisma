@@ -36,15 +36,12 @@ model participate {
 }
 
 model Question {
-  idx          Int      @id @default(autoincrement())
+  idx         Int      @id @default(autoincrement())
   userId      String   // 로그인 사용자 식별자(세션에서 결정)
   topic       String
   difficulty  String
-  q           String
+  question    String
   options     Json
   answer      String
   createdAt   DateTime @default(now())
-
-  validUntil  DateTime
-  isRevoked   Boolean  @default(false)
 }

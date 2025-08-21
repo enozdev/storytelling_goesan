@@ -1,15 +1,16 @@
-// src/components/quiz/SummaryList.tsx
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import type { SessionQuestion } from "@/lib/frontend/quiz/types";
 
 type Props = {
   title: string;
   items: SessionQuestion[];
-  denom?: number; // 진행률 분모(없으면 items.length 사용)
-  onReset?: () => void; // Draft 페이지에서만 노출
+  denom?: number;
+  onReset?: () => void;
   createPath?: string;
-  primaryPath?: string;
+  isSaved?: boolean;
   primaryLabel?: string;
 };
 
@@ -19,10 +20,17 @@ export default function QuizItems({
   denom,
   onReset,
   createPath = "/ai-quiz-walk/indoor/quiz/create",
-  primaryPath = "/ai-quiz-walk/indoor/quiz/qr",
+  isSaved = false,
   primaryLabel = "문제 전체 저장하기",
 }: Props) {
   const router = useRouter();
+
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUserId(localStorage.getItem("user_id"));
+    }
+  }, []);
 
   const generated = items.length;
   const base = denom ?? (generated || 1);
@@ -57,6 +65,7 @@ export default function QuizItems({
       <section className="space-y-3">
         {!hasAny ? (
           <div className="rounded-2xl border p-6 bg-white text-slate-700">
+            {/* 저장된 문제 없을 시 */}
             아직 생성된 문제가 없습니다.{" "}
             <button
               onClick={() => router.push(createPath)}
@@ -67,13 +76,19 @@ export default function QuizItems({
           </div>
         ) : (
           <ol className="space-y-3">
+            {/* 저장된 문제 존재할 시 */}
             {items.map((it, idx) => (
-              <li key={idx} className="rounded-2xl border bg-white">
+              <li
+                key={it.question.id ?? idx}
+                className="rounded-2xl border bg-white"
+              >
                 <div className="p-4 sm:p-5">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold px-2">
                       #{idx + 1}
                     </span>
+
+                    {/* 주제 파트 */}
                     <span className="text-sm text-slate-600">
                       주제: <b>{it.question.topic}</b>
                     </span>
@@ -82,27 +97,18 @@ export default function QuizItems({
                     </span>
                   </div>
 
-                  <p className="font-medium mt-3">
-                    {"q" in it.question
-                      ? it.question.q
-                      : (it.question as any).question}
-                  </p>
-                  <ul className="list-disc pl-5 text-sm mt-2 text-slate-700 space-y-0.5">
-                    {it.question.options.map((o: string, i: number) => (
+                  {/* 옵션 파트 */}
+                  <p className="font-medium mt-3">{it.question.question}</p>
+                  <ol className="list-decimal pl-5 text-sm mt-2 text-slate-700 space-y-0.5">
+                    {it.question.options.map((o, i) => (
                       <li key={i}>{o}</li>
                     ))}
-                  </ul>
+                  </ol>
 
+                  {/* 정답 파트 */}
                   <p className="text-sm text-emerald-700 mt-2">
                     정답:{" "}
-                    <span className="font-semibold">
-                      {"a" in it.question
-                        ? it.question.a
-                        : (it.question as any).answer}
-                    </span>{" "}
-                    <span className="text-slate-500">
-                      (내 답안: {it.userAnswer ?? "—"})
-                    </span>
+                    <span className="font-semibold">{it.question.answer}</span>
                   </p>
                 </div>
               </li>
@@ -113,7 +119,31 @@ export default function QuizItems({
 
       <div className="mt-6 flex flex-wrap gap-2">
         <button
-          onClick={() => router.push(primaryPath)}
+          onClick={
+            isSaved
+              ? () => {
+                  {
+                    /* SavedItems일때 저장된 QR로 가기 */
+                  }
+                  router.push("/ai-quiz-walk/indoor/quiz/qr");
+                }
+              : async () => {
+                  {
+                    /* DraftItems(임시저장)일때 저장하기 파트 */
+                  }
+                  const res = await fetch("/api/ai-quiz-walk/quiz/save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId, items }),
+                  });
+                  if (!res.ok) {
+                    alert("문제 저장에 실패했습니다.");
+                  } else {
+                    onReset;
+                    router.push("/ai-quiz-walk/indoor/quiz/savedItems");
+                  }
+                }
+          }
           disabled={!hasAny}
           className={`rounded-xl px-4 py-3 text-sm font-semibold min-h-12 ${
             hasAny
@@ -125,6 +155,7 @@ export default function QuizItems({
           {primaryLabel}
         </button>
 
+        {/* 문제 전체 초기화 버튼 */}
         {onReset && (
           <button
             onClick={onReset}
@@ -134,6 +165,7 @@ export default function QuizItems({
           </button>
         )}
 
+        {/* 홈 버튼 */}
         <button
           onClick={() => router.push("/ai-quiz-walk/indoor")}
           className="rounded-xl border px-4 py-3 text-sm min-h-12 hover:bg-slate-50"

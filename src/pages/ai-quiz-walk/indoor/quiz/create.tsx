@@ -60,7 +60,7 @@ function saveHistory(next: HistoryStore) {
 
 export default function NewQuestionPage() {
   const router = useRouter();
-  const { sessionId, items, maxCount, addItem } = useQuizSession();
+  const { sessionId, items, maxCount, addItem, reset } = useQuizSession();
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [isLoading, setIsLoading] = useState(false);
@@ -115,12 +115,6 @@ export default function NewQuestionPage() {
 
       // 1) 클라이언트에서 최종 중복 검사
       const fp = makeFingerprint(data);
-      // if (history.fingerprints.includes(fp)) {
-      //   alert(
-      //     "이미 생성된 문제와 유사합니다. 주제를 바꾸거나 다시 시도해 주세요."
-      //   );
-      //   return;
-      // }
 
       // 2) localStorage 갱신
       const nextHistory: HistoryStore = {
@@ -295,6 +289,17 @@ export default function NewQuestionPage() {
                 </span>
               </button>
             </div>
+            {remaining <= 0 && (
+              <div className="flex justify-center items-center mt-1">
+                <button
+                  className="inline-flex items-center text-sm text-red-600"
+                  type="button"
+                  onClick={() => reset()}
+                >
+                  문제를 재생성하시겠습니까?
+                </button>
+              </div>
+            )}
             <div className="mt-2 text-xs text-slate-500">
               <button
                 type="button"
