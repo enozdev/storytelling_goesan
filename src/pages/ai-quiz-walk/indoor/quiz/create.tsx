@@ -138,7 +138,7 @@ export default function NewQuestionPage() {
       className="min-h-[100dvh] bg-gradient-to-b from-white to-slate-50"
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
-      <header className="sticky top-0 z-10 :bg-white/70 bg-white/90 border-b">
+      <header className="sticky top-7 z-10 :bg-white/70 bg-white/90 border-b">
         <div className="mx-auto max-w-4xl px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 font-semibold">
@@ -156,7 +156,7 @@ export default function NewQuestionPage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-4xl px-5 py-6 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
+      <section className="mx-auto max-w-4xl px-5 py-10 pb-[calc(env(safe-area-inset-bottom)_+_1rem)]">
         <div className="rounded-2xl border bg-white shadow-sm p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
