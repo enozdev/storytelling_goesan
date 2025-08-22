@@ -2,11 +2,13 @@
 import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import type { Question } from "@/lib/frontend/quiz/types";
+import { useRouter } from "next/router";
 
 export default function QrListPage() {
   const [origin, setOrigin] = useState("");
   const [rows, setRows] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (typeof window !== "undefined") setOrigin(window.location.origin);
@@ -76,8 +78,30 @@ export default function QrListPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold">QR 목록</h1>
+      <header className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              QR 목록
+            </h1>
+          </div>
+
+          {/* 우측 액션 */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => window.print()}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+            >
+              전체 인쇄
+            </button>
+            <button
+              onClick={() => router.push("/ai-quiz-walk/indoor")}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+            >
+              홈으로
+            </button>
+          </div>
+        </div>
       </header>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-3">

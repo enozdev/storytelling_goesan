@@ -42,6 +42,17 @@ export default function Home() {
     }, 1500);
   };
 
+  // 실제 로그아웃 동작
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => {});
+    } catch {}
+    // 클라이언트 토큰/세션 제거
+    localStorage.removeItem("accessToken");
+    // 로그아웃 후 로그인 페이지로 이동
+    router.push("/ai-quiz-walk/user/login");
+  };
+
   // 버튼 공통 클래스 (일관된 높이/라운드/포커스)
   const baseBtn = useMemo(
     () =>
@@ -77,6 +88,7 @@ export default function Home() {
 
       {/* 대표 이미지 */}
       <main className="relative z-10 w-full flex-1 flex flex-col items-center justify-center mb-6">
+        {/* 대표 이미지 카드(기존 그대로) */}
         <div className="w-full max-w-2xl h-64 rounded-2xl overflow-hidden shadow-lg relative mb-4">
           <Image
             src="/goesan_image.png"
@@ -84,18 +96,7 @@ export default function Home() {
             fill
             style={{ objectFit: "cover" }}
             priority
-            sizes="(max-width: 768px) 100vw, 700px"
-          />
-        </div>
-
-        <div className="w-full max-w-2xl mx-auto mb-6 rounded-2xl overflow-hidden shadow-lg relative">
-          <Image
-            src="/map.png"
-            alt="산막이 옛길 이미지"
-            width={700}
-            height={300}
-            style={{ objectFit: "cover", width: "100%", height: "250px" }}
-            priority
+            sizes="(max-width: 1000px) 100vw, 700px"
           />
         </div>
       </main>
@@ -121,7 +122,6 @@ export default function Home() {
                 </span>
               </span>
             </button>
-
             <button
               aria-label="최근 저장 항목"
               className={`${baseBtn} bg-blue-200 text-gray-900 hover:bg-blue-300 active:bg-blue-400 focus-visible:ring-blue-500`}
@@ -149,6 +149,24 @@ export default function Home() {
               </span>
             </button>
           </div>
+        </div>
+        {/* 좌하단 고정 로그아웃 버튼 */}
+        <div className="fixed left-5 bottom-5 flex gap-2">
+          <button
+            className="px-2 py-2 rounded-lg text-base font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 opacity-80 hover:opacity-200 transition shadow"
+            onClick={handleLogout}
+            aria-label="로그아웃"
+          >
+            로그아웃
+          </button>
+          <button
+            className="px-1 py-2 rounded-lg text-base font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 opacity-80 hover:opacity-200 transition shadow"
+            onClick={() => {
+              router.push("/ai-quiz-walk");
+            }}
+          >
+            수업 페이지로
+          </button>
         </div>
       </div>
     </div>
