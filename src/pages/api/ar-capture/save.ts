@@ -136,11 +136,11 @@ export default async function handler(
     const userId = String(fields.user_id || "anonymous");
     const contentsId = 0;
 
-    // ✅ 업로드된 파일들 리스트 가져오기
+    // 업로드된 파일들 리스트 가져오기
     const uploadedFiles = files.file; // 'file' 필드는 Postman/브라우저의 name="file" input
     const renamedFiles: string[] = [];
 
-    // ✅ 다중 파일 처리
+    // 다중 파일 처리
     const fileArray = Array.isArray(uploadedFiles)
       ? uploadedFiles
       : [uploadedFiles];

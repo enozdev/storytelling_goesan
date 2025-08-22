@@ -145,7 +145,6 @@ export default function Home() {
               disabled={isAnimating}
             >
               <span className="flex items-center justify-center gap-2">
-                <CpuChipIcon className="w-6 h-6" />
                 <span>임시 저장 항목</span>
               </span>
             </button>

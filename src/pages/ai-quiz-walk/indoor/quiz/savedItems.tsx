@@ -32,7 +32,7 @@ export default function SavedListPage() {
     }
   }, []);
 
-  // 리스트 요청
+  // 저장된 리스트 요청
   const { data, error, isLoading } = useSWR(
     userId ? ["/api/ai-quiz-walk/quiz/list", { user_id: userId }] : null,
     ([url, payload]) => postFetcher(url as string, payload),
@@ -60,7 +60,7 @@ export default function SavedListPage() {
   return (
     <QuizItems
       title="저장된 문제 리스트"
-      items={data?.items ?? []} // API가 SessionQuestion[]을 보장
+      items={data?.items ?? []}
       onReset={reset}
       createPath="/ai-quiz-walk/indoor/quiz/create"
       isSaved={true}

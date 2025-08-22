@@ -1,32 +1,45 @@
-// // pages/api/ai-quiz-walk/quiz/by-id/[id].ts
-// import type { NextApiRequest, NextApiResponse } from "next";
-// import { PrismaClient } from "@prisma/client";
+// pages/api/public/questions/[publicId].ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-// const prisma = new PrismaClient();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "GET")
+    return res.status(405).json({ error: "Method Not Allowed" });
+  try {
+    const { id } = req.query;
+    if (!id) {
+      return res.status(400).json({ error: "invalid id" });
+    }
 
-// export default async function handler(
-//   req: NextApiRequest,
-//   res: NextApiResponse
-// ) {
-//   const { idx } = req.query;
-//   const num = Number(idx);
-//   if (!Number.isFinite(num))
-//     return res.status(400).json({ error: "잘못된 요청" });
+    const idxNumber = Array.isArray(id) ? Number(id[0]) : Number(id);
+    if (isNaN(idxNumber)) {
+      return res.status(400).json({ error: "invalid id" });
+    }
 
-//   const q = await prisma.question.findUnique({ where: { idx: num } });
-//   if (!q) return res.status(404).json({ error: "존재하지 않음" });
+    const q = await prisma.question.findUnique({
+      where: { idx: idxNumber },
+      select: {
+        idx: true,
+        topic: true,
+        difficulty: true,
+        question: true,
+        options: true,
+        answer: true,
+        createdAt: true,
+      },
+    });
 
-//   // 정책: 최소 1개월 유지 → 만료 전 해지 금지(운영), 만료 체크는 안내/차단 중 선택
-//   if (q.isRevoked || new Date() > q.validUntil) {
-//     return res.status(410).json({ error: "만료 또는 해지" });
-//   }
+    if (!q) return res.status(404).json({ error: "not found" });
 
-//   return res.status(200).json({
-//     topic: q.topic,
-//     difficulty: q.difficulty,
-//     q: q.q,
-//     options: q.options,
-//     a: q.answer,
-//     id: q.idx,
-//   });
-// }
+    return res.status(200).json({
+      question: q,
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "server error" });
+  }
+}
