@@ -21,6 +21,39 @@ function hexToRgba(hex: string, alpha = 1) {
   return `rgba(${r}, ${g}, ${b}, ${clamp01(alpha)})`;
 }
 
+async function copyToClipboard(text: string) {
+  try {
+    // HTTPS(또는 localhost) + 사용자 제스처에서 가장 먼저 시도
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      window.isSecureContext
+    ) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) {
+    // noop → 폴백 시도
+  }
+
+  // 폴백: 임시 textarea 사용 (HTTP에서도 대체로 동작)
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length); // iOS 대응
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 export default function QrListPage() {
   const [origin, setOrigin] = useState("");
   const [rows, setRows] = useState<Question[]>([]);
@@ -52,11 +85,16 @@ export default function QrListPage() {
   useEffect(() => {
     const run = async () => {
       try {
-        const userId = localStorage.getItem("user_id");
+        const qsUserId =
+          typeof router.query.user_id === "string"
+            ? router.query.user_id
+            : null;
+        const userId = qsUserId ?? localStorage.getItem("user_id");
         if (!userId) {
           setRows([]);
           return;
         }
+        if (qsUserId) localStorage.setItem("user_id", qsUserId);
         const res = await fetch("/api/ai-quiz-walk/quiz/list", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -207,17 +245,25 @@ export default function QrListPage() {
 
               <div className="mt-2 flex gap-2">
                 <button
-                  onClick={() => navigator.clipboard.writeText(url)}
-                  className="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 bg-white"
+                  onClick={async () => {
+                    const ok = await copyToClipboard(url);
+                    if (!ok) {
+                      alert(
+                        "복사에 실패했습니다. 브라우저 설정을 확인하거나 수동으로 복사해주세요."
+                      );
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 bg-white border"
                   style={{ borderColor: borderColor }}
                 >
                   링크 복사
                 </button>
+
                 <a
                   href={url}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 bg-white"
+                  className="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 bg-white border"
                   style={{ borderColor: borderColor }}
                 >
                   새 창에서 열기
