@@ -89,7 +89,7 @@ export default function Home() {
       {/* 대표 이미지 */}
       <main className="relative z-10 w-full flex-1 flex flex-col items-center justify-center mb-6">
         {/* 대표 이미지 카드(기존 그대로) */}
-        <div className="w-full max-w-2xl h-64 rounded-2xl overflow-hidden shadow-lg relative mb-4">
+        <div className="w-full max-w-2xl h-96 rounded-2xl overflow-hidden shadow-lg relative mb-4">
           <Image
             src="/goesan_image.png"
             alt="산막이 옛길 대표 이미지"

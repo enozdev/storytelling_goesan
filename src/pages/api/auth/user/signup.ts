@@ -18,7 +18,7 @@ export default async function handler(
     });
   }
 
-  const { group, userTeamName, userTeamPassword } = req.body;
+  const { userTeamName, userTeamPassword } = req.body;
 
   if (!userTeamName || !userTeamPassword) {
     return res.status(400).json({
@@ -45,7 +45,6 @@ export default async function handler(
     // 사용자 생성
     const newUser = await prisma.user.create({
       data: {
-        group: group,
         userTeamName: userTeamName,
         userTeamPassword: hashedPassword,
         access_at: new Date(),

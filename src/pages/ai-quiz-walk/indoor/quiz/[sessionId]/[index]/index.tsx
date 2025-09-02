@@ -24,14 +24,13 @@ export default function QuizPagess() {
   useEffect(() => {
     if (!router.isReady) return;
 
-    // 세션 불일치 시 요약으로 이동
     if (typeof sidParam === "string" && sidParam !== sessionId) {
-      router.replace("/ai-quiz-walk/indoor/quiz/list");
+      router.replace("/ai-quiz-walk/indoor/quiz/create");
       return;
     }
 
     if (!Number.isFinite(idx) || idx < 0 || idx >= items.length) {
-      router.replace("/ai-quiz-walk/indoor/quiz/list");
+      router.replace("/ai-quiz-walk/indoor/quiz/create");
       return;
     }
   }, [router.isReady, sidParam, sessionId, idx, items, router]);
@@ -56,8 +55,6 @@ export default function QuizPagess() {
     setSubmitted(true); // 정답 노출/저장 버튼 활성화
   };
 
-  // Not Use Now //
-  // DB 수정 후 사용할 예정 //
   const onChoose = async () => {
     const it = items[idx];
     try {
@@ -137,6 +134,11 @@ export default function QuizPagess() {
     } finally {
       setRegenerating(false);
     }
+  };
+
+  const onDelete = () => {
+    useQuizSession.getState().pop();
+    router.replace("/ai-quiz-walk/indoor/quiz/create");
   };
 
   return (
@@ -235,6 +237,16 @@ export default function QuizPagess() {
             AI는 유사한 문제를 생성할 수도 있어요! <br />
             그럴땐 주제를 바꾸거나 다시 시도해 보세요.
           </p>
+
+          <button
+            type="button"
+            onClick={onDelete}
+            className="inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm min-h-12 hover:bg-slate-50 active:scale-[0.99]"
+            aria-label="뒤로 가기"
+          >
+            <span>←</span>
+            뒤로 가기
+          </button>
         </div>
       </div>
     </main>

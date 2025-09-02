@@ -9,25 +9,7 @@ export default function UserSignup() {
   const [groupList, setGroupList] = useState<{ idx: number; school: string }[]>(
     []
   );
-  const [selectedGroup, setSelectedGroup] = useState("");
   const [isSignupSuccess, setIsSignupSuccess] = useState(false);
-
-  useEffect(() => {
-    handleGroupList();
-  }, []);
-
-  const handleGroupList = async () => {
-    const response = await fetch("/api/common/group/list", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setGroupList(data.group);
-    } else {
-      alert("학교 목록을 불러오는 데 실패했습니다.");
-    }
-  };
 
   const handleUserSignup = async () => {
     const response = await fetch("/api/auth/user/signup", {
@@ -36,7 +18,6 @@ export default function UserSignup() {
       body: JSON.stringify({
         userTeamName,
         userTeamPassword,
-        group: selectedGroup,
       }),
     });
 

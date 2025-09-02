@@ -16,6 +16,7 @@ interface QuizActions {
     index: number,
     nextQuestion: SessionQuestion["question"]
   ) => void;
+  pop: () => void;
 }
 
 export const useQuizSession = create<QuizSessionState & QuizActions>()(
@@ -62,6 +63,13 @@ export const useQuizSession = create<QuizSessionState & QuizActions>()(
             userAnswer: "", // 기존 답안 초기화
           };
 
+          return { ...s, items };
+        }),
+
+      pop: () =>
+        set((s) => {
+          if (s.items.length === 0) return s;
+          const items = s.items.slice(0, -1); // 마지막 요소 제외
           return { ...s, items };
         }),
     }),
