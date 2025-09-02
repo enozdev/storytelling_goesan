@@ -81,7 +81,7 @@ export default function OpenByIdPage() {
 
   const canSubmit = !!data && answer.length > 0;
   const userTeamName = localStorage.getItem("userTeamName");
-  const count = (Number(rid) % 7) + 1;
+  const count = Number(rid) % 7 != 0 ? Number(rid) % 7 : 7;
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-8">
