@@ -123,14 +123,16 @@ ${avoidList}
     try {
       data = JSON.parse(text);
     } catch {
-      return res.status(500).json({ error: "응답 형식이 올바르지 않습니다." });
+      return res
+        .status(500)
+        .json({ error: "생성 중 오류가 발생했습니다. (1)" });
     }
 
     // 3) 스키마 검증
     const parsedLlm = LlmQuestionZ.safeParse(data);
     if (!parsedLlm.success) {
       return res.status(500).json({
-        error: `응답 형식이 올바르지 않습니다: ${parsedLlm.error.message}`,
+        error: `생성 중 오류가 발생했습니다. (2): ${parsedLlm.error.message}`,
       });
     }
 
