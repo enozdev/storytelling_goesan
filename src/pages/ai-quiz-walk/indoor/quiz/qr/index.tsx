@@ -1,17 +1,52 @@
 // pages/ai-quiz-walk/indoor/quiz/qr/index.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import type { Question } from "@/lib/frontend/quiz/types";
 import { useRouter } from "next/router";
+
+const LS_COLOR_KEY = "qrThemeColor";
+const DEFAULT_COLOR = "#ef4444"; // 빨강(red-500)
+
+function isHexColor(v: string) {
+  return /^#([0-9a-fA-F]{6})$/.test(v);
+}
+function clamp01(x: number) {
+  return Math.max(0, Math.min(1, x));
+}
+function hexToRgba(hex: string, alpha = 1) {
+  if (!isHexColor(hex)) return `rgba(239,68,68,${clamp01(alpha)})`; // fallback: red-500
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${clamp01(alpha)})`;
+}
 
 export default function QrListPage() {
   const [origin, setOrigin] = useState("");
   const [rows, setRows] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [color, setColor] = useState<string>(DEFAULT_COLOR);
   const router = useRouter();
 
+  const rainbow = useMemo(
+    () => [
+      { label: "빨", value: "#ef4444" },
+      { label: "주", value: "#f97316" },
+      { label: "노", value: "#eab308" },
+      { label: "초", value: "#16a34a" },
+      { label: "파", value: "#2563eb" },
+      { label: "남", value: "#4f46e5" },
+      { label: "보", value: "#7c3aed" },
+    ],
+    []
+  );
+
   useEffect(() => {
-    if (typeof window !== "undefined") setOrigin(window.location.origin);
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+      const saved = localStorage.getItem(LS_COLOR_KEY);
+      if (saved && isHexColor(saved)) setColor(saved);
+    }
   }, []);
 
   useEffect(() => {
@@ -19,26 +54,22 @@ export default function QrListPage() {
       try {
         const userId = localStorage.getItem("user_id");
         if (!userId) {
+          setRows([]);
           return;
         }
-
         const res = await fetch("/api/ai-quiz-walk/quiz/list", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: userId }),
         });
-
         const j = await res.json().catch(() => ({}));
-
         if (!res.ok) {
           console.error("QR list load failed:", j?.error || j);
           return;
         }
-        console.log(j);
-
         const normalized = Array.isArray(j.items)
           ? j.items.map((it: any) => {
-              const q = it?.question ?? it; // 혹시 래핑 없이 올 때 대비
+              const q = it?.question ?? it;
               const options = Array.isArray(q?.options)
                 ? q.options
                 : (() => {
@@ -48,7 +79,6 @@ export default function QrListPage() {
                       return [];
                     }
                   })();
-
               return {
                 id: String(q?.id ?? ""),
                 topic: q?.topic ?? "",
@@ -56,13 +86,10 @@ export default function QrListPage() {
                 question: q?.question ?? "",
                 options,
                 answer: q?.answer ?? "",
-              };
+              } as Question;
             })
           : [];
-
         setRows(normalized);
-
-        console.log("rows= ", normalized);
       } catch (e) {
         console.error(e);
       } finally {
@@ -72,9 +99,24 @@ export default function QrListPage() {
     run();
   }, []);
 
-  if (loading) return <main className="p-6">로딩 중…</main>;
+  const userTeamName =
+    typeof window !== "undefined"
+      ? localStorage.getItem("userTeamName") ?? ""
+      : "";
 
+  const onPick = (v: string) => {
+    if (!isHexColor(v)) return;
+    setColor(v);
+    localStorage.setItem(LS_COLOR_KEY, v);
+  };
+
+  if (loading) return <main className="p-6">로딩 중…</main>;
   if (!rows.length) return <main className="p-6">저장된 문제가 없습니다.</main>;
+
+  // 배경은 은은하게(인쇄 가독성 고려)
+  const cardBg = hexToRgba(color, 0.1);
+  const borderColor = hexToRgba(color, 0.5);
+  const teamColor = color;
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8">
@@ -84,19 +126,44 @@ export default function QrListPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               QR 목록
             </h1>
+            {/* TeamName만 색상 */}
+            {userTeamName && (
+              <p className="text-sm font-medium">
+                Team: <span style={{ color: teamColor }}>{userTeamName}</span>
+              </p>
+            )}
           </div>
 
-          {/* 우측 액션 */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* 단순 무지개 선택 */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-600">색상</span>
+            <div className="flex items-center gap-1.5">
+              {rainbow.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => onPick(c.value)}
+                  title={c.label}
+                  aria-label={`${c.label} 선택`}
+                  className="h-5 w-5 rounded-full border border-slate-300"
+                  style={{
+                    backgroundColor: c.value,
+                    outline:
+                      color === c.value ? `2px solid ${c.value}` : "none",
+                    outlineOffset: 2,
+                  }}
+                />
+              ))}
+            </div>
+
             <button
               onClick={() => window.print()}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+              className="ml-3 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-sm hover:bg-slate-50"
             >
               전체 인쇄
             </button>
             <button
               onClick={() => router.push("/ai-quiz-walk/indoor")}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+              className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 shadow-sm hover:bg-slate-50"
             >
               홈으로
             </button>
@@ -108,14 +175,29 @@ export default function QrListPage() {
         {rows.map((s, i) => {
           const url = `${origin}/ai-quiz-walk/indoor/quiz/qr/${s.id}`;
           return (
-            <article key={s.id} className="rounded-2xl border bg-white p-5">
-              <p className="text-xs text-slate-500">#{i + 1}</p>
-              <h2 className="text-sm font-semibold leading-5">{s.question}</h2>
-              <p className="text-xs text-slate-500 mt-1">
+            <article
+              key={s.id}
+              className="rounded-2xl border bg-white p-5 shadow-sm"
+              style={{
+                background: cardBg, // ✅ 카드 배경만 컬러
+                borderColor: borderColor,
+              }}
+            >
+              <p className="text-lg" style={{ color: teamColor }}>
+                {userTeamName}
+              </p>
+              <p className="text-xs text-slate-500">{i + 1}번 문제</p>
+              <h2 className="text-sm font-semibold leading-5 mt-1">
+                {s.question}
+              </h2>
+              <p className="text-xs text-slate-600 mt-1">
                 주제: {s.topic} · 난이도: {s.difficulty}
               </p>
 
-              <div className="mt-3 mx-auto w-[168px] h-[168px] border rounded-xl p-2 bg-white">
+              <div
+                className="mt-3 mx-auto w-[168px] h-[168px] border rounded-xl p-2 bg-white"
+                style={{ borderColor: borderColor }}
+              >
                 <QRCode
                   value={url}
                   size={150}
@@ -126,7 +208,8 @@ export default function QrListPage() {
               <div className="mt-2 flex gap-2">
                 <button
                   onClick={() => navigator.clipboard.writeText(url)}
-                  className="rounded-lg border px-3 py-1.5 text-xs hover:bg-slate-50"
+                  className="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 bg-white"
+                  style={{ borderColor: borderColor }}
                 >
                   링크 복사
                 </button>
@@ -134,7 +217,8 @@ export default function QrListPage() {
                   href={url}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-lg border px-3 py-1.5 text-xs hover:bg-slate-50"
+                  className="rounded-lg px-3 py-1.5 text-xs hover:bg-slate-50 bg-white"
+                  style={{ borderColor: borderColor }}
                 >
                   새 창에서 열기
                 </a>
@@ -155,6 +239,11 @@ export default function QrListPage() {
           }
           article {
             break-inside: avoid;
+          }
+          /* 인쇄 시 컬러 유지 */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
         }
       `}</style>
