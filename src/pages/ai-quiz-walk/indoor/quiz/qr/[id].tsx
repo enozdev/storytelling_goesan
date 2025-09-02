@@ -80,6 +80,8 @@ export default function OpenByIdPage() {
   }, [router.isReady, rid]);
 
   const canSubmit = !!data && answer.length > 0;
+  const userTeamName = localStorage.getItem("userTeamName");
+  const count = (Number(rid) % 8) + 1;
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-8">
@@ -90,7 +92,9 @@ export default function OpenByIdPage() {
       ) : (
         <div className="rounded-2xl border p-6 bg-white">
           <header className="mb-4">
-            <h1 className="text-xl font-bold">공개 문제</h1>
+            <h1 className="text-xl font-bold">
+              {userTeamName} 의 {count}번째 문제!
+            </h1>
             <p className="text-slate-600 text-sm">
               주제: {data.topic} · 난이도: {data.difficulty ?? "—"}
             </p>

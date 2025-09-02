@@ -2,50 +2,75 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { PrismaClient, Prisma } from "@prisma/client";
 import type { SessionQuestion, Difficulty } from "@/lib/frontend/quiz/types";
 
-// PrismaClient 싱글턴 (개발 환경 커넥션 누수 방지)
-const prisma = (globalThis as any).prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== "production") (globalThis as any).prisma = prisma;
+/** ── PrismaClient 싱글턴 (개발 환경 커넥션 누수 방지) ───────────────────── */
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
+const prisma = global.prisma ?? new PrismaClient();
+if (process.env.NODE_ENV !== "production") global.prisma = prisma;
 
-// Json/문자열/배열 어떤 형태여도 string[]로 정규화
+/** ── 요청/응답/DB Row 타입 ─────────────────────────────────────────────── */
+type RequestBody = { user_id?: string };
+
+type ItemsResponse = { items: SessionQuestion[] };
+type ErrorResponse = { error: string };
+
+type DBQuestionRow = Prisma.QuestionGetPayload<{
+  select: {
+    idx: true;
+    topic: true;
+    difficulty: true;
+    question: true;
+    answer: true;
+    options: true;
+  };
+}>;
+
+/** Json/문자열/배열 어떤 형태여도 string[]로 정규화 */
 const toStringArray = (v: unknown): string[] => {
   if (Array.isArray(v)) return v.map(String);
+
   if (typeof v === "string") {
     try {
       const parsed = JSON.parse(v);
-      return Array.isArray(parsed) ? parsed.map(String) : [];
+      return Array.isArray(parsed) ? parsed.map(String) : v.trim() ? [v] : [];
     } catch {
       return v.trim() ? [v] : [];
     }
   }
+
   if (typeof v === "object" && v !== null) {
     try {
-      const serialized = JSON.stringify(v);
-      const parsed = JSON.parse(serialized);
+      // Prisma.JsonValue 같은 경우도 직렬화 후 배열이면 매핑
+      const parsed = JSON.parse(JSON.stringify(v));
       return Array.isArray(parsed) ? parsed.map(String) : [];
     } catch {
       return [];
     }
   }
+
   return [];
 };
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<ItemsResponse | ErrorResponse>
 ) {
   try {
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method Not Allowed" });
     }
 
-    const { user_id } = req.body as { user_id?: string };
+    const { user_id } = (req.body ?? {}) as RequestBody;
     if (!user_id) {
       return res.status(400).json({ error: "user_id is required" });
     }
 
-    const rows = await prisma.question.findMany({
+    // 1) 최신 7건(내림차순) 조회
+    const rows: DBQuestionRow[] = await prisma.question.findMany({
       where: { userId: user_id },
-      orderBy: { createdAt: "desc" },
+      orderBy: { idx: "desc" },
       take: 7,
       select: {
         idx: true,
@@ -53,27 +78,26 @@ export default async function handler(
         difficulty: true,
         question: true,
         answer: true,
-        options: true, // Json / TEXT[] / JSON 문자열 등
+        options: true,
       },
     });
 
-    // SessionQuestion[]으로 계약 맞춰 매핑
-    const items: SessionQuestion[] = rows
-      .filter((r: { question: any; answer: any }) => !!r.question && !!r.answer)
+    // 2) 가져온 7건만 오름차순(가장 먼저 생성된 순)으로 재정렬
+    const rowsAsc: DBQuestionRow[] = rows
+      .slice()
+      .sort((a, b) => Number(a.idx) - Number(b.idx));
+
+    // 3) SessionQuestion[] 형태로 매핑
+    const items: SessionQuestion[] = rowsAsc
+      .filter((r) => !!r.question && !!r.answer)
       .map(
-        (r: {
-          idx: any;
-          topic: any;
-          difficulty: unknown;
-          question: any;
-          answer: any;
-        }) => ({
+        (r): SessionQuestion => ({
           question: {
             id: String(r.idx),
-            topic: String(r.topic),
-            difficulty: String(r.difficulty),
+            topic: String(r.topic ?? ""),
+            difficulty: String(r.difficulty ?? "medium") as Difficulty,
             question: String(r.question),
-            options: toStringArray((r as any).options),
+            options: toStringArray(r.options as unknown),
             answer: String(r.answer),
           },
         })
