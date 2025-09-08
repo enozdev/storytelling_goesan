@@ -8,12 +8,13 @@ import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { userLogin, adminLogin } = useAuth();
+  const { userLogin } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleUserLogin = async (payload: {
     userTeamName: string;
     userTeamPassword: string;
+    role: string;
   }) => {
     try {
       setLoading(true);
@@ -42,27 +43,5 @@ export default function LoginPage() {
     }
   };
 
-  const handleAdminLogin = async (payload: {
-    userTeamName: string;
-    userTeamPassword: string;
-  }) => {
-    try {
-      setLoading(true);
-      await adminLogin(payload);
-      // 관리자 로그인 성공 후 이동 경로 정의
-      router.push("/admin");
-    } catch (e) {
-      alert("관리자 로그인 실패");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <LoginForm
-      onUserLogin={handleUserLogin}
-      onAdminLogin={handleAdminLogin}
-      isLoading={loading}
-    />
-  );
+  return <LoginForm onUserLogin={handleUserLogin} isLoading={loading} />;
 }

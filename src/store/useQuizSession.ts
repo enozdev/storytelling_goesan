@@ -11,6 +11,8 @@ interface QuizActions {
   setAnswer: (index: number, answer: string) => void;
   setUserId: (id: string | null) => void;
   getUserId: () => string | null;
+  setRole: (id: string | null) => void;
+  getRole: () => string | null;
   /** 현재 인덱스의 문제를 교체(길이 유지, 카운트 증가 X) */
   replaceQuestionAt: (
     index: number,
@@ -26,6 +28,7 @@ export const useQuizSession = create<QuizSessionState & QuizActions>()(
       items: [],
       maxCount: 7,
       userId: null,
+      role: "USER",
 
       reset: () =>
         set({
@@ -51,6 +54,10 @@ export const useQuizSession = create<QuizSessionState & QuizActions>()(
       setUserId: (id) => set({ userId: id }),
 
       getUserId: () => get().userId,
+
+      setRole: (role) => set({ role: role }),
+
+      getRole: () => get().role,
 
       replaceQuestionAt: (index, nextQuestion) =>
         set((s) => {

@@ -91,14 +91,6 @@ export default function UserSignup() {
           >
             팀 로그인
           </button>
-
-          <button
-            onClick={() => router.push("/ai-quiz-walk/admin/login")}
-            className="w-full py-3 border-2 border-gray-300 bg-gray-50 text-gray-700 rounded-lg text-base font-semibold flex items-center justify-center gap-2 hover:bg-gray-100 transition"
-          >
-            <LockClosedIcon className="w-5 h-5" />
-            관리자 로그인
-          </button>
         </div>
       </div>
     </div>

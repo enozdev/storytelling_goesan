@@ -163,6 +163,50 @@ export default function AiQuizWalkIndex() {
               </button>
             </div>
           </section>
+
+          {localStorage.getItem("role") === "ADMIN" && (
+            <section
+              className="
+                rounded-3xl bg-white border border-amber-200 shadow-sm p-5
+                flex flex-col justify-between min-h-[160px]
+              "
+              aria-label="관리자 전용"
+            >
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-6 w-6"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    {/* shield/cog 조합 느낌 */}
+                    <path d="M12 2l7 4v5c0 5-3.5 9.74-7 11-3.5-1.26-7-6-7-11V6l7-4z" />
+                  </svg>
+                </span>
+                <div className="flex-1">
+                  <h2 className={`${titleBase} text-amber-800`}>
+                    관리자 페이지
+                  </h2>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <button
+                  aria-label="관리자 페이지로 이동"
+                  className={
+                    `${btnBase} ` +
+                    "bg-amber-600 text-white hover:bg-amber-700 focus:ring-amber-600"
+                  }
+                  onClick={() =>
+                    router.push("/ai-quiz-walk/indoor/admin/teamList")
+                  }
+                >
+                  퀴즈 리스트 한번에 보기
+                </button>
+              </div>
+            </section>
+          )}
         </main>
       </div>
 

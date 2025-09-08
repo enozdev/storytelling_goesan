@@ -69,7 +69,7 @@ export default function AdminTeamListPage() {
             QR 인쇄 - 팀 목록
           </h1>
           <button
-            onClick={() => router.push("/ai-quiz-walk/indoor")}
+            onClick={() => router.push("/ai-quiz-walk")}
             className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
           >
             홈으로

@@ -7,12 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model admin {
-  ID       Int    @id(map: "adminLogin_pkey") @default(autoincrement())
-  adminID  String @db.VarChar(20)
-  adminPWD String @db.VarChar(20)
-}
-
 model user {
   idx              Int       @id(map: "userLogin_pkey") @default(autoincrement())
   group            String?   @db.VarChar(255)
@@ -20,6 +14,7 @@ model user {
   userTeamPassword String    @db.VarChar(255)
   access_at        DateTime? @db.Timestamp(6)
   created_at       DateTime? @default(now()) @db.Timestamp(6)
+  role             String?   @default("USER") @db.VarChar
 }
 
 model group {
@@ -36,12 +31,18 @@ model participate {
 }
 
 model Question {
-  idx         Int      @id @default(autoincrement())
-  userId      String   // 로그인 사용자 식별자(세션에서 결정)
-  topic       String
-  difficulty  String
-  question    String
-  options     Json
-  answer      String
-  createdAt   DateTime @default(now())
+  topic      String
+  difficulty String
+  question   String
+  options    Json
+  answer     String
+  createdAt  DateTime @default(now())
+  userId     String
+  idx        Int      @id @default(autoincrement())
+}
+
+model admin {
+  ID       Int    @id(map: "adminLogin_pkey") @default(autoincrement())
+  adminID  String @db.VarChar(20)
+  adminPWD String @db.VarChar(20)
 }

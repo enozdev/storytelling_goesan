@@ -31,4 +31,5 @@ export interface QuizSessionState {
   items: SessionQuestion[]; // 최대 7개
   maxCount: number; // 기본 7
   userId: string | null; // 로그인 시 사용자 ID 저장
+  role: string | null;
 }

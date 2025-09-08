@@ -2,8 +2,12 @@
 import { useCallback } from "react";
 import { apiClient } from "@/lib/apiClient";
 
-type LoginDto = { userTeamName: string; userTeamPassword: string };
-type UserLoginResponse = { accessToken: string; idx: number };
+type LoginDto = {
+  userTeamName: string;
+  userTeamPassword: string;
+  role: string;
+};
+type UserLoginResponse = { accessToken: string; idx: number; role: string };
 
 export function useAuth() {
   const userLogin = useCallback(
@@ -24,6 +28,7 @@ export function useAuth() {
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("user_id", String(data.idx));
       localStorage.setItem("userTeamName", dto.userTeamName);
+      localStorage.setItem("role", data.role);
 
       return data;
     },

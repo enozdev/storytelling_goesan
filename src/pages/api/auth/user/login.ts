@@ -69,6 +69,7 @@ export default async function handler(
       idx: user.idx,
       userTeamName,
       userTeamCreatedAt: now.toISOString(),
+      role: user.role,
     });
   } catch (error) {
     console.error("네트워크 오류 발생:", error);

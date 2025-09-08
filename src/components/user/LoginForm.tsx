@@ -7,29 +7,19 @@ type Props = {
   onUserLogin: (payload: {
     userTeamName: string;
     userTeamPassword: string;
-  }) => Promise<void> | void;
-  onAdminLogin: (payload: {
-    userTeamName: string;
-    userTeamPassword: string;
+    role: string;
   }) => Promise<void> | void;
   isLoading?: boolean;
 };
 
-export default function LoginForm({
-  onUserLogin,
-  onAdminLogin,
-  isLoading,
-}: Props) {
+export default function LoginForm({ onUserLogin, isLoading }: Props) {
   const [userTeamName, setUserTeamName] = useState("");
   const [userTeamPassword, setUserTeamPassword] = useState("");
+  const [role, setRole] = useState("");
   const router = useRouter();
 
   const handleUser = async () => {
-    await onUserLogin({ userTeamName, userTeamPassword });
-  };
-
-  const handleAdmin = async () => {
-    await onAdminLogin({ userTeamName, userTeamPassword });
+    await onUserLogin({ userTeamName, userTeamPassword, role });
   };
 
   return (
@@ -72,15 +62,6 @@ export default function LoginForm({
             className="w-full py-3 border-2 border-gray-100 bg-gray-100 text-green-700 rounded-lg font-semibold shadow hover:bg-green-100 transition"
           >
             팀 등록하기
-          </button>
-
-          <button
-            onClick={handleAdmin}
-            disabled={isLoading}
-            className="w-full py-3 border-2 border-green-300 bg-green-50 text-green-700 rounded-lg font-semibold shadow hover:bg-green-100 transition disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            <LockClosedIcon className="w-5 h-5" />
-            {isLoading ? "관리자 로그인 중..." : "관리자 로그인"}
           </button>
         </div>
       </div>
