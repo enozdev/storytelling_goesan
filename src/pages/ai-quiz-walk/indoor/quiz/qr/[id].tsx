@@ -142,7 +142,7 @@ export default function OpenByIdPage() {
               <p className="text-slate-600 mt-1">
                 내 답안: {answer || "(미입력)"}
               </p>
-              <div className="mt-3 flex gap-2">
+              {/* <div className="mt-3 flex gap-2">
                 <button
                   className="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
                   onClick={() => setSubmitted(false)}
@@ -155,7 +155,7 @@ export default function OpenByIdPage() {
                 >
                   홈으로
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
         </div>
