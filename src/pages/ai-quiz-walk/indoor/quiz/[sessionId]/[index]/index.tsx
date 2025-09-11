@@ -4,11 +4,70 @@ import { useQuizSession } from "@/store/useQuizSession";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import type { Question, SessionQuestion } from "@/lib/frontend/quiz/types";
 
+type HistoryStore = {
+  questions: string[]; // 과거 질문 텍스트 목록
+  fingerprints: string[]; // 중복 판정용 간단 지문
+};
+
+const LS_KEY = "ai-quiz-walk:history";
+
+// 기존 normalize 대체 (ESLint/TS 친화적, \p{} 미사용)
+const normalize = (t: string) =>
+  t
+    .toLowerCase()
+    .normalize("NFKD") // 악센트 분해
+    .replace(/[\u0300-\u036f]/g, "") // 결합 문자 제거
+    .replace(/[\s\u00a0]+/g, " ") // 모든 공백류를 단일 공백으로
+    .replace(/[^a-z0-9\uac00-\ud7a3\s]/g, "") // 한글/영문/숫자/공백만 허용
+    .trim();
+
+function makeFingerprint(q: Question): string {
+  const base = [
+    q.topic ?? "",
+    q.difficulty ?? "",
+    q.question,
+    ...(q.options ?? []),
+    q.answer ?? "",
+  ]
+    .filter(Boolean)
+    .join(" | ");
+  return normalize(base);
+}
+
+function loadHistory(): HistoryStore {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { questions: [], fingerprints: [] };
+    const parsed = JSON.parse(raw) as Partial<HistoryStore>;
+    return {
+      questions: Array.isArray(parsed.questions) ? parsed.questions : [],
+      fingerprints: Array.isArray(parsed.fingerprints)
+        ? parsed.fingerprints
+        : [],
+    };
+  } catch {
+    return { questions: [], fingerprints: [] };
+  }
+}
+
+function saveHistory(next: HistoryStore) {
+  localStorage.setItem(LS_KEY, JSON.stringify(next));
+}
+
 export default function QuizPagess() {
   const router = useRouter();
   const { sessionId, items, setAnswer, maxCount } = useQuizSession();
 
   const { sessionId: sidParam, index: indexParam } = router.query;
+
+  // SSR 대비: 최초 마운트 후에만 localStorage 접근
+  const [history, setHistory] = useState<HistoryStore>({
+    questions: [],
+    fingerprints: [],
+  });
+  useEffect(() => {
+    setHistory(loadHistory());
+  }, []);
 
   const idx = useMemo<number>(() => {
     if (Array.isArray(indexParam)) return Number(indexParam[0]);
@@ -56,31 +115,6 @@ export default function QuizPagess() {
   };
 
   const onChoose = async () => {
-    const it = items[idx];
-    try {
-      const res = await fetch("/api/user/question/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          topic: it.question.topic,
-          difficulty: it.question.difficulty,
-          q: it.question.question,
-          options: it.question.options,
-          a: it.question.answer,
-          userAnswer: localAnswer,
-        }),
-        credentials: "include",
-      });
-      const j = await res.json();
-      if (!res.ok) {
-        alert(j?.error ?? "DB 저장 실패");
-      } else {
-        console.log("saved:", j.publicUrl);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
     const nextIndex = idx + 1;
     if (nextIndex < maxCount) {
       router.replace("/ai-quiz-walk/indoor/quiz/create");
@@ -94,12 +128,15 @@ export default function QuizPagess() {
     if (!submitted || regenerating) return; // 제출 후에만 재생성 허용 조건 유지 시
     setRegenerating(true);
     try {
+      const previousQuestions = history.questions.slice(-50);
+
       const result = await fetch("/api/ai-quiz-walk/quiz/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topic: item.question.topic,
           difficulty: item.question.difficulty,
+          previousQuestions,
         }),
       });
 
@@ -109,21 +146,22 @@ export default function QuizPagess() {
         setRegenerating(false);
         return;
       }
-      const raw = await result.json();
-      const normalized =
-        "q" in raw
-          ? {
-              // UI가 item.question.question / answer 를 쓰는 경우에 맞춤
-              question: raw.question,
-              options: raw.options,
-              answer: raw.answer,
-              topic: raw.topic,
-              difficulty: raw.difficulty,
-            }
-          : raw;
+
+      const data = (await result.json()) as Question;
+
+      // 1) 클라이언트에서 최종 중복 검사
+      const fp = makeFingerprint(data);
+
+      // 2) localStorage 갱신
+      const nextHistory: HistoryStore = {
+        questions: [...history.questions, data.question],
+        fingerprints: [...history.fingerprints, fp],
+      };
+      saveHistory(nextHistory);
+      setHistory(nextHistory);
 
       // 기존 인덱스의 문제를 "교체" (길이 유지 → 개수 증가 없음)
-      useQuizSession.getState().replaceQuestionAt(idx, normalized);
+      useQuizSession.getState().replaceQuestionAt(idx, data);
 
       // 로컬 제출/선택 상태 초기화 (새 문제니까)
       setLocalAnswer("");
