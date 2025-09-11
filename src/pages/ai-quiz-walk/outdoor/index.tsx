@@ -1,10 +1,6 @@
 import Image from "next/image";
 import { useRouter } from "next/router";
-import {
-  CpuChipIcon,
-  LightBulbIcon,
-  SparklesIcon,
-} from "@heroicons/react/24/solid";
+import { MapPinIcon, KeyIcon, TrophyIcon } from "@heroicons/react/24/solid";
 import { useMemo, useState } from "react";
 import { useQuizSession } from "@/store/useQuizSession";
 
@@ -29,31 +25,25 @@ function Spinner() {
   );
 }
 
-export default function Home() {
+export default function AiQuizWalkHome() {
   const router = useRouter();
   const [isAnimating, setIsAnimating] = useState(false);
   const { reset } = useQuizSession();
 
   const handleQuizStart = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
     setTimeout(() => {
-      router.push("/ai-quiz-walk/indoor/quiz/create");
-    }, 1500);
+      router.push("/ai-quiz-walk/outdoor/scan");
+    }, 1200);
   };
 
-  // 실제 로그아웃 동작
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => {});
     } catch {}
-    // 클라이언트 토큰/세션 제거
     localStorage.removeItem("accessToken");
-    // 로그아웃 후 로그인 페이지로 이동
     router.push("/ai-quiz-walk/user/login");
   };
 
-  // 버튼 공통 클래스 (일관된 높이/라운드/포커스)
   const baseBtn = useMemo(
     () =>
       "h-14 w-full rounded-2xl text-base md:text-lg font-semibold shadow-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed",
@@ -61,101 +51,116 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-white relative flex flex-col px-4 pt-12 pb-6 text-gray-800">
-      {/* 배경 이미지 */}
-      <div className="absolute inset-0 z-0 bg-cover bg-center opacity-10" />
+    <div className="min-h-screen bg-amber-50 text-stone-800 relative flex flex-col">
+      {/* 배경: 지도 느낌의 점선 패턴 + 오래된 종이 텍스처 그라디언트 */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px), linear-gradient(180deg, rgba(245,222,179,0.28), rgba(255,255,255,0.6))",
+          backgroundSize: "12px 12px, 100% 100%",
+          backgroundPosition: "0 0, 0 0",
+        }}
+      />
 
-      {/* 애니메이션 오버레이 */}
-      {isAnimating && (
-        <div className="absolute inset-0 z-50 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center animate-fadeOut">
-          <SparklesIcon className="w-16 h-16 text-green-600 animate-pulse" />
-          <p className="mt-4 text-2xl font-bold text-green-700 animate-bounce">
-            AI 퀴즈 생성하러 가는 중...
-          </p>
+      {/* 헤더: 타이틀 + 위치 아이콘(보물지도 분위기) */}
+      <header className="relative z-10 px-4 pt-6 pb-2 text-center">
+        <div className="mx-auto max-w-2xl flex items-center justify-center gap-2 text-amber-900">
+          <MapPinIcon className="w-7 h-7 animate-compass" />
+          <h1 className="text-2xl font-black md:text-3xl">
+            괴산 산막이 옛길 보물퀴즈
+          </h1>
         </div>
-      )}
-
-      {/* 헤더 */}
-      <header className="relative z-10 text-center mb-6">
-        <div className="flex justify-center items-center gap-3 text-green-800">
-          <CpuChipIcon className="w-8 h-8" />
-          <h1 className="text-3xl font-extrabold">괴산 산막이 옛길 퀴즈</h1>
-        </div>
-        <p className="text-lg text-gray-600 mt-2">
-          AI와 함께하는 산막이 옛길 탐방 퀴즈
+        <p className="text-sm md:text-base text-stone-600 mt-1">
+          산막이 옛길을 탐험하며 퀴즈를 풀어 보세요.
         </p>
       </header>
 
-      {/* 대표 이미지 */}
-      <main className="relative z-10 w-full flex-1 flex flex-col items-center justify-center mb-6">
-        {/* 대표 이미지 카드(기존 그대로) */}
-        <div className="w-full max-w-2xl h-72 rounded-2xl overflow-hidden shadow-lg relative mb-4">
-          <Image
-            src="/goesan_outdoor.png"
-            alt="산막이 옛길 대표 이미지"
-            fill
-            style={{ objectFit: "cover" }}
-            priority
-            sizes="(max-width: 1000px) 100vw, 700px"
-          />
+      {/* 메인: 세로형 대표 이미지(포스터 느낌) */}
+      <main className="relative z-10 w-full flex-1 px-4">
+        <div className="mx-auto max-w-md w-full">
+          {/* 세로 비율 강조: 모바일 전용 65~75vh 권장 */}
+          <div className="relative w-full h-[59vh] min-h-[300px] rounded-3xl overflow-hidden shadow-xl ring-1 ring-black/5">
+            <Image
+              src="/goesan_outdoor.png"
+              alt="산막이 옛길 퀴즈 풀기"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 420px"
+              style={{ objectFit: "cover" }}
+            />
+            <div className="absolute inset-x-0 bottom-0 p-4">
+              <div className="rounded-2xl bg-gradient-to-t from-amber-900/70 to-amber-700/70 p-4">
+                <p className="text-amber-50 text-sm leading-snug">
+                  QR을 찾아 산막이 옛길을 돌아다녀 보세요.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 단서 카드(요약 가이드) */}
+          <section className="mt-4 space-y-2" aria-label="플레이 가이드">
+            <div className="rounded-2xl bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 p-3 shadow ring-1 ring-black/5">
+              <p className="text-sm leading-relaxed">
+                제한 시간 내 더 많은 퀴즈를 맞춰보세요!
+              </p>
+            </div>
+          </section>
         </div>
       </main>
 
-      {/* 하단 버튼 바 */}
-      <div className="relative z-20">
-        <div className="mx-auto w-full max-w-2xl rounded-3xl border border-gray-100 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 shadow-xl p-3 md:p-4 isolate overflow-visible">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <button
-              aria-label="AI 퀴즈 생성하기"
-              className={`${baseBtn} bg-green-600 text-white hover:bg-green-700 active:bg-green-800 focus-visible:ring-green-600 shadow-xl ring-1 ring-black/5`}
-              onClick={handleQuizStart}
-              disabled={isAnimating}
-            >
-              <span className="flex items-center justify-center gap-2">
-                {isAnimating ? (
-                  <Spinner />
-                ) : (
-                  <LightBulbIcon className="w-6 h-6 text-neon-yellow animate-flicker" />
-                )}
-                <span className={isAnimating ? "animate-pulse" : ""}>
-                  퀴즈 발견!
+      {/* 하단 고정 액션바: 시작 / 랭킹 / 부가 이동 */}
+      <nav className="relative z-20">
+        <div className="mx-auto max-w-md w-full px-4 pb-4">
+          <div className="rounded-3xl border border-amber-100 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 shadow-xl p-3 isolate">
+            <div className="grid grid-cols-1 gap-2">
+              <button
+                aria-label="보물 퀴즈 시작"
+                className={`${baseBtn} bg-amber-700 text-amber-50 hover:bg-amber-800 active:bg-amber-900 focus-visible:ring-amber-700 shadow-xl ring-1 ring-black/5`}
+                onClick={handleQuizStart}
+                disabled={isAnimating}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  {isAnimating ? <Spinner /> : <KeyIcon className="w-6 h-6" />}
+                  <span className={isAnimating ? "animate-pulse-soft" : ""}>
+                    QR 찾기 시작
+                  </span>
                 </span>
-              </span>
-            </button>
-            <button
-              aria-label="최근 저장 항목"
-              className={`${baseBtn} bg-blue-200 text-gray-900 hover:bg-blue-300 active:bg-blue-400 focus-visible:ring-blue-500`}
-              onClick={() =>
-                router.push("/ai-quiz-walk/indoor/quiz/savedItems")
-              }
-              disabled={isAnimating}
-            >
-              <span className="flex items-center justify-center gap-2">
-                <SparklesIcon className="w-6 h-6" />
-                <span>랭킹 보기</span>
-              </span>
-            </button>
+              </button>
+
+              <button
+                aria-label="랭킹 보기"
+                className={`${baseBtn} bg-amber-100 text-amber-900 hover:bg-amber-200 active:bg-amber-300 focus-visible:ring-amber-400`}
+                onClick={() => router.push("/ai-quiz-walk/outdoor/scan")}
+                disabled={isAnimating}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <TrophyIcon className="w-6 h-6" />
+                  <span>랭킹 보기</span>
+                </span>
+              </button>
+            </div>
+
+            {/* 부가 링크: 좌하단 고정 대신 하단 보조 링크로 단순화(모바일 접근성 향상) */}
+            <div className="mt-3 flex items-center justify-between text-sm">
+              <button
+                className="px-3 py-2 rounded-lg font-semibold bg-stone-200 text-stone-700 hover:bg-stone-300 transition shadow"
+                onClick={handleLogout}
+                aria-label="로그아웃"
+              >
+                로그아웃
+              </button>
+              <button
+                className="px-3 py-2 rounded-lg font-semibold bg-stone-200 text-stone-700 hover:bg-stone-300 transition shadow"
+                onClick={() => router.push("/ai-quiz-walk")}
+              >
+                수업 페이지로
+              </button>
+            </div>
           </div>
         </div>
-        {/* 좌하단 고정 로그아웃 버튼 */}
-        <div className="fixed left-5 bottom-5 flex gap-2">
-          <button
-            className="px-2 py-2 rounded-lg text-base font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 opacity-80 hover:opacity-200 transition shadow"
-            onClick={handleLogout}
-            aria-label="로그아웃"
-          >
-            로그아웃
-          </button>
-          <button
-            className="px-1 py-2 rounded-lg text-base font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 opacity-80 hover:opacity-200 transition shadow"
-            onClick={() => {
-              router.push("/ai-quiz-walk");
-            }}
-          >
-            수업 페이지로
-          </button>
-        </div>
-      </div>
+      </nav>
     </div>
   );
 }

@@ -29,6 +29,7 @@ export default function OpenByIdPage() {
   );
 
   const [data, setData] = useState<Question | null>(null);
+  const [author, setAuthor] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [answer, setAnswer] = useState<string>("");
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -44,6 +45,7 @@ export default function OpenByIdPage() {
 
         if (!res.ok) {
           setError(j?.error || "문제를 불러올 수 없습니다.");
+          setAuthor("");
           setData(null);
           return;
         }
@@ -70,6 +72,7 @@ export default function OpenByIdPage() {
               : "",
         };
 
+        setAuthor(j?.userTeamName);
         setData(normalized);
         setError("");
       } catch {

@@ -1,12 +1,13 @@
-// pages/ai-quiz-walk/outdoor/scanner.tsx
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 import QrMiniBrowser from "@/components/ai-quiz-walk/QrMiniBrowser";
-
-type TorchCapabilities = Partial<MediaTrackCapabilities> & { torch?: boolean };
-type TorchConstraint = { advanced?: Array<{ torch?: boolean }> };
+import {
+  UserGroupIcon,
+  MagnifyingGlassIcon,
+  CheckBadgeIcon,
+} from "@heroicons/react/24/solid";
 
 function isHttpUrl(text: string): boolean {
   try {
@@ -17,6 +18,17 @@ function isHttpUrl(text: string): boolean {
   }
 }
 
+// 숫자 로컬스토리지 안전 파서
+const getInt = (key: string, fallback = 0): number => {
+  try {
+    const raw = localStorage.getItem(key);
+    const n = raw !== null ? parseInt(raw, 10) : NaN;
+    return Number.isFinite(n) ? n : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export default function OutdoorScannerPage(): JSX.Element {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -26,8 +38,11 @@ export default function OutdoorScannerPage(): JSX.Element {
 
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string>("");
-  const [torchSupported, setTorchSupported] = useState(false);
-  const [torchOn, setTorchOn] = useState(false);
+
+  // 상단 정보 바 상태
+  const [teamName, setTeamName] = useState<string>("게스트");
+  const [foundCount, setFoundCount] = useState<number>(0);
+  const [correctCount, setCorrectCount] = useState<number>(0);
 
   const [decodedText, setDecodedText] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -46,6 +61,17 @@ export default function OutdoorScannerPage(): JSX.Element {
     streamRef.current = null;
     trackRef.current = null;
     setReady(false);
+  }, []);
+
+  // 상단 정보 바 리프레시
+  const refreshStatsFromStorage = useCallback(() => {
+    try {
+      setTeamName(localStorage.getItem("team_name") || "게스트");
+      setFoundCount(getInt("found_count", 0));
+      setCorrectCount(getInt("correct_count", 0));
+    } catch {
+      // ignore
+    }
   }, []);
 
   // 카메라 시작
@@ -85,17 +111,8 @@ export default function OutdoorScannerPage(): JSX.Element {
       const track = stream.getVideoTracks()[0];
       trackRef.current = track;
 
-      // 캡처 가능한지 및 torch 지원 여부 확인
-      const caps: TorchCapabilities =
-        typeof track.getCapabilities === "function"
-          ? (track.getCapabilities() as TorchCapabilities)
-          : {};
-
-      setTorchSupported(Boolean(caps && "torch" in caps));
-
       setReady(true);
     } catch (e: unknown) {
-      // 에러 메시지 내로잉
       const msg =
         typeof e === "object" &&
         e !== null &&
@@ -167,25 +184,34 @@ export default function OutdoorScannerPage(): JSX.Element {
       setDecodedText(text);
       setPreviewUrl(isHttpUrl(text) ? text : null);
 
+      // TODO: 필요 시 여기에서 발견/정답 카운트 갱신 후 localStorage 반영
+      // localStorage.setItem("found_count", String(foundCount + 1));
+      // refreshStatsFromStorage();
+
       // 1회 인식 후 루프 중단 (재개는 onClosePreview에서)
       return;
     }
 
     rafRef.current = requestAnimationFrame(scanLoop);
-  }, []);
+  }, [refreshStatsFromStorage /*, foundCount */]);
 
-  // 시작/정지 관리
+  // 시작/정지 + 스토리지 동기화
   useEffect(() => {
     if (!isSecure) {
       setError("HTTPS 환경(혹은 localhost)에서만 카메라 사용이 가능합니다.");
       return;
     }
     void startCamera();
+    refreshStatsFromStorage();
+
+    const handler = () => refreshStatsFromStorage();
+    window.addEventListener("storage", handler);
 
     return () => {
+      window.removeEventListener("storage", handler);
       stopAll();
     };
-  }, [isSecure, startCamera, stopAll]);
+  }, [isSecure, startCamera, stopAll, refreshStatsFromStorage]);
 
   useEffect(() => {
     if (!ready) return;
@@ -197,29 +223,6 @@ export default function OutdoorScannerPage(): JSX.Element {
       }
     };
   }, [ready, scanLoop]);
-
-  // 손전등 토글
-  const toggleTorch = useCallback(async (): Promise<void> => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    try {
-      const caps: TorchCapabilities =
-        typeof track.getCapabilities === "function"
-          ? (track.getCapabilities() as TorchCapabilities)
-          : {};
-      if (!("torch" in caps)) return;
-
-      const constraints: MediaTrackConstraints & TorchConstraint = {
-        advanced: [{ torch: !torchOn }],
-      };
-      await track.applyConstraints(constraints);
-      setTorchOn((v) => !v);
-    } catch (e) {
-      // 일부 브라우저는 실패 가능 (권한/디바이스 미지원)
-      console.log("torch not supported or applyConstraints failed", e);
-    }
-  }, [torchOn]);
 
   // 다시 스캔(미니 브라우저 닫을 때)
   const onClosePreview = useCallback((): void => {
@@ -234,7 +237,6 @@ export default function OutdoorScannerPage(): JSX.Element {
     try {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(decodedText);
-        // 단순 알림은 유지
         alert("복사되었습니다.");
       }
     } catch {
@@ -244,6 +246,28 @@ export default function OutdoorScannerPage(): JSX.Element {
 
   return (
     <main className="relative min-h-[100dvh] bg-black text-white">
+      {/* === 상단 정보 바: 팀명 / 발견 / 정답 === */}
+      <div className="absolute top-0 left-0 right-0 z-20 px-4 pt-[max(0.25rem,env(safe-area-inset-top))] pointer-events-none">
+        <div className="mx-auto max-w-[640px]">
+          <div className="flex items-center justify-between gap-3 rounded-b-2xl bg-black/55 backdrop-blur px-3 py-2 ring-1 ring-white/10">
+            <div className="min-w-0 flex items-center gap-2 text-xl font-semibold">
+              <UserGroupIcon className="w-4 h-10 flex-shrink-0 opacity-90" />
+              <span className="truncate">{teamName}</span>
+            </div>
+            <div className="flex items-center gap-3 text-[15px]">
+              <span className="inline-flex items-center gap-1">
+                <MagnifyingGlassIcon className="w-4 h-4 opacity-90" />
+                <span className="opacity-90">발견 {foundCount}/7</span>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <CheckBadgeIcon className="w-4 h-4 opacity-90" />
+                <span className="opacity-90">정답 {correctCount}/7</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 비디오 (풀스크린) */}
       <video
         ref={videoRef}
@@ -255,8 +279,8 @@ export default function OutdoorScannerPage(): JSX.Element {
       {/* 디코드용 캔버스(숨김) */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* 상단 안내/에러 */}
-      <div className="absolute top-0 left-0 right-0 p-4 pointer-events-none">
+      {/* 상단 안내/에러 (정보 바 아래로 살짝 내림) */}
+      <div className="absolute left-0 right-0 top-12 md:top-14 p-4 pointer-events-none">
         {!error ? (
           <div className="mx-auto max-w-[640px] text-center">
             <p className="inline-block rounded-full bg-black/40 px-3 py-1 text-xs tracking-tight">
@@ -290,30 +314,22 @@ export default function OutdoorScannerPage(): JSX.Element {
             )}
           </div>
           <div className="flex items-center gap-2">
-            {decodedText && (
+            {decodedText ? (
               <button
                 onClick={copyDecoded}
-                className="rounded-lg bg-white/90 text-black px-3 py-2 text-xs hover:bg-white"
+                className="rounded-lg bg-white/90 text-black px-10 py-2 text-sm hover:bg-white"
               >
-                텍스트 복사
+                복사
               </button>
-            )}
-            {torchSupported && (
-              <button
-                onClick={toggleTorch}
-                className="rounded-lg bg-white/90 text-black px-3 py-2 text-xs hover:bg-white"
-              >
-                {torchOn ? "플래시 끄기" : "플래시 켜기"}
-              </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
 
       {/* 미니 브라우저 (반창) */}
-      {previewUrl && (
+      {previewUrl ? (
         <QrMiniBrowser url={previewUrl} onClose={onClosePreview} />
-      )}
+      ) : null}
     </main>
   );
 }

@@ -35,8 +35,13 @@ export default async function handler(
 
     if (!q) return res.status(404).json({ error: "not found" });
 
+    const findTeam = await prisma.user.findFirst({
+      where: { idx: idxNumber },
+    });
+
     return res.status(200).json({
       question: q,
+      userTeamName: findTeam?.userTeamName,
     });
   } catch (e) {
     console.error(e);
