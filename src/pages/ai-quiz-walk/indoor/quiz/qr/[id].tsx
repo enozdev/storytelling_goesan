@@ -76,7 +76,7 @@ export default function OpenByIdPage() {
               : "",
         };
 
-        setAuthor(j?.userTeamName ?? "");
+        setAuthor(j?.authorTeamName ?? "");
         setData(normalized);
         setError("");
 
