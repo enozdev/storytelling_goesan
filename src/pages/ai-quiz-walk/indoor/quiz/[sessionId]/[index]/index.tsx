@@ -223,14 +223,28 @@ export default function QuizPagess() {
             제출하고 정답 확인
           </button>
         ) : (
-          <div className="mt-2 rounded-xl bg-emerald-50 border border-emerald-200 p-4">
-            <p className="text-emerald-800">
-              정답:{" "}
-              <span className="font-semibold">{item.question.answer}</span>
-            </p>
-            <p className="text-slate-600 mt-1">
-              내 답안: {localAnswer || "(미입력)"}
-            </p>
+          <div>
+            {localAnswer === item.question.answer ? (
+              <div className="mt-2 rounded-xl bg-emerald-50 border border-emerald-200 p-4">
+                <p className="text-emerald-800">
+                  정답:{" "}
+                  <span className="font-semibold">{item.question.answer}</span>
+                </p>
+                <p className="text-slate-600 mt-1">
+                  내 답안: {localAnswer || "(미입력)"}
+                </p>
+              </div>
+            ) : (
+              <div className="mt-2 rounded-xl bg-red-50 border border-red-200 p-4">
+                <p className="text-red-800">
+                  정답:{" "}
+                  <span className="font-semibold">{item.question.answer}</span>
+                </p>
+                <p className="text-slate-600 mt-1">
+                  내 답안: {localAnswer || "(미입력)"}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
