@@ -198,11 +198,11 @@ export default function OpenByIdPage() {
                 </div>
               ) : (
                 <div className="mt-4 rounded-xl bg-red-50 border border-red-200 p-4">
-                  <p className="text-red-800">
+                  <p className="text-emerald-800">
                     정답: <span className="font-semibold">{data.answer}</span>
                   </p>
 
-                  <p className="text-slate-600 mt-1">
+                  <p className="text-red-600 mt-1">
                     내 답안: {answer || "(미입력)"}
                   </p>
                 </div>
