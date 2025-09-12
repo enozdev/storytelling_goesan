@@ -52,7 +52,7 @@ export default function AiQuizWalkHome() {
 
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800 relative flex flex-col">
-      {/* 배경: 지도 느낌의 점선 패턴 + 오래된 종이 텍스처 그라디언트 */}
+      {/* 배경 */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"
@@ -64,7 +64,7 @@ export default function AiQuizWalkHome() {
         }}
       />
 
-      {/* 헤더: 타이틀 + 위치 아이콘(보물지도 분위기) */}
+      {/* 헤더 */}
       <header className="relative z-10 px-4 pt-6 pb-2 text-center">
         <div className="mx-auto max-w-2xl flex items-center justify-center gap-2 text-amber-900">
           <MapPinIcon className="w-7 h-7 animate-compass" />
@@ -77,10 +77,10 @@ export default function AiQuizWalkHome() {
         </p>
       </header>
 
-      {/* 메인: 세로형 대표 이미지(포스터 느낌) */}
+      {/* 메인 */}
       <main className="relative z-10 w-full flex-1 px-4">
         <div className="mx-auto max-w-md w-full">
-          {/* 세로 비율 강조: 모바일 전용 65~75vh 권장 */}
+          {/* 세로형 이미지 */}
           <div className="relative w-full h-[59vh] min-h-[300px] rounded-3xl overflow-hidden shadow-xl ring-1 ring-black/5">
             <Image
               src="/goesan_outdoor.png"
@@ -99,7 +99,6 @@ export default function AiQuizWalkHome() {
             </div>
           </div>
 
-          {/* 단서 카드(요약 가이드) */}
           <section className="mt-4 space-y-2" aria-label="플레이 가이드">
             <div className="rounded-2xl bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 p-3 shadow ring-1 ring-black/5">
               <p className="text-sm leading-relaxed">
@@ -110,7 +109,7 @@ export default function AiQuizWalkHome() {
         </div>
       </main>
 
-      {/* 하단 고정 액션바: 시작 / 랭킹 / 부가 이동 */}
+      {/* 하단 고정 액션바 */}
       <nav className="relative z-20">
         <div className="mx-auto max-w-md w-full px-4 pb-4">
           <div className="rounded-3xl border border-amber-100 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 shadow-xl p-3 isolate">
@@ -132,7 +131,7 @@ export default function AiQuizWalkHome() {
               <button
                 aria-label="랭킹 보기"
                 className={`${baseBtn} bg-amber-100 text-amber-900 hover:bg-amber-200 active:bg-amber-300 focus-visible:ring-amber-400`}
-                onClick={() => router.push("/ai-quiz-walk/outdoor/scan")}
+                onClick={() => router.push("/ai-quiz-walk/outdoor/rank")}
                 disabled={isAnimating}
               >
                 <span className="flex items-center justify-center gap-2">
@@ -142,7 +141,7 @@ export default function AiQuizWalkHome() {
               </button>
             </div>
 
-            {/* 부가 링크: 좌하단 고정 대신 하단 보조 링크로 단순화(모바일 접근성 향상) */}
+            {/* 하단 버튼 */}
             <div className="mt-3 flex items-center justify-between text-sm">
               <button
                 className="px-3 py-2 rounded-lg font-semibold bg-stone-200 text-stone-700 hover:bg-stone-300 transition shadow"

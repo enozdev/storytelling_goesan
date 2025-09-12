@@ -46,3 +46,19 @@ model admin {
   adminID  String @db.VarChar(20)
   adminPWD String @db.VarChar(20)
 }
+
+model QuizScan {
+  id        String   @id @db.VarChar(200)
+  teamId    Int
+  qrId      String   @db.VarChar(128)
+  createdAt DateTime @default(now())
+}
+
+model QuizAttempt {
+  id          String   @id @db.VarChar(200)
+  teamId      Int
+  questionIdx Int
+  selected    String   @db.VarChar(255)
+  correct     Boolean
+  createdAt   DateTime @default(now())
+}

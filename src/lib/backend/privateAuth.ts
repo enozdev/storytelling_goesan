@@ -38,6 +38,7 @@ export function privateAuth(req: NextApiRequest) {
         { expiresIn: TOKEN_EXPIRES_TIME }
       );
     }
+
     return {
       success: true,
       adminId: decoded.adminId,

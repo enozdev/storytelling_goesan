@@ -1,10 +1,8 @@
+// /pages/api/auth/login.ts (예시 경로)
+import type { NextApiRequest, NextApiResponse } from "next";
+import bcrypt from "bcrypt";
+import prisma from "@/lib/backend/prisma";
 import { signAccessToken, signRefreshToken } from "@/lib/backend/jwt";
-import { NextApiRequest, NextApiResponse } from "next";
-import bcrypt, { compare } from "bcrypt";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-const SALT_ROUNDS = 10;
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,20 +16,17 @@ export default async function handler(
     });
   }
 
-  const { userTeamName, userTeamPassword } = req.body;
+  const { userTeamName, userTeamPassword } = req.body ?? {};
   if (!userTeamName || !userTeamPassword) {
     return res.status(400).json({
       success: false,
       errorCode: "E0003",
-      error: "요청 본문에 필수 입력값이 누락되었습니다.",
+      error: "필수 입력값이 누락되었습니다.",
     });
   }
 
   try {
-    const user = await prisma.user.findFirst({
-      where: { userTeamName: userTeamName },
-    });
-
+    const user = await prisma.user.findFirst({ where: { userTeamName } });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -40,7 +35,7 @@ export default async function handler(
       });
     }
 
-    const isPasswordValid = await compare(
+    const isPasswordValid = await bcrypt.compare(
       userTeamPassword,
       user.userTeamPassword
     );
@@ -53,30 +48,31 @@ export default async function handler(
     }
 
     const now = new Date();
-
     await prisma.user.update({
       where: { idx: user.idx },
-      data: {
-        access_at: now,
-      },
+      data: { access_at: now },
     });
 
-    const accessToken = signAccessToken({ userTeamName });
+    // 토큰 payload에 팀 PK(idx) 포함
+    const payload = { idx: user.idx, role: user.role ?? "USER" };
+    const accessToken = signAccessToken(payload);
+    const refreshToken = signRefreshToken(payload);
 
     return res.status(200).json({
       success: true,
       accessToken,
+      refreshToken,
       idx: user.idx,
-      userTeamName,
-      userTeamCreatedAt: now.toISOString(),
-      role: user.role,
+      teamName: user.userTeamName,
+      role: user.role ?? "USER",
+      accessAt: now.toISOString(),
     });
   } catch (error) {
-    console.error("네트워크 오류 발생:", error);
+    console.error("[auth/login] fatal:", error);
     return res.status(500).json({
       success: false,
       errorCode: "E9999",
-      error: "네트워크 오류가 발생했습니다.",
+      error: "서버 오류가 발생했습니다.",
     });
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import jsQR from "jsqr";
 import QrMiniBrowser from "@/components/ai-quiz-walk/QrMiniBrowser";
 import {
@@ -29,7 +30,34 @@ const getInt = (key: string, fallback = 0): number => {
   }
 };
 
+// Authorization, 토큰 자동 갱신
+async function authedFetch(
+  input: RequestInfo | URL,
+  init: RequestInit = {}
+): Promise<{ res: Response; json: any }> {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+  const headers = new Headers(init.headers || {});
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (!headers.has("Content-Type") && init.body)
+    headers.set("Content-Type", "application/json");
+
+  const res = await fetch(input, { ...init, headers });
+  let json: any = null;
+  try {
+    json = await res.json();
+  } catch {
+    // no body
+  }
+  if (json?.token && typeof json.token === "string") {
+    localStorage.setItem("access_token", json.token); // 만료 임박 시 갱신
+  }
+  return { res, json };
+}
+
 export default function OutdoorScannerPage(): JSX.Element {
+  const router = useRouter();
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -66,13 +94,28 @@ export default function OutdoorScannerPage(): JSX.Element {
   // 상단 정보 바 리프레시
   const refreshStatsFromStorage = useCallback(() => {
     try {
-      setTeamName(localStorage.getItem("team_name") || "게스트");
+      setTeamName(localStorage.getItem("userTeamName") || "게스트");
       setFoundCount(getInt("found_count", 0));
       setCorrectCount(getInt("correct_count", 0));
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, []);
+
+  const syncStatsFromServer = useCallback(async () => {
+    try {
+      const { res, json } = await authedFetch("/api/ai-quiz-walk/quiz/stats");
+      if (res.ok && json) {
+        if (typeof json.teamName === "string")
+          localStorage.setItem("userTeamName", json.teamName);
+        if (Number.isFinite(json.foundCount))
+          localStorage.setItem("found_count", String(json.foundCount));
+        if (Number.isFinite(json.correctCount))
+          localStorage.setItem("correct_count", String(json.correctCount));
+        refreshStatsFromStorage();
+      }
+    } catch {
+      // ignore (게스트거나 네트워크 이슈 시 로컬 값만 사용)
+    }
+  }, [refreshStatsFromStorage]);
 
   // 카메라 시작
   const startCamera = useCallback(async (): Promise<void> => {
@@ -98,7 +141,6 @@ export default function OutdoorScannerPage(): JSX.Element {
 
       const video = videoRef.current;
       if (!video) {
-        // 컴포넌트가 언마운트 되었거나 참조가 없는 경우
         stream.getTracks().forEach((t) => t.stop());
         setError("비디오 엘리먼트를 찾을 수 없습니다.");
         return;
@@ -137,6 +179,32 @@ export default function OutdoorScannerPage(): JSX.Element {
       }
     }
   }, [isSecure]);
+
+  // 스캔 결과 처리(내부 라우팅 규칙 포함)
+  const handleDecoded = useCallback(
+    (text: string) => {
+      setDecodedText(text);
+
+      // 1) 외부/내부 HTTP(S) 링크는 미니 브라우저로
+      if (isHttpUrl(text)) {
+        setPreviewUrl(text);
+        return;
+      }
+
+      // 2) 숫자만 → /ai-quiz-walk/open/{id}
+      if (/^\d+$/.test(text)) {
+        router.push(`/ai-quiz-walk/open/${encodeURIComponent(text)}`);
+        return;
+      }
+
+      // 3) 슬래시로 시작하는 내부 경로 → 그 경로로 이동
+      if (/^\/[A-Za-z0-9/_\-?=&.%]+$/.test(text)) {
+        router.push(text);
+        return;
+      }
+    },
+    [router]
+  );
 
   // 카메라/스캔 루프
   const scanLoop = useCallback((): void => {
@@ -181,21 +249,14 @@ export default function OutdoorScannerPage(): JSX.Element {
     const code = jsQR(img.data, cw, ch, { inversionAttempts: "dontInvert" });
     if (code?.data) {
       const text = code.data.trim();
-      setDecodedText(text);
-      setPreviewUrl(isHttpUrl(text) ? text : null);
-
-      // TODO: 필요 시 여기에서 발견/정답 카운트 갱신 후 localStorage 반영
-      // localStorage.setItem("found_count", String(foundCount + 1));
-      // refreshStatsFromStorage();
-
-      // 1회 인식 후 루프 중단 (재개는 onClosePreview에서)
+      handleDecoded(text);
       return;
     }
 
     rafRef.current = requestAnimationFrame(scanLoop);
-  }, [refreshStatsFromStorage /*, foundCount */]);
+  }, [handleDecoded]);
 
-  // 시작/정지 + 스토리지 동기화
+  // 시작/정지 + 스토리지/서버 동기화
   useEffect(() => {
     if (!isSecure) {
       setError("HTTPS 환경(혹은 localhost)에서만 카메라 사용이 가능합니다.");
@@ -203,6 +264,7 @@ export default function OutdoorScannerPage(): JSX.Element {
     }
     void startCamera();
     refreshStatsFromStorage();
+    void syncStatsFromServer();
 
     const handler = () => refreshStatsFromStorage();
     window.addEventListener("storage", handler);
@@ -211,7 +273,13 @@ export default function OutdoorScannerPage(): JSX.Element {
       window.removeEventListener("storage", handler);
       stopAll();
     };
-  }, [isSecure, startCamera, stopAll, refreshStatsFromStorage]);
+  }, [
+    isSecure,
+    startCamera,
+    stopAll,
+    refreshStatsFromStorage,
+    syncStatsFromServer,
+  ]);
 
   useEffect(() => {
     if (!ready) return;
@@ -246,7 +314,7 @@ export default function OutdoorScannerPage(): JSX.Element {
 
   return (
     <main className="relative min-h-[100dvh] bg-black text-white">
-      {/* === 상단 정보 바: 팀명 / 발견 / 정답 === */}
+      {/* === 팀명 / 발견 / 정답 === */}
       <div className="absolute top-0 left-0 right-0 z-20 px-4 pt-[max(0.25rem,env(safe-area-inset-top))] pointer-events-none">
         <div className="mx-auto max-w-[640px]">
           <div className="flex items-center justify-between gap-3 rounded-b-2xl bg-black/55 backdrop-blur px-3 py-2 ring-1 ring-white/10">
@@ -279,7 +347,7 @@ export default function OutdoorScannerPage(): JSX.Element {
       {/* 디코드용 캔버스(숨김) */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* 상단 안내/에러 (정보 바 아래로 살짝 내림) */}
+      {/* 상단 안내/에러 */}
       <div className="absolute left-0 right-0 top-12 md:top-14 p-4 pointer-events-none">
         {!error ? (
           <div className="mx-auto max-w-[640px] text-center">
@@ -323,6 +391,15 @@ export default function OutdoorScannerPage(): JSX.Element {
               </button>
             ) : null}
           </div>
+
+          {!previewUrl ? (
+            <button
+              onClick={() => router.push("/ai-quiz-walk/outdoor")}
+              className="flex items-center justify-between gap-3 rounded-2xl bg-black/55 backdrop-blur px-3 py-2 ring-1 ring-white/10"
+            >
+              뒤로 가기
+            </button>
+          ) : null}
         </div>
       </div>
 

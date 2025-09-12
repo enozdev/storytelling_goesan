@@ -3,11 +3,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useState, useMemo } from "react";
 import type { Question } from "@/lib/frontend/quiz/types";
+import { fetchAuthed } from "@/lib/frontend/fetchAuthed";
 
 function normalizeOptions(input: any): string[] {
   if (Array.isArray(input)) return input as string[];
   if (typeof input === "string") {
-    // 1) JSON 문자열 시도 → 2) 구분자 분리
     try {
       const parsed = JSON.parse(input);
       if (Array.isArray(parsed)) return parsed as string[];
@@ -19,6 +19,13 @@ function normalizeOptions(input: any): string[] {
   }
   return [];
 }
+
+// 로그인 여부(토큰 보유)만 체크: 없으면 서버 집계 호출 스킵
+const hasAccessToken = () =>
+  typeof window !== "undefined" &&
+  !!(
+    localStorage.getItem("accessToken") || localStorage.getItem("access_token")
+  );
 
 export default function OpenByIdPage() {
   const router = useRouter();
@@ -38,11 +45,10 @@ export default function OpenByIdPage() {
     if (!router.isReady || !rid) return;
     (async () => {
       try {
-        const res = await fetch(
+        // 문제 조회(게스트 허용)
+        const { res, json: j } = await fetchAuthed(
           `/api/ai-quiz-walk/quiz/qr/${encodeURIComponent(String(rid))}`
         );
-        const j = await res.json();
-
         if (!res.ok) {
           setError(j?.error || "문제를 불러올 수 없습니다.");
           setAuthor("");
@@ -50,9 +56,7 @@ export default function OpenByIdPage() {
           return;
         }
 
-        // 서버가 {question: {...}} 또는 {...} 형태로 줄 수 있어 모두 허용
         const raw = j?.question ?? j;
-
         const normalized: Question = {
           id: raw?.id,
           topic: raw?.topic ?? "",
@@ -72,9 +76,27 @@ export default function OpenByIdPage() {
               : "",
         };
 
-        setAuthor(j?.userTeamName);
+        setAuthor(j?.userTeamName ?? "");
         setData(normalized);
         setError("");
+
+        // ★ 발견 집계: 토큰 없으면 호출하지 않음(관전자/다른 팀용)
+        try {
+          if (hasAccessToken()) {
+            const { res: r2, json: scanJ } = await fetchAuthed(
+              "/api/ai-quiz-walk/quiz/qr/scan",
+              {
+                method: "POST",
+                body: JSON.stringify({ qrId: String(rid) }),
+              }
+            );
+            if (r2.ok && Number.isFinite(scanJ?.foundCount)) {
+              localStorage.setItem("found_count", String(scanJ.foundCount));
+            }
+          }
+        } catch {
+          // ignore (관전 모드에서는 실패해도 무시)
+        }
       } catch {
         setError("네트워크 오류");
         setData(null);
@@ -83,8 +105,7 @@ export default function OpenByIdPage() {
   }, [router.isReady, rid]);
 
   const canSubmit = !!data && answer.length > 0;
-  const userTeamName = localStorage.getItem("userTeamName");
-  const count = Number(rid) % 7 != 0 ? Number(rid) % 7 : 7;
+  const count = Number(rid) % 7 !== 0 ? Number(rid) % 7 : 7;
 
   return (
     <main className="mx-auto max-w-3xl px-5 py-8">
@@ -96,7 +117,7 @@ export default function OpenByIdPage() {
         <div className="rounded-2xl border p-6 bg-white">
           <header className="mb-4">
             <h1 className="text-xl font-bold">
-              {userTeamName} 의 {count}번째 문제!
+              {author} 의 {count}번째 문제!
             </h1>
             <p className="text-slate-600 text-sm">
               주제: {data.topic} · 난이도: {data.difficulty ?? "—"}
@@ -128,7 +149,33 @@ export default function OpenByIdPage() {
           {!submitted ? (
             <button
               disabled={!canSubmit}
-              onClick={() => setSubmitted(true)}
+              onClick={async () => {
+                setSubmitted(true);
+
+                // ★ 정답 집계: 토큰 없으면 서버 호출 스킵(관전자/다른 팀용)
+                try {
+                  if (hasAccessToken()) {
+                    const { res, json: j } = await fetchAuthed(
+                      "/api/ai-quiz-walk/quiz/attempt",
+                      {
+                        method: "POST",
+                        body: JSON.stringify({
+                          questionId: data!.id,
+                          selected: answer,
+                        }),
+                      }
+                    );
+                    if (res.ok && Number.isFinite(j?.correctCount)) {
+                      localStorage.setItem(
+                        "correct_count",
+                        String(j.correctCount)
+                      );
+                    }
+                  }
+                } catch {
+                  // ignore
+                }
+              }}
               className={`mt-4 rounded-xl px-4 py-3 font-semibold ${
                 !canSubmit
                   ? "bg-slate-200 text-slate-500"
@@ -145,20 +192,6 @@ export default function OpenByIdPage() {
               <p className="text-slate-600 mt-1">
                 내 답안: {answer || "(미입력)"}
               </p>
-              {/* <div className="mt-3 flex gap-2">
-                <button
-                  className="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
-                  onClick={() => setSubmitted(false)}
-                >
-                  다시 풀기
-                </button>
-                <button
-                  className="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50"
-                  onClick={() => router.push("/ai-quiz-walk/indoor")}
-                >
-                  홈으로
-                </button>
-              </div> */}
             </div>
           )}
         </div>

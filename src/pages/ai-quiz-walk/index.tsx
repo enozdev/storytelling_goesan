@@ -147,7 +147,7 @@ export default function AiQuizWalkIndex() {
               </div>
             </div>
 
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <button
                 disabled={!isOutdoorEnabled}
                 className={`${btnBase} ${
@@ -160,6 +160,15 @@ export default function AiQuizWalkIndex() {
                 }
               >
                 {isOutdoorEnabled ? "시작하기" : "다음 수업에서 만나요!"}
+              </button>
+            </div> */}
+
+            <div className="mt-4">
+              <button
+                className={`${btnBase} ${"bg-white text-green-700 border border-green-200 hover:bg-green-50 focus:ring-green-500"}`}
+                onClick={() => router.push("/ai-quiz-walk/outdoor")}
+              >
+                시작하기
               </button>
             </div>
           </section>
