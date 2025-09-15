@@ -209,7 +209,7 @@ export default function QrListPage() {
         </div>
       </header>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-2">
         {rows.map((s, i) => {
           const url = `${origin}/ai-quiz-walk/indoor/quiz/qr/${s.id}`;
           return (
@@ -217,29 +217,30 @@ export default function QrListPage() {
               key={s.id}
               className="rounded-2xl border bg-white p-5 shadow-sm"
               style={{
-                background: cardBg, // ✅ 카드 배경만 컬러
+                background: cardBg, // 카드 배경만 컬러
                 borderColor: borderColor,
+                lineHeight: 2,
               }}
             >
               <p className="text-lg" style={{ color: teamColor }}>
                 {userTeamName}
               </p>
-              <p className="text-xs text-slate-500">{i + 1}번 문제</p>
-              <h2 className="text-sm font-semibold leading-5 mt-1">
+              <p className="text-sm text-slate-500">{i + 1}번 문제</p>
+              <h2 className="text-xl font-semibold leading-5 mt-1 tracking-wide leading-relaxed flex-wrap">
                 {s.question}
               </h2>
-              <p className="text-xs text-slate-600 mt-1">
+              <p className="text-sm text-slate-600 mt-1">
                 주제: {s.topic} · 난이도: {s.difficulty}
               </p>
 
               <div
-                className="mt-3 mx-auto w-[168px] h-[168px] border rounded-xl p-2 bg-white"
+                className="mt-3 mx-auto w-[270px] h-[270px] border rounded-xl p-2 bg-white"
                 style={{ borderColor: borderColor }}
               >
                 <QRCode
                   value={url}
-                  size={150}
-                  style={{ width: 150, height: 150 }}
+                  size={250}
+                  style={{ width: 250, height: 250 }}
                 />
               </div>
 

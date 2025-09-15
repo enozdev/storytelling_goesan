@@ -124,12 +124,12 @@ export default function OpenByIdPage() {
             </p>
           </header>
 
-          <p className="font-medium">{data.question}</p>
+          <p className="text-lg leading-relaxed">{data.question}</p>
 
           <ul className="space-y-2 mt-3">
             {data.options.map((opt, i) => (
               <li key={i}>
-                <label className="inline-flex items-center gap-2">
+                <label className="inline-flex items-center gap-2 text-lg">
                   <input
                     type="radio"
                     name="mc"
