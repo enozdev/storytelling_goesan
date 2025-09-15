@@ -61,6 +61,33 @@ export default function LeaderboardStyled() {
     });
   }, [data]);
 
+  const deleteRank = async () => {
+    if (!confirm("정말로 이 랭킹 데이터를 삭제하시겠습니까? (복구 불가)"))
+      return;
+    try {
+      const res = await fetch("/api/ai-quiz-walk/quiz/rank/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        alert(`랭킹 데이터 삭제에 실패했습니다: ${res.status} ${text}`);
+        return;
+      }
+      const j: { success?: boolean; error?: string } = await res.json();
+      if (!j.success) {
+        alert(
+          `랭킹 데이터 삭제에 실패했습니다: ${j.error ?? "알 수 없는 오류"}`
+        );
+        return;
+      }
+      mutate();
+    } catch (err) {
+      alert(`랭킹 데이터 삭제에 실패했습니다: ${err}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-amber-50 text-stone-800 relative flex flex-col">
       {/* 배경 */}
@@ -108,6 +135,15 @@ export default function LeaderboardStyled() {
               <ArrowPathIcon className="w-4 h-4" />
               새로고침
             </button>
+
+            {localStorage.getItem("role") === "ADMIN" && (
+              <button
+                className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 ring-1 ring-black/5 hover:bg-white"
+                onClick={() => deleteRank()} // 0을 보내면 전체 삭제
+              >
+                전체 초기화
+              </button>
+            )}
           </div>
 
           {/* 랭킹 리스트 */}

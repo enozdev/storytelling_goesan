@@ -1,14 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient, Prisma } from "@prisma/client";
 import type { SessionQuestion, Difficulty } from "@/lib/frontend/quiz/types";
-
-/** ── PrismaClient 싱글턴 (개발 환경 커넥션 누수 방지) ───────────────────── */
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
-}
-const prisma = global.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== "production") global.prisma = prisma;
+import prisma from "@/lib/backend/prisma";
+import { Prisma } from "@prisma/client";
 
 /** ── 요청/응답/DB Row 타입 ─────────────────────────────────────────────── */
 type RequestBody = { user_id?: string };

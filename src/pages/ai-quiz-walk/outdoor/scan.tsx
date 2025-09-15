@@ -325,11 +325,11 @@ export default function OutdoorScannerPage(): JSX.Element {
             <div className="flex items-center gap-3 text-[15px]">
               <span className="inline-flex items-center gap-1">
                 <MagnifyingGlassIcon className="w-4 h-4 opacity-90" />
-                <span className="opacity-90">발견 {foundCount}/7</span>
+                <span className="opacity-90">발견 {foundCount}</span>
               </span>
               <span className="inline-flex items-center gap-1">
                 <CheckBadgeIcon className="w-4 h-4 opacity-90" />
-                <span className="opacity-90">정답 {correctCount}/7</span>
+                <span className="opacity-90">정답 {correctCount}</span>
               </span>
             </div>
           </div>
