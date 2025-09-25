@@ -39,6 +39,8 @@ model Question {
   createdAt  DateTime @default(now())
   userId     String
   idx        Int      @id @default(autoincrement())
+  nextLocation String?   @db.VarChar(191)
+
 }
 
 model admin {

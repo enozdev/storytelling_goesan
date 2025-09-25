@@ -1,6 +1,4 @@
-// /pages/api/checkLogin.ts
-
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 
 const SECRET_KEY = process.env.JWT_SECRET as string;
@@ -18,8 +16,8 @@ export default async function handler(
   }
 
   const authHeader = req.headers.authorization;
-
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.warn("[/api/user/check] no bearer header:", authHeader);
     return res.status(401).json({
       success: false,
       errorCode: "E0007",
@@ -30,14 +28,23 @@ export default async function handler(
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!SECRET_KEY) {
+      console.error("[/api/user/check] JWT_SECRET is undefined");
+      return res.status(500).json({
+        success: false,
+        errorCode: "E9998",
+        error: "서버 설정 오류(JWT_SECRET).",
+      });
+    }
 
+    const decoded = jwt.verify(token, SECRET_KEY);
     return res.status(200).json({
       success: true,
       isLoggedIn: true,
       user: decoded,
     });
   } catch (err) {
+    console.error("[/api/user/check] 토큰 검증 실패:", err);
     return res.status(401).json({
       success: false,
       errorCode: "E0008",

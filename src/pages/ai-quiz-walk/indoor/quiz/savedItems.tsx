@@ -62,7 +62,7 @@ export default function SavedListPage() {
       title="저장된 문제 리스트"
       items={data?.items ?? []}
       onReset={reset}
-      createPath="/ai-quiz-walk/indoor/quiz/create"
+      createPath="/escape-room/questioning/quiz/create"
       isSaved={true}
       primaryLabel="저장된 문제 QR 보기"
     />
