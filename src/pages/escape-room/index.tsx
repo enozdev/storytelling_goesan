@@ -24,8 +24,8 @@ export default function AiQuizWalkIndex() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F1E7] text-[#3F3629] flex flex-col items-center justify-center px-5">
-      <div className="w-full max-w-md space-y-10">
+    <div className="bg-[#F6F1E7] text-[#3F3629] flex flex-col items-center justify-center px-5">
+      <div className="w-full max-w-md space-y-10 py-16">
         {/* 제목 영역 */}
         <header className="text-center space-y-4">
           <h1 className="text-4xl font-extrabold leading-tight text-[#3F3629]">
@@ -54,7 +54,7 @@ export default function AiQuizWalkIndex() {
               <div className="flex-1">
                 <h2 className={`${titleBase}`}>퀴즈 생성</h2>
                 <p className={`${descBase} text-[#6B604E]`}>
-                  교실/현장 활동에 맞춘 AI 기반 퀴즈를 빠르게 만듭니다.
+                  AI를 사용해서 김홍도와 관련된 퀴즈를 제작해보세요.
                 </p>
               </div>
             </div>
@@ -87,7 +87,7 @@ export default function AiQuizWalkIndex() {
               <div className="flex-1">
                 <h2 className={`${titleBase} text-[#3F3629]`}>QR 부착</h2>
                 <p className={`${descBase} text-[#6B604E]`}>
-                  장소별 QR을 배치하고 위치를 기록합니다.
+                  직접 김홍도 QR 방탈출을 제작해보세요!
                 </p>
               </div>
             </div>
@@ -97,7 +97,7 @@ export default function AiQuizWalkIndex() {
                   hover:bg-[#F3EBDC] focus:ring-[#BFA06A]`}
                 onClick={() => router.push("/escape-room/placing")}
               >
-                위치 설정하러 가기
+                방탈출 제작하기
               </button>
             </div>
           </section>
@@ -117,7 +117,7 @@ export default function AiQuizWalkIndex() {
               <div className="flex-1">
                 <h2 className={`${titleBase}`}>QR 방탈출</h2>
                 <p className={`${descBase} text-[#6B604E]`}>
-                  칠판/장소의 QR을 스캔해 미션을 진행합니다.
+                  칠판/장소의 QR을 스캔해 방을 탈출해보세요!
                 </p>
               </div>
             </div>
@@ -160,10 +160,11 @@ export default function AiQuizWalkIndex() {
                 <div className="mt-4">
                   <button
                     aria-label="관리자 페이지로 이동"
-                    className={`${btnBase} text-[#F6F1E7] bg-gradient-to-br from-[#3F3629] to-[#2F291F] hover:brightness-[1.06] focus:ring-[#3F3629]`}
-                    onClick={() =>
-                      router.push("/ai-quiz-walk/indoor/admin/teamList")
-                    }
+                    className={`${btnBase} bg-[#E9DDC8] text-[#3F3629] border border-[#D8C6B3] 
+                  hover:bg-[#F3EBDC] focus:ring-[#BFA06A]`}
+                    // onClick={() =>
+                    //   router.push("/ai-quiz-walk/indoor/admin/teamList")
+                    // }
                   >
                     퀴즈 리스트 한번에 보기
                   </button>
