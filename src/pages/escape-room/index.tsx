@@ -24,7 +24,7 @@ export default function AiQuizWalkIndex() {
   };
 
   return (
-    <div className="bg-[#F6F1E7] text-[#3F3629] flex flex-col items-center justify-center px-5">
+    <div className="min-h-[100dvh] bg-[#F6F1E7] text-[#3F3629] flex flex-col items-center justify-center px-5">
       <div className="w-full max-w-md space-y-10 py-16">
         {/* 제목 영역 */}
         <header className="text-center space-y-4">
