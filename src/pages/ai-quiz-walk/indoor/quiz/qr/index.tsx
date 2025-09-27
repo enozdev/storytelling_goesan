@@ -226,7 +226,7 @@ export default function QrListPage() {
                 {userTeamName}
               </p>
               <p className="text-sm text-slate-500">{i + 1}번 문제</p>
-              <h2 className="text-xl font-semibold leading-5 mt-1 tracking-wide leading-relaxed flex-wrap">
+              <h2 className="text-xl font-semibold mt-1 tracking-wide leading-relaxed flex-wrap">
                 {s.question}
               </h2>
               <p className="text-sm text-slate-600 mt-1">

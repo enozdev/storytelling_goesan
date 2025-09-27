@@ -47,7 +47,7 @@ export default function OpenByIdPage() {
       try {
         // 문제 조회(게스트 허용)
         const { res, json: j } = await fetchAuthed(
-          `/api/ai-quiz-walk/quiz/qr/${encodeURIComponent(String(rid))}`
+          `/api/escape-room/quiz/qr/${encodeURIComponent(String(rid))}`
         );
         if (!res.ok) {
           setError(j?.error || "문제를 불러올 수 없습니다.");
@@ -84,7 +84,7 @@ export default function OpenByIdPage() {
         try {
           if (hasAccessToken()) {
             const { res: r2, json: scanJ } = await fetchAuthed(
-              "/api/ai-quiz-walk/quiz/qr/scan",
+              "/api/escape-room/quiz/qr/scan",
               {
                 method: "POST",
                 body: JSON.stringify({ qrId: String(rid) }),
@@ -156,7 +156,7 @@ export default function OpenByIdPage() {
                 try {
                   if (hasAccessToken()) {
                     const { res, json: j } = await fetchAuthed(
-                      "/api/ai-quiz-walk/quiz/attempt",
+                      "/api/escape-room/quiz/attempt",
                       {
                         method: "POST",
                         body: JSON.stringify({

@@ -23,7 +23,7 @@ export default function UserSignup() {
 
     if (response.ok) {
       setIsSignupSuccess(true);
-      setTimeout(() => router.push("/ai-quiz-walk/user/login"), 1500);
+      setTimeout(() => router.push("/escape-room/user/login"), 1500);
     } else {
       if (response.status === 409) {
         alert("이미 존재하는 팀 이름입니다. 다른 이름을 사용해 주세요.");
@@ -43,7 +43,7 @@ export default function UserSignup() {
             </h2>
             <p className="text-[#5d5342] mb-6">로그인 페이지로 이동합니다.</p>
             <button
-              onClick={() => router.push("/ai-quiz-walk/user/login")}
+              onClick={() => router.push("/escape-room/user/login")}
               className="w-full py-2 bg-[#3F3629] text-[#F6F1E7] rounded-lg font-semibold hover:bg-[#2F291F] transition"
             >
               확인

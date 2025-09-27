@@ -4,7 +4,7 @@ import prisma from "@/lib/backend/prisma";
 import { Prisma } from "@prisma/client";
 
 /** ── 요청/응답/DB Row 타입 ─────────────────────────────────────────────── */
-type RequestBody = { user_id?: string };
+type RequestBody = { user_id?: string; contentsId?: number | null };
 
 type ItemsResponse = { items: SessionQuestion[] };
 type ErrorResponse = { error: string };
@@ -55,14 +55,14 @@ export default async function handler(
       return res.status(405).json({ error: "Method Not Allowed" });
     }
 
-    const { user_id } = (req.body ?? {}) as RequestBody;
+    const { user_id, contentsId } = (req.body ?? {}) as RequestBody;
     if (!user_id) {
       return res.status(400).json({ error: "user_id is required" });
     }
 
     // 1) 최신 7건(내림차순) 조회
     const rows: DBQuestionRow[] = await prisma.question.findMany({
-      where: { userId: user_id },
+      where: { userId: user_id, contentsId: contentsId },
       orderBy: { idx: "desc" },
       take: 7,
       select: {

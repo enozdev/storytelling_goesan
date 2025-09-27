@@ -5,9 +5,36 @@ import {
   QrCodeIcon,
   CameraIcon,
 } from "@heroicons/react/24/solid";
+import { useEffect, useState } from "react";
 
 export default function AiQuizWalkIndex() {
   const router = useRouter();
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const isLoggedIn = await handleCheckLogin();
+      if (!isLoggedIn) {
+        router.push("/escape-room/user/login");
+      }
+    };
+    checkLoginStatus();
+  }, [router]);
+
+  const handleCheckLogin = async () => {
+    const res = await fetch("/api/auth/user/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
+    });
+    if (!res.ok) {
+      console.error("로그인 상태 확인 실패");
+      return false;
+    }
+    const data = await res.json();
+    return !!data?.success;
+  };
 
   const titleBase = "text-2xl font-bold tracking-tight";
   const descBase = "text-sm";
@@ -132,45 +159,44 @@ export default function AiQuizWalkIndex() {
           </section>
 
           {/* 관리자 전용 (옵션) */}
-          {typeof window !== "undefined" &&
-            localStorage.getItem("role") === "ADMIN" && (
-              <section
-                className="
+          {localStorage.getItem("role") === "ADMIN" && (
+            <section
+              className="
                   rounded-3xl bg-white border border-[#E9E2D3] shadow-[0_10px_30px_-18px_rgba(0,0,0,.25)]
                   p-5 flex flex-col justify-between min-h-[160px]
                 "
-                aria-label="관리자 전용"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#3F3629]/10 text-[#3F3629] ring-1 ring-[#3F3629]/15">
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="h-6 w-6"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 2l7 4v5c0 5-3.5 9.74-7 11-3.5-1.26-7-6-7-11V6l7-4z" />
-                    </svg>
-                  </span>
-                  <div className="flex-1">
-                    <h2 className={`${titleBase}`}>관리자 페이지</h2>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <button
-                    aria-label="관리자 페이지로 이동"
-                    className={`${btnBase} bg-[#E9DDC8] text-[#3F3629] border border-[#D8C6B3] 
-                  hover:bg-[#F3EBDC] focus:ring-[#BFA06A]`}
-                    // onClick={() =>
-                    //   router.push("/ai-quiz-walk/indoor/admin/teamList")
-                    // }
+              aria-label="관리자 전용"
+            >
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#3F3629]/10 text-[#3F3629] ring-1 ring-[#3F3629]/15">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-6 w-6"
+                    fill="currentColor"
+                    aria-hidden="true"
                   >
-                    퀴즈 리스트 한번에 보기
-                  </button>
+                    <path d="M12 2l7 4v5c0 5-3.5 9.74-7 11-3.5-1.26-7-6-7-11V6l7-4z" />
+                  </svg>
+                </span>
+                <div className="flex-1">
+                  <h2 className={`${titleBase}`}>관리자 페이지</h2>
                 </div>
-              </section>
-            )}
+              </div>
+
+              <div className="mt-4">
+                <button
+                  aria-label="관리자 페이지로 이동"
+                  className={`${btnBase} bg-[#E9DDC8] text-[#3F3629] border border-[#D8C6B3] 
+                  hover:bg-[#F3EBDC] focus:ring-[#BFA06A]`}
+                  // onClick={() =>
+                  //   router.push("/ai-quiz-walk/indoor/admin/teamList")
+                  // }
+                >
+                  퀴즈 리스트 한번에 보기
+                </button>
+              </div>
+            </section>
+          )}
         </main>
       </div>
 

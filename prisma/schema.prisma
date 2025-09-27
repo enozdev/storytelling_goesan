@@ -31,16 +31,16 @@ model participate {
 }
 
 model Question {
-  topic      String
-  difficulty String
-  question   String
-  options    Json
-  answer     String
-  createdAt  DateTime @default(now())
-  userId     String
-  idx        Int      @id @default(autoincrement())
-  nextLocation String?   @db.VarChar(191)
-
+  topic        String
+  difficulty   String
+  question     String
+  options      Json
+  answer       String
+  createdAt    DateTime @default(now())
+  userId       String
+  idx          Int      @id @default(autoincrement())
+  nextLocation String?  @db.VarChar(191)
+  contentsId   Int?
 }
 
 model admin {
@@ -50,10 +50,11 @@ model admin {
 }
 
 model QuizScan {
-  id        String   @id @db.VarChar(200)
-  teamId    Int
-  qrId      String   @db.VarChar(128)
-  createdAt DateTime @default(now())
+  id         String   @id @db.VarChar(200)
+  teamId     Int
+  qrId       String   @db.VarChar(128)
+  createdAt  DateTime @default(now())
+  contentsId Int?
 }
 
 model QuizAttempt {
@@ -63,4 +64,5 @@ model QuizAttempt {
   selected    String   @db.VarChar(255)
   correct     Boolean
   createdAt   DateTime @default(now())
+  contentsId  Int?
 }

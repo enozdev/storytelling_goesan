@@ -1,6 +1,27 @@
 import { useMemo } from "react";
 import QuizItems from "@/components/escape-room/quizItems";
 import type { SessionQuestion } from "@/lib/frontend/quiz/types";
+import { useQuizSession } from "@/store/useQuizSession.escape";
+import useSWR from "swr";
+import React, { useEffect, useState } from "react";
+
+type ApiResponse = { items: SessionQuestion[] };
+
+const postFetcher = async (
+  url: string,
+  payload: unknown
+): Promise<ApiResponse> => {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const msg = await res.text().catch(() => "");
+    throw new Error(`Request failed: ${res.status} ${msg}`);
+  }
+  return res.json();
+};
 
 export default function SavedListPage() {
   const hanji = useMemo(
@@ -16,86 +37,26 @@ export default function SavedListPage() {
     []
   );
 
-  const dummyItems: SessionQuestion[] = [
-    {
-      question: {
-        id: "1",
-        question: "단원 김홍도의 호(號)는 무엇일까요?",
-        options: ["단원", "혜원", "겸재", "청명"],
-        answer: "단원",
-        difficulty: "easy",
-        topic: "김홍도",
-      },
-    },
-    {
-      question: {
-        id: "2",
-        question: "김홍도가 특히 뛰어났던 화풍으로 알려진 것은?",
-        options: ["풍속화", "초상화", "불화", "추상화"],
-        answer: "풍속화",
-        difficulty: "easy",
-        topic: "김홍도",
-      },
-    },
-    {
-      question: {
-        id: "3",
-        question:
-          "다음 중 김홍도의 ‘씨름’과 같은 계열의 풍속 장면으로 보기 어려운 것은?",
-        options: ["서당", "씨름", "무동", "금강전도"],
-        answer: "금강전도",
-        difficulty: "medium",
-        topic: "김홍도",
-      },
-    },
-    {
-      question: {
-        id: "4",
-        question:
-          "김홍도의 작품 활동과 가장 밀접한 조선 후기 임금은 누구일까요?",
-        options: ["세종", "영조", "정조", "순조"],
-        answer: "정조",
-        difficulty: "medium",
-        topic: "김홍도",
-      },
-    },
-    {
-      question: {
-        id: "5",
-        question: "다음 중 김홍도의 대표적 풍속화 제목은?",
-        options: ["서당", "금강전도", "인왕제색도", "송하맹호도"],
-        answer: "서당",
-        difficulty: "easy",
-        topic: "김홍도",
-      },
-    },
-    {
-      question: {
-        id: "6",
-        question: "김홍도의 시대적·화풍적 특징으로 옳은 것은 무엇일까요?",
-        options: [
-          "18세기 후반 일상의 풍속을 사실적으로 묘사했다",
-          "삼국시대 불교미술 양식을 계승했다",
-          "고려청자 문양 연구로 유명하다",
-          "조선 후기 추상표현주의를 개척했다",
-        ],
-        answer: "18세기 후반 일상의 풍속을 사실적으로 묘사했다",
-        difficulty: "medium",
-        topic: "김홍도",
-      },
-    },
-    {
-      question: {
-        id: "7",
-        question:
-          "다음 중 김홍도와 동시대 혹은 관련 화가로 묶기 ‘가장’ 어려운 인물은?",
-        options: ["신윤복", "정선", "안견", "김득신"],
-        answer: "안견",
-        difficulty: "medium",
-        topic: "김홍도",
-      },
-    },
-  ];
+  // SSR 이슈 -> localStorage 접근은 클라이언트에서만
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUserId(localStorage.getItem("user_id"));
+    }
+  }, []);
+
+  // 저장된 리스트 요청
+  const { data, error, isLoading } = useSWR(
+    userId
+      ? ["/api/escape-room/quiz/list", { user_id: userId, contentsId: 2 }]
+      : null,
+    ([url, payload]) => postFetcher(url as string, payload),
+    { revalidateOnFocus: false }
+  );
+
+  if (isLoading || userId === null) {
+    return <div className="max-w-2xl mx-auto p-4">불러오는 중…</div>;
+  }
 
   const Header = (
     <header
@@ -134,7 +95,7 @@ export default function SavedListPage() {
       <main className="mx-auto max-w-4xl px-5 py-8">
         <QuizItems
           title="단원 김홍도 · 저장된 문제"
-          items={dummyItems}
+          items={data?.items ?? []}
           primaryLabel="저장된 문제 QR 보기"
         />
       </main>

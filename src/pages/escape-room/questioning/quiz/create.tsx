@@ -1,7 +1,7 @@
 // /pages/ai-quiz-walk/indoor/quiz/create.tsx
 import { useRouter } from "next/router";
 import { useState, useMemo, useEffect } from "react";
-import { useQuizSession } from "@/store/useQuizSession";
+import { useQuizSession } from "@/store/useQuizSession.escape";
 import type {
   Difficulty,
   SessionQuestion,
@@ -9,7 +9,7 @@ import type {
 } from "@/lib/frontend/quiz/types";
 
 type HistoryStore = { questions: string[]; fingerprints: string[] };
-const LS_KEY = "ai-quiz-walk:history";
+const LS_KEY = "escape-room-question-history";
 
 const normalize = (t: string) =>
   t
@@ -89,6 +89,8 @@ export default function NewQuestionPage() {
   const generated = items.length;
   const progressPct = Math.round((generated / Math.max(maxCount, 1)) * 100);
   const remaining = maxCount - items.length;
+  const userId =
+    typeof window !== "undefined" ? localStorage.getItem("user_id") : null;
 
   const [history, setHistory] = useState<HistoryStore>({
     questions: [],
@@ -144,6 +146,24 @@ export default function NewQuestionPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onSave = async () => {
+    try {
+      const res = await fetch("/api/escape-room/quiz/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, items, contentsId: 2 }),
+      });
+      if (!res.ok) throw new Error("save failed");
+      await reset();
+      alert("문제를 저장했습니다!");
+      localStorage.removeItem(LS_KEY);
+      await router.push("/escape-room/questioning/quiz/items");
+    } catch {
+      alert("문제 저장에 실패했습니다.");
+    }
+    // 성공
   };
 
   return (
@@ -305,14 +325,28 @@ export default function NewQuestionPage() {
             </div>
 
             {remaining <= 0 && (
-              <div className="flex justify-center items-center mt-1">
+              <div>
                 <button
-                  className="inline-flex items-center text-sm text-[#b6412e]"
                   type="button"
-                  onClick={() => reset()}
+                  onClick={onSave}
+                  className={`inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-4 focus:ring-[#dce6ce] min-h-12
+    bg-[#4d6b3b] text-[#f8f4ea] hover:bg-[#3d552f] active:scale-[0.99]`}
+                  aria-label="문제 저장하기"
                 >
-                  문제를 재생성하시겠습니까?
+                  <span className="inline-flex items-center gap-2">
+                    문제 저장하기
+                  </span>
                 </button>
+
+                <div className="flex justify-center items-center mt-5">
+                  <button
+                    className="inline-flex items-center text-sm text-[#b6412e]"
+                    type="button"
+                    onClick={() => reset()}
+                  >
+                    문제를 재생성하시겠습니까?
+                  </button>
+                </div>
               </div>
             )}
 

@@ -7,79 +7,6 @@ import { useRouter } from "next/router";
 const LS_COLOR_KEY = "qrThemeColor";
 const DEFAULT_COLOR = "#ef4444"; // 빨강(red-500)
 
-// ──────────────────────────────────────────────────────────────
-// 1) 김홍도 전용 문제 세트 (로컬 폴백)
-//    기존 dummy(SessionQuestion[])를 Question[]으로 평탄화
-// ──────────────────────────────────────────────────────────────
-const KIMHONGDO_ITEMS: Question[] = [
-  {
-    id: "1",
-    question: "단원 김홍도의 호(號)는 무엇일까요?",
-    options: ["단원", "혜원", "겸재", "청명"],
-    answer: "단원",
-    difficulty: "easy",
-    topic: "김홍도",
-  },
-  {
-    id: "2",
-    question: "김홍도가 특히 뛰어났던 화풍으로 알려진 것은?",
-    options: ["풍속화", "초상화", "불화", "추상화"],
-    answer: "풍속화",
-    difficulty: "easy",
-    topic: "김홍도",
-  },
-  {
-    id: "3",
-    question:
-      "다음 중 김홍도의 ‘씨름’과 같은 계열의 풍속 장면으로 보기 어려운 것은?",
-    options: ["서당", "씨름", "무동", "금강전도"],
-    answer: "금강전도",
-    difficulty: "medium",
-    topic: "김홍도",
-  },
-  {
-    id: "4",
-    question: "김홍도의 작품 활동과 가장 밀접한 조선 후기 임금은 누구일까요?",
-    options: ["세종", "영조", "정조", "순조"],
-    answer: "정조",
-    difficulty: "medium",
-    topic: "김홍도",
-  },
-  {
-    id: "5",
-    question: "다음 중 김홍도의 대표적 풍속화 제목은?",
-    options: ["서당", "금강전도", "인왕제색도", "송하맹호도"],
-    answer: "서당",
-    difficulty: "easy",
-    topic: "김홍도",
-  },
-  {
-    id: "6",
-    question: "김홍도의 시대적·화풍적 특징으로 옳은 것은 무엇일까요?",
-    options: [
-      "18세기 후반 일상의 풍속을 사실적으로 묘사했다",
-      "삼국시대 불교미술 양식을 계승했다",
-      "고려청자 문양 연구로 유명하다",
-      "조선 후기 추상표현주의를 개척했다",
-    ],
-    answer: "18세기 후반 일상의 풍속을 사실적으로 묘사했다",
-    difficulty: "medium",
-    topic: "김홍도",
-  },
-  {
-    id: "7",
-    question:
-      "다음 중 김홍도와 동시대 혹은 관련 화가로 묶기 ‘가장’ 어려운 인물은?",
-    options: ["신윤복", "정선", "안견", "김득신"],
-    answer: "안견",
-    difficulty: "medium",
-    topic: "김홍도",
-  },
-];
-
-// ──────────────────────────────────────────────────────────────
-// 2) 유틸
-// ──────────────────────────────────────────────────────────────
 function isHexColor(v: string) {
   return /^#([0-9a-fA-F]{6})$/.test(v);
 }
@@ -93,15 +20,10 @@ function hexToRgba(hex: string, alpha = 1) {
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${clamp01(alpha)})`;
 }
-function toBase64Unicode(obj: unknown) {
-  // UTF-8 안전 인코딩
-  const s = JSON.stringify(obj);
-  return typeof window === "undefined"
-    ? Buffer.from(s, "utf-8").toString("base64")
-    : btoa(unescape(encodeURIComponent(s)));
-}
+
 async function copyToClipboard(text: string) {
   try {
+    // HTTPS(또는 localhost) + 사용자 제스처에서 가장 먼저 시도
     if (
       typeof navigator !== "undefined" &&
       navigator.clipboard &&
@@ -110,7 +32,11 @@ async function copyToClipboard(text: string) {
       await navigator.clipboard.writeText(text);
       return true;
     }
-  } catch (_) {}
+  } catch (_) {
+    // noop → 폴백 시도
+  }
+
+  // 폴백: 임시 textarea 사용 (HTTP에서도 대체로 동작)
   try {
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -119,7 +45,7 @@ async function copyToClipboard(text: string) {
     ta.style.top = "-9999px";
     document.body.appendChild(ta);
     ta.select();
-    ta.setSelectionRange(0, ta.value.length);
+    ta.setSelectionRange(0, ta.value.length); // iOS 대응
     const ok = document.execCommand("copy");
     document.body.removeChild(ta);
     return ok;
@@ -128,9 +54,6 @@ async function copyToClipboard(text: string) {
   }
 }
 
-// ──────────────────────────────────────────────────────────────
-// 3) 페이지
-// ──────────────────────────────────────────────────────────────
 export default function QrListPage() {
   const [origin, setOrigin] = useState("");
   const [rows, setRows] = useState<Question[]>([]);
@@ -166,27 +89,24 @@ export default function QrListPage() {
           typeof router.query.user_id === "string"
             ? router.query.user_id
             : null;
-        const userId =
-          qsUserId ??
-          (typeof window !== "undefined"
-            ? localStorage.getItem("user_id")
-            : null);
-
-        if (qsUserId && typeof window !== "undefined") {
-          localStorage.setItem("user_id", qsUserId);
+        const userId = qsUserId ?? localStorage.getItem("user_id");
+        if (!userId) {
+          setRows([]);
+          return;
         }
-
-        // ① 서버에 저장된 문제 우선
-        let normalized: Question[] = [];
-        if (userId) {
-          const res = await fetch("/api/ai-quiz-walk/quiz/list", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: userId }),
-          });
-          const j = await res.json().catch(() => ({}));
-          if (res.ok && Array.isArray(j.items)) {
-            normalized = j.items.map((it: any) => {
+        if (qsUserId) localStorage.setItem("user_id", qsUserId);
+        const res = await fetch("/api/escape-room/quiz/list", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId }),
+        });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          console.error("QR list load failed:", j?.error || j);
+          return;
+        }
+        const normalized = Array.isArray(j.items)
+          ? j.items.map((it: any) => {
               const q = it?.question ?? it;
               const options = Array.isArray(q?.options)
                 ? q.options
@@ -205,22 +125,11 @@ export default function QrListPage() {
                 options,
                 answer: q?.answer ?? "",
               } as Question;
-            });
-          } else {
-            console.error("QR list load failed:", j?.error || j);
-          }
-        }
-
-        // ② 비어있으면 김홍도 세트로 폴백
-        if (!normalized.length) {
-          normalized = KIMHONGDO_ITEMS;
-        }
-
+            })
+          : [];
         setRows(normalized);
       } catch (e) {
         console.error(e);
-        // 에러여도 김홍도 세트로 폴백
-        setRows(KIMHONGDO_ITEMS);
       } finally {
         setLoading(false);
       }
@@ -255,6 +164,7 @@ export default function QrListPage() {
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               QR 목록
             </h1>
+            {/* TeamName만 색상 */}
             {userTeamName && (
               <p className="text-sm font-medium">
                 Team: <span style={{ color: teamColor }}>{userTeamName}</span>
@@ -262,6 +172,7 @@ export default function QrListPage() {
             )}
           </div>
 
+          {/* 단순 무지개 선택 */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-600">색상</span>
             <div className="flex items-center gap-1.5">
@@ -300,19 +211,13 @@ export default function QrListPage() {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 print:grid-cols-2">
         {rows.map((s, i) => {
-          // ─────────────────────────────────────────────
-          // 서버/DB가 없어도 동작하도록 payload 삽입
-          // 상세 페이지는 ?payload 가 있으면 이를 우선 사용
-          // ─────────────────────────────────────────────
-          const payload = encodeURIComponent(toBase64Unicode(s));
-          const url = `${origin}/ai-quiz-walk/indoor/quiz/qr/${s.id}?payload=${payload}`;
-
+          const url = `${origin}/escape-room/questioning/quiz/qr/${s.id}`;
           return (
             <article
               key={s.id}
               className="rounded-2xl border bg-white p-5 shadow-sm"
               style={{
-                background: cardBg,
+                background: cardBg, // 카드 배경만 컬러
                 borderColor: borderColor,
                 lineHeight: 2,
               }}
@@ -321,7 +226,7 @@ export default function QrListPage() {
                 {userTeamName}
               </p>
               <p className="text-sm text-slate-500">{i + 1}번 문제</p>
-              <h2 className="text-xl font-semibold leading-5 mt-1 tracking-wide leading-relaxed flex-wrap">
+              <h2 className="text-xl font-semibold mt-1 tracking-wide leading-relaxed flex-wrap">
                 {s.question}
               </h2>
               <p className="text-sm text-slate-600 mt-1">
@@ -382,6 +287,7 @@ export default function QrListPage() {
           article {
             break-inside: avoid;
           }
+          /* 인쇄 시 컬러 유지 */
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;

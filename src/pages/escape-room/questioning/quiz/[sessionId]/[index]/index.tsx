@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router"; // Page Router
-import { useQuizSession } from "@/store/useQuizSession";
+import { useQuizSession } from "@/store/useQuizSession.escape";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import type { Question } from "@/lib/frontend/quiz/types";
 
 type HistoryStore = { questions: string[]; fingerprints: string[] };
-const LS_KEY = "ai-quiz-walk:history";
+const LS_KEY = "escape-room-question-history";
 
 // normalize
 const normalize = (t: string) =>
@@ -78,7 +78,7 @@ function ScrollIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function QuizPagess() {
   const router = useRouter();
-  const { sessionId, items, setAnswer, maxCount } = useQuizSession();
+  const { sessionId, items, setAnswer, maxCount, reset } = useQuizSession();
   const { sessionId: sidParam, index: indexParam } = router.query;
 
   const [history, setHistory] = useState<HistoryStore>({
@@ -98,6 +98,13 @@ export default function QuizPagess() {
   const [localAnswer, setLocalAnswer] = useState<string>("");
   const [regenerating, setRegenerating] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
+
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUserId(localStorage.getItem("user_id"));
+    }
+  }, []);
 
   // 라우트 검증
   useEffect(() => {
@@ -128,9 +135,7 @@ export default function QuizPagess() {
 
   const onChoose = async () => {
     const nextIndex = idx + 1;
-    if (nextIndex < maxCount)
-      router.replace("/escape-room/questioning/quiz/create");
-    else router.replace("/escape-room/questioning/quiz/items");
+    router.replace("/escape-room/questioning/quiz/create");
   };
 
   const onRegenerate = async () => {

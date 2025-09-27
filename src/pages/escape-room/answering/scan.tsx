@@ -20,7 +20,6 @@ function isHttpUrl(text: string): boolean {
   }
 }
 
-// 숫자 로컬스토리지 안전 파서
 const getInt = (key: string, fallback = 0): number => {
   try {
     const raw = localStorage.getItem(key);
