@@ -1,12 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { SessionQuestion, Difficulty } from "@/lib/frontend/quiz/types";
 import prisma from "@/lib/backend/prisma";
 import { Prisma } from "@prisma/client";
 
 /** ── 요청/응답/DB Row 타입 ─────────────────────────────────────────────── */
 type RequestBody = { user_id?: string; contentsId?: number | null };
 
-type ItemsResponse = { items: SessionQuestion[] };
+type ItemsResponse = {
+  items: {
+    question: {
+      id: string;
+      idx?: number; // 화면용 키(선택)
+      topic: string;
+      difficulty: string; // enum이 있다면 string 대신 유니온으로 교체
+      question: string;
+      options: string[];
+      answer: string;
+      nextLocation?: string | null;
+      contentsId?: number | null;
+    };
+  }[];
+};
 type ErrorResponse = { error: string };
 
 type DBQuestionRow = Prisma.QuestionGetPayload<{
@@ -35,7 +48,6 @@ const toStringArray = (v: unknown): string[] => {
 
   if (typeof v === "object" && v !== null) {
     try {
-      // Prisma.JsonValue 같은 경우도 직렬화 후 배열이면 매핑
       const parsed = JSON.parse(JSON.stringify(v));
       return Array.isArray(parsed) ? parsed.map(String) : [];
     } catch {
@@ -62,7 +74,7 @@ export default async function handler(
 
     // 1) 최신 7건(내림차순) 조회
     const rows: DBQuestionRow[] = await prisma.question.findMany({
-      where: { userId: user_id, contentsId: contentsId },
+      where: { userId: user_id, contentsId: contentsId ?? undefined },
       orderBy: { idx: "desc" },
       take: 7,
       select: {
@@ -76,25 +88,23 @@ export default async function handler(
     });
 
     // 2) 가져온 7건만 오름차순(가장 먼저 생성된 순)으로 재정렬
-    const rowsAsc: DBQuestionRow[] = rows
-      .slice()
-      .sort((a, b) => Number(a.idx) - Number(b.idx));
+    const rowsAsc = rows.slice().sort((a, b) => Number(a.idx) - Number(b.idx));
 
-    // 3) SessionQuestion[] 형태로 매핑
-    const items: SessionQuestion[] = rowsAsc
+    // 3) 응답 매핑 (idx/옵션 정규화 포함)
+    const items: ItemsResponse["items"] = rowsAsc
       .filter((r) => !!r.question && !!r.answer)
-      .map(
-        (r): SessionQuestion => ({
-          question: {
-            id: String(r.idx),
-            topic: String(r.topic ?? ""),
-            difficulty: String(r.difficulty ?? "medium") as Difficulty,
-            question: String(r.question),
-            options: toStringArray(r.options as unknown),
-            answer: String(r.answer),
-          },
-        })
-      );
+      .map((r) => ({
+        question: {
+          id: String(r.idx),
+          idx: Number(r.idx), // 프론트에서 안정적 키로 사용 가능
+          topic: String(r.topic ?? ""),
+          difficulty: String(r.difficulty ?? "medium"),
+          question: String(r.question),
+          options: toStringArray(r.options as unknown),
+          answer: String(r.answer),
+          // nextLocation / contentsId는 필요 시 DB 스키마에 맞춰 추가
+        },
+      }));
 
     return res.status(200).json({ items });
   } catch (err) {
