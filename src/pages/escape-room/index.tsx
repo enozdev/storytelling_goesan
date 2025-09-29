@@ -188,9 +188,7 @@ export default function AiQuizWalkIndex() {
                   aria-label="관리자 페이지로 이동"
                   className={`${btnBase} bg-[#E9DDC8] text-[#3F3629] border border-[#D8C6B3] 
                   hover:bg-[#F3EBDC] focus:ring-[#BFA06A]`}
-                  // onClick={() =>
-                  //   router.push("/ai-quiz-walk/indoor/admin/teamList")
-                  // }
+                  onClick={() => router.push("/escape-room/admin/list")}
                 >
                   퀴즈 리스트 한번에 보기
                 </button>
