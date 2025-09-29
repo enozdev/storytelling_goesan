@@ -15,7 +15,7 @@ type ItemsResponse = {
       question: string;
       options: string[];
       answer: string;
-      nextLocation?: string | null;
+      nextLocation?: string;
       contentsId?: number | null;
     };
   }[];
@@ -30,6 +30,8 @@ type DBQuestionRow = Prisma.QuestionGetPayload<{
     question: true;
     answer: true;
     options: true;
+    nextLocation: true;
+    contentsId: true;
   };
 }>;
 
@@ -84,6 +86,8 @@ export default async function handler(
         question: true,
         answer: true,
         options: true,
+        nextLocation: true, // Escape Room 전용
+        contentsId: true, // Escape Room 전용
       },
     });
 
@@ -102,7 +106,8 @@ export default async function handler(
           question: String(r.question),
           options: toStringArray(r.options as unknown),
           answer: String(r.answer),
-          // nextLocation / contentsId는 필요 시 DB 스키마에 맞춰 추가
+          nextLocation: r.nextLocation ?? undefined,
+          contentsId: r.contentsId ?? null,
         },
       }));
 

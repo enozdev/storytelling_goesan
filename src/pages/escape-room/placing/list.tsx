@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 /** ---------- 타입 ---------- */
 type SessionQuestion = {
@@ -71,6 +72,8 @@ export default function QuizFlowPage() {
     }),
     []
   );
+
+  const router = useRouter();
 
   const [items, setItems] = useState<SessionQuestion[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -298,7 +301,7 @@ export default function QuizFlowPage() {
             위치 입력으로 돌아가기
           </Link>
           <button
-            onClick={() => window.print()}
+            onClick={() => router.push("/escape-room/placing")}
             className="ml-auto rounded-xl px-4 py-3 text-sm hover:opacity-90"
             style={{
               background: "#fff",
@@ -306,7 +309,7 @@ export default function QuizFlowPage() {
               color: hanji.ink,
             }}
           >
-            인쇄/저장
+            뒤로 가기
           </button>
         </div>
       </footer>

@@ -220,7 +220,9 @@ export default function PlacingInputPage() {
 
   // 입력 변경
   const onChangeDraft = (idxKey: number, v: string) => {
-    setDraftMap((m) => ({ ...m, [idxKey]: v }));
+    const vv = v.trim().toLowerCase();
+    const safeV = vv === "null" || vv === "undefined" ? "" : v;
+    setDraftMap((m) => ({ ...m, [idxKey]: safeV }));
     setSavedMap((m) => ({ ...m, [idxKey]: false }));
     setErrorMap((m) => ({ ...m, [idxKey]: "" }));
   };

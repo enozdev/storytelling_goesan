@@ -81,19 +81,37 @@ export default function PlacingHome() {
         </p>
       </main>
 
-      {/* 하단: 버튼 1개(고정) */}
       <div className="fixed bottom-10 left-0 w-full z-20 px-4 pb-6">
         <div className="mx-auto w-full max-w-2xl rounded-3xl border border-[#e4d6ad] bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] p-3 md:p-4">
-          <button
-            aria-label="QR 장소 입력하기"
-            className="h-14 w-full rounded-2xl text-base md:text-lg font-semibold shadow-lg transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-[#5f513d] text-[#f8f4ea] hover:bg-[#4d4231] active:bg-[#413628] focus-visible:ring-[#5f513d]"
-            onClick={() => router.push("/escape-room/placing/input")}
-          >
-            <span className="inline-flex items-center justify-center gap-2">
-              <MapPinIcon className="w-6 h-6" />
-              <span>QR 장소 입력하기</span>
-            </span>
-          </button>
+          {/* 버튼 컨테이너 - 세로 간격 추가 */}
+          <div className="flex flex-col space-y-3">
+            <button
+              aria-label="QR 장소 입력하기"
+              className="h-14 w-full rounded-2xl text-base md:text-lg font-semibold shadow-lg transition 
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 
+          bg-[#5f513d] text-[#f8f4ea] 
+          hover:bg-[#4d4231] active:bg-[#413628] focus-visible:ring-[#5f513d]"
+              onClick={() => router.push("/escape-room/placing/input")}
+            >
+              <span className="inline-flex items-center justify-center gap-2">
+                <MapPinIcon className="w-6 h-6" />
+                <span>QR 장소 입력하기</span>
+              </span>
+            </button>
+
+            <button
+              aria-label="최근 저장 항목"
+              className="h-14 w-full rounded-2xl text-base md:text-lg font-semibold shadow-lg transition 
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 
+          bg-[#efe6ce] text-[#5f513d]  
+          hover:bg-[#e4d6ad] active:bg-[#d9c898] focus-visible:ring-[#e4d6ad]"
+              onClick={() => router.push("/escape-room/placing/list")}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <span>QR 장소 확인하기</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

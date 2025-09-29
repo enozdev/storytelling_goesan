@@ -172,7 +172,7 @@ export default function QrListPage() {
             )}
           </div>
 
-          {/* 단순 무지개 선택 */}
+          {/* 색상 선택 */}
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-600">색상</span>
             <div className="flex items-center gap-1.5">
