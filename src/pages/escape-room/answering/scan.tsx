@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import jsQR from "jsqr";
-import QrMiniBrowser from "@/components/ai-quiz-walk/QrMiniBrowser";
+import QrMiniBrowser from "@/components/escape-room/QrMiniBrowser";
 import {
   UserGroupIcon,
   MagnifyingGlassIcon,
   CheckBadgeIcon,
-  ClockIcon,
 } from "@heroicons/react/24/solid";
 
 function isHttpUrl(text: string): boolean {
@@ -20,6 +19,7 @@ function isHttpUrl(text: string): boolean {
   }
 }
 
+// 숫자 로컬스토리지 안전 파서
 const getInt = (key: string, fallback = 0): number => {
   try {
     const raw = localStorage.getItem(key);
@@ -75,21 +75,6 @@ export default function OutdoorScannerPage(): JSX.Element {
   const [decodedText, setDecodedText] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const [elapsedTime, setElapsedTime] = useState<string>("00:00");
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    const start = Date.now();
-    interval = setInterval(() => {
-      const diff = Date.now() - start;
-      const m = Math.floor(diff / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setElapsedTime(
-        `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
-      );
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   const isSecure =
     typeof window !== "undefined" &&
     (window.isSecureContext ||
@@ -117,7 +102,7 @@ export default function OutdoorScannerPage(): JSX.Element {
 
   const syncStatsFromServer = useCallback(async () => {
     try {
-      const { res, json } = await authedFetch("/api/ai-quiz-walk/quiz/stats");
+      const { res, json } = await authedFetch("/api/escape-room/quiz/stats");
       if (res.ok && json) {
         if (typeof json.teamName === "string")
           localStorage.setItem("userTeamName", json.teamName);
@@ -206,9 +191,8 @@ export default function OutdoorScannerPage(): JSX.Element {
         return;
       }
 
-      // 2) 숫자만 → /ai-quiz-walk/open/{id}
       if (/^\d+$/.test(text)) {
-        router.push(`/ai-quiz-walk/open/${encodeURIComponent(text)}`);
+        router.push(`/escape-room/open/${encodeURIComponent(text)}`);
         return;
       }
 
@@ -329,26 +313,23 @@ export default function OutdoorScannerPage(): JSX.Element {
 
   return (
     <main className="relative min-h-[100dvh] bg-black text-white">
-      {/* === 팀명 / 소요 시간 / 정답 === */}
+      {/* === 팀명 / 발견 / 정답 === */}
       <div className="absolute top-0 left-0 right-0 z-20 px-4 pt-[max(0.25rem,env(safe-area-inset-top))] pointer-events-none">
         <div className="mx-auto max-w-[640px]">
           <div className="flex items-center justify-between gap-3 rounded-b-2xl bg-black/55 backdrop-blur px-3 py-2 ring-1 ring-white/10">
-            {/* 팀명 */}
             <div className="min-w-0 flex items-center gap-2 text-xl font-semibold">
-              <UserGroupIcon className="w-5 h-5 flex-shrink-0 opacity-90" />
+              <UserGroupIcon className="w-4 h-10 flex-shrink-0 opacity-90" />
               <span className="truncate">{teamName}</span>
             </div>
-
-            {/* 중앙: 소요 시간 */}
-            <div className="flex items-center gap-1 text-[15px] font-medium text-white/90">
-              <ClockIcon className="w-4 h-4 opacity-90" />
-              <span>{elapsedTime}</span>
-            </div>
-
-            {/* 정답 */}
-            <div className="flex items-center gap-1 text-[15px]">
-              <CheckBadgeIcon className="w-4 h-4 opacity-90" />
-              <span className="opacity-90">정답 {correctCount}</span>
+            <div className="flex items-center gap-3 text-[15px]">
+              <span className="inline-flex items-center gap-1">
+                <MagnifyingGlassIcon className="w-4 h-4 opacity-90" />
+                <span className="opacity-90">발견 {foundCount}</span>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <CheckBadgeIcon className="w-4 h-4 opacity-90" />
+                <span className="opacity-90">정답 {correctCount}</span>
+              </span>
             </div>
           </div>
         </div>

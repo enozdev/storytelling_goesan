@@ -1,4 +1,4 @@
-import "../styles/globals.css";
+import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import SplashApp1 from "@/components/ai-quiz-walk/splash";
 import SplashApp2 from "@/components/escape-room/splash";

@@ -3,6 +3,7 @@ import prisma from "@/lib/backend/prisma";
 import { privateAuth } from "@/lib/backend/privateAuth";
 
 import type { AuthOK, AuthFail } from "@/lib/backend/auth/types";
+import next from "next";
 
 export default async function handler(
   req: NextApiRequest,
@@ -65,6 +66,7 @@ export default async function handler(
         q: q.question,
         options: safeOptions,
         a: q.answer,
+        nextLocation: q.nextLocation,
       },
     });
   } catch (err: any) {

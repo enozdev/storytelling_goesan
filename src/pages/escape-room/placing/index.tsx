@@ -95,7 +95,7 @@ export default function PlacingHome() {
             >
               <span className="inline-flex items-center justify-center gap-2">
                 <MapPinIcon className="w-6 h-6" />
-                <span>QR 장소 입력하기</span>
+                <span>QR 힌트 입력하기</span>
               </span>
             </button>
 
@@ -108,7 +108,7 @@ export default function PlacingHome() {
               onClick={() => router.push("/escape-room/placing/list")}
             >
               <span className="flex items-center justify-center gap-2">
-                <span>QR 장소 확인하기</span>
+                <span>QR 힌트 확인하기</span>
               </span>
             </button>
           </div>
