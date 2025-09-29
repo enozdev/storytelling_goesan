@@ -180,7 +180,7 @@ export default function QuizFlowPage() {
               className="rounded-xl px-3 py-2 text-sm font-semibold hover:opacity-90"
               style={{ background: hanji.ink, color: hanji.bg }}
             >
-              위치 입력으로 이동
+              힌트 입력으로 이동
             </Link>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function QuizFlowPage() {
                     <MapPinIcon className="w-5 h-5 mt-0.5" />
                     <div className="flex-1">
                       <div className="text-sm font-semibold">
-                        다음 장소
+                        다음 장소 힌트
                         {!next && (
                           <span
                             className="ml-2 text-xs"
@@ -251,7 +251,7 @@ export default function QuizFlowPage() {
                           color: next ? "#145a14" : "#b6412e",
                         }}
                       >
-                        {next || "다음 장소가 아직 입력되지 않았습니다."}
+                        {next || "다음 장소 힌트가 아직 입력되지 않았습니다."}
                       </div>
                     </div>
                   </div>
@@ -298,7 +298,7 @@ export default function QuizFlowPage() {
             className="rounded-xl px-4 py-3 font-semibold hover:opacity-90"
             style={{ background: hanji.ink, color: hanji.bg }}
           >
-            위치 입력으로 돌아가기
+            힌트 입력으로 돌아가기
           </Link>
           <button
             onClick={() => router.push("/escape-room/placing")}
@@ -372,7 +372,7 @@ function Header({ hanji, title }: { hanji: Hanji; title: string }) {
           김홍도 QR 방탈출 · {title}
         </h1>
         <p className="text-xs mt-0.5" style={{ color: `${hanji.ink}B3` }}>
-          작성한 ‘다음 장소’ 순서대로 흐름을 확인하세요.
+          작성한 ‘다음 장소 힌트’ 순서대로 흐름을 확인하세요.
         </p>
       </div>
     </header>

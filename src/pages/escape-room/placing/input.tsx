@@ -565,7 +565,9 @@ export default function PlacingInputPage() {
                     <MapPinIcon className="w-5 h-5 mt-0.5" />
                     <div className="flex-1">
                       <div className="text-sm font-semibold">
-                        {isLast ? "종료 지점(마지막)" : `${i + 2}번 문제 힌트`}
+                        {isLast
+                          ? "종료 지점(마지막)"
+                          : `${i + 2}번 문제 장소 힌트`}
                       </div>
                       {isLast ? (
                         <div className="mt-2 flex gap-2 flex-col sm:flex-row">
@@ -759,8 +761,8 @@ function Header({ hanji }: { hanji: Hanji }) {
               김홍도 QR 방탈출 제작하기
             </h1>
             <p className="text-xs" style={{ color: `${hanji.ink}B3` }}>
-              각 문제 아래에서 ‘다음 힌트 위치’를 입력하고 저장하세요. (마지막은
-              종료 지점)
+              각 문제 아래에서 ‘다음 장소 힌트 위치’를 입력하고 저장하세요.
+              (마지막은 종료 지점)
             </p>
           </div>
         </div>
