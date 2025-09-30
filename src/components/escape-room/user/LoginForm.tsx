@@ -12,13 +12,17 @@ type Props = {
   isLoading?: boolean;
 };
 
-export default function LoginForm({ onUserLogin, isLoading }: Props) {
+export default function LoginForm({ onUserLogin, isLoading = false }: Props) {
   const [userTeamName, setUserTeamName] = useState("");
   const [userTeamPassword, setUserTeamPassword] = useState("");
   const [role, setRole] = useState("");
   const router = useRouter();
 
   const handleUser = async () => {
+    if (!userTeamName.trim() || !userTeamPassword.trim()) {
+      alert("팀 이름과 비밀번호를 모두 입력해주세요.");
+      return;
+    }
     await onUserLogin({ userTeamName, userTeamPassword, role });
   };
 
@@ -45,6 +49,7 @@ export default function LoginForm({ onUserLogin, isLoading }: Props) {
             className="w-full py-3 px-4 border border-[#E9E2D3] rounded-xl bg-[#FAF7F0] focus:outline-none focus:ring-2 focus:ring-[#BFA06A] text-base"
             value={userTeamName}
             onChange={(e) => setUserTeamName(e.target.value)}
+            disabled={isLoading} // 로딩 중 입력도 잠깐 막을 수 있음
           />
           <input
             type="password"
@@ -52,6 +57,7 @@ export default function LoginForm({ onUserLogin, isLoading }: Props) {
             className="w-full py-3 px-4 border border-[#E9E2D3] rounded-xl bg-[#FAF7F0] focus:outline-none focus:ring-2 focus:ring-[#BFA06A] text-base"
             value={userTeamPassword}
             onChange={(e) => setUserTeamPassword(e.target.value)}
+            disabled={isLoading}
           />
         </div>
 
@@ -60,18 +66,21 @@ export default function LoginForm({ onUserLogin, isLoading }: Props) {
           <button
             onClick={handleUser}
             disabled={isLoading}
-            className="w-full py-3 rounded-xl font-semibold text-base shadow-md transition 
-                       bg-gradient-to-br from-[#3F3629] to-[#2F291F] text-[#F6F1E7] 
-                       hover:brightness-[1.05] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3F3629] 
-                       disabled:opacity-60"
+            className={`w-full py-3 rounded-xl font-semibold text-base shadow-md transition
+              ${
+                isLoading
+                  ? "bg-gray-400 text-gray-100 cursor-not-allowed"
+                  : "bg-gradient-to-br from-[#3F3629] to-[#2F291F] text-[#F6F1E7] hover:brightness-[1.05]"
+              }`}
           >
             {isLoading ? "로그인 중..." : "로그인"}
           </button>
 
           <button
             onClick={() => router.push("/escape-room/user/signup")}
+            disabled={isLoading}
             className="w-full py-3 rounded-xl font-semibold text-base shadow border border-[#E9E2D3] 
-                       bg-white hover:bg-[#FAF7F0] text-[#3F3629] transition"
+                       bg-white hover:bg-[#FAF7F0] text-[#3F3629] transition disabled:opacity-60"
           >
             팀 등록하기
           </button>

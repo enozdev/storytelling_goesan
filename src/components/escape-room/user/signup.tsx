@@ -10,26 +10,42 @@ export default function UserSignup() {
   const [userTeamName, setUserTeamName] = useState("");
   const [userTeamPassword, setUserTeamPassword] = useState("");
   const [isSignupSuccess, setIsSignupSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleUserSignup = async () => {
-    const response = await fetch("/api/auth/user/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userTeamName,
-        userTeamPassword,
-      }),
-    });
+    const teamNameRegex = /^[가-힣a-zA-Z0-9]+$/;
+    if (!teamNameRegex.test(userTeamName)) {
+      alert("팀 이름은 한글, 영문, 숫자만 사용할 수 있습니다.");
+      return;
+    }
 
-    if (response.ok) {
-      setIsSignupSuccess(true);
-      setTimeout(() => router.push("/escape-room/user/login"), 1500);
-    } else {
-      if (response.status === 409) {
-        alert("이미 존재하는 팀 이름입니다. 다른 이름을 사용해 주세요.");
+    if (!userTeamPassword) {
+      alert("비밀번호를 입력해주세요.");
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/auth/user/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userTeamName,
+          userTeamPassword,
+        }),
+      });
+
+      if (response.ok) {
+        setIsSignupSuccess(true);
+        setTimeout(() => router.push("/escape-room/user/login"), 1500);
       } else {
-        alert("회원가입 실패");
+        if (response.status === 409) {
+          alert("이미 존재하는 팀 이름입니다. 다른 이름을 사용해 주세요.");
+        } else {
+          alert("회원가입 실패");
+        }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,8 +85,9 @@ export default function UserSignup() {
         <div className="space-y-4">
           <input
             type="text"
-            placeholder="팀 이름"
+            placeholder="팀 이름 (한글/영문/숫자만 가능)"
             className="w-full py-3 px-4 rounded-xl bg-white border border-[#E5DED0] text-[#3F3629] placeholder:text-[#9C8F7A] focus:outline-none focus:ring-2 focus:ring-[#BFA06A]"
+            value={userTeamName}
             onChange={(e) => setUserTeamName(e.target.value)}
           />
           <input
@@ -85,9 +102,15 @@ export default function UserSignup() {
         <div className="space-y-3">
           <button
             onClick={handleUserSignup}
-            className="w-full py-3 bg-gradient-to-br from-[#BFA06A] to-[#A98D5F] text-[#2F291F] rounded-xl font-semibold shadow-md hover:brightness-110 transition"
+            disabled={isLoading} // 비활성화 처리
+            className={`w-full py-3 rounded-xl font-semibold shadow-md transition 
+              ${
+                isLoading
+                  ? "bg-gray-400 text-gray-100 cursor-not-allowed"
+                  : "bg-gradient-to-br from-[#BFA06A] to-[#A98D5F] text-[#2F291F] hover:brightness-110"
+              }`}
           >
-            등록하기
+            {isLoading ? "등록 중..." : "등록하기"}
           </button>
 
           <div className="flex items-center justify-between text-sm text-[#6B604E]">
