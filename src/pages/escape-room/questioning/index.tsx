@@ -50,8 +50,8 @@ function KHDCard({ src = "/kimhongdo2.png" }: { src?: string }) {
       className="relative w-full max-w-5xl rounded-3xl overflow-hidden shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-[#e4d6ad] bg-white"
       style={{
         aspectRatio: "16 / 9",
-        maxHeight: "100vh",
-        height: "clamp(320px, 75vh, 640px)",
+        maxHeight: "55vh",
+        height: "clamp(320px, 60vh, 640px)",
       }}
     >
       <div className="relative w-full h-full">
@@ -60,7 +60,7 @@ function KHDCard({ src = "/kimhongdo2.png" }: { src?: string }) {
           alt="김홍도(가로형) 일러스트"
           fill
           priority
-          sizes="(max-width: 1280px) 100vw, 1280px"
+          sizes="(max-width: 1280px) 70vw, 1280px"
           style={{ objectFit: "cover" }}
         />
       </div>

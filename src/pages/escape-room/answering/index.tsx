@@ -16,7 +16,7 @@ function KHDCard({ src = "/placing_hongdo.png" }: { src?: string }) {
       className="relative w-full max-w-md rounded-3xl overflow-hidden shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-[#e4d6ad] bg-white"
       style={{
         aspectRatio: "1 / 1",
-        height: "clamp(240px, 60vh, 480px)",
+        height: "clamp(240px, 45vh, 480px)",
       }}
     >
       <Image

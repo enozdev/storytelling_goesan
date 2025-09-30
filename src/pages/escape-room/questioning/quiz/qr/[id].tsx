@@ -68,6 +68,15 @@ export default function OpenByIdPage() {
     }, 28); // 타자 속도(조절 가능)
   };
 
+  const exitQuestion = () => {
+    // 히스토리가 있으면 뒤로, 없으면 안전한 경로로 이동
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.replace("/escape-room"); // 필요에 맞게 목록/홈 등으로 변경
+    }
+  };
+
   // 정리
   useEffect(() => {
     return () => {
@@ -201,12 +210,12 @@ export default function OpenByIdPage() {
             </p>
           </header>
 
-          <p className="text-lg leading-relaxed">{data.question}</p>
+          <p className="text-md leading-relaxed">{data.question}</p>
 
           <ul className="space-y-2 mt-3">
             {data.options.map((opt, i) => (
               <li key={i}>
-                <label className="inline-flex items-center gap-2 text-lg">
+                <label className="inline-flex items-center gap-2 text-md">
                   <input
                     type="radio"
                     name="mc"
@@ -264,21 +273,13 @@ export default function OpenByIdPage() {
             <div>
               {answer === data.answer ? (
                 <div>
-                  <div className="mt-4 rounded-xl bg-emerald-50 border border-emerald-200 p-4">
-                    <p className="text-emerald-800">
-                      정답: <span className="font-semibold">{data.answer}</span>
-                    </p>
-                    <p className="text-slate-600 mt-1">
-                      내 답안: {answer || "(미입력)"}
-                    </p>
-                  </div>
-
                   {/* 다음 위치 힌트 보기 버튼(원래 크기 유지) */}
                   <div>
                     <button
                       onClick={openHint}
                       className="group relative mt-3 w-full rounded-xl px-5 py-3 font-bold text-lg text-[#5f513d] bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-400 shadow-md hover:shadow-lg transition hover:from-yellow-300 hover:to-yellow-500 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     >
+                      <span className="text-green-600">정답입니다!</span> <br />
                       다음 위치 힌트 보기
                     </button>
                   </div>
@@ -361,26 +362,6 @@ export default function OpenByIdPage() {
                     >
                       {hintLoading ? "힌트를 불러오는 중..." : typedHint}
                     </p>
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between">
-                    <button
-                      onClick={() => {
-                        // 다시 타이핑
-                        if (fullHint) startTypewriter(fullHint);
-                      }}
-                      className="rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-white"
-                      style={{ borderColor: "#e4d6ad", color: "#5f513d" }}
-                    >
-                      다시 보기
-                    </button>
-
-                    <button
-                      onClick={() => setShowHint(false)}
-                      className="rounded-xl px-4 py-2 text-sm font-semibold bg-[#5f513d] text-[#f8f4ea] hover:opacity-95"
-                    >
-                      닫기
-                    </button>
                   </div>
                 </div>
               </div>

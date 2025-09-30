@@ -16,7 +16,7 @@ function KHDCard({ src = "/placing_hongdo.png" }: { src?: string }) {
       className="relative w-full max-w-md rounded-3xl overflow-hidden shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-[#e4d6ad] bg-white"
       style={{
         aspectRatio: "1 / 1",
-        height: "clamp(240px, 60vh, 480px)",
+        height: "clamp(240px, 45vh, 480px)",
       }}
     >
       <Image
@@ -108,7 +108,7 @@ export default function PlacingHome() {
               onClick={() => router.push("/escape-room/placing/list")}
             >
               <span className="flex items-center justify-center gap-2">
-                <span>QR 힌트 확인하기</span>
+                <span>QR 방탈출 흐름 확인하기</span>
               </span>
             </button>
           </div>

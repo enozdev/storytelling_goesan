@@ -21,9 +21,24 @@ export default function QrMiniBrowser({ url, onClose }: Props) {
         <div className="absolute top-2 right-2 z-10">
           <button
             onClick={onClose}
-            className="rounded-full bg-black/70 text-white text-xs px-3 py-1.5 hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            className="flex items-center gap-2 rounded-xl bg-yellow-600 text-white text-sm md:text-base font-bold px-5 py-2.5 shadow-lg hover:bg-yellow-700 hover:scale-105 active:scale-95 transition transform focus:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300"
             aria-label="미리보기 닫기"
           >
+            {/* X 아이콘 (lucide-react나 heroicons 사용 가능) */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 md:h-5 md:w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
             닫기
           </button>
         </div>

@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
-// TODO: 세션 처리
-
 /** ---------- 타입 ---------- */
 type SessionQuestion = {
   question: {
@@ -112,14 +110,14 @@ export default function PlacingInputPage() {
     []
   );
 
-  // 상태: 목록, 초점 인덱스(첫 미입력으로 이동), 부착체크
+  // 상태: 목록, 초점 인덱스, 부착체크
   const [items, setItems] = useState<SessionQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [placedMap, setPlacedMap] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  // flow 입력/저장 상태: 각 idx별 초안/저장/로딩/에러
+  // flow 입력/저장 상태
   const [draftMap, setDraftMap] = useState<Record<number, string>>({});
   const [savedMap, setSavedMap] = useState<Record<number, boolean>>({});
   const [savingMap, setSavingMap] = useState<Record<number, boolean>>({});
@@ -149,7 +147,6 @@ export default function PlacingInputPage() {
   }, []);
 
   // API 로드 (마운트 후 1회)
-  // API 로드 (마운트 후 1회)
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -177,35 +174,24 @@ export default function PlacingInputPage() {
           },
         }));
 
-        // draft/saved 초기화 (+ 마지막 항목은 완료 문구로 강제)
+        // draft/saved 초기화 규칙:
+        // - i === 0 (1번 퀴즈): 입력 없음(고정) → draft "", saved true(표시용)
+        // - i > 0: draft = (i-1).nextLocation, saved = 값 존재 여부
         const nextDraft: Record<number, string> = {};
         const nextSaved: Record<number, boolean> = {};
 
-        // 자동 저장 필요 여부 체크용
-        let needPersistCompletion = false;
-        let completionIdxKey: number | null = null;
-        let completionContentsId: number | null = null;
+        const lastIdx = Math.max(normalized.length - 1, 0);
 
         normalized.forEach((it, i) => {
-          const idx = it.question.idx ?? i;
-          const isLast = i === normalized.length - 1;
-
-          if (isLast) {
-            // 마지막 문제는 무조건 완료 문구로 초기화
-            nextDraft[idx] = COMPLETION_MSG;
-            nextSaved[idx] =
-              (it.question.nextLocation ?? "").trim() === COMPLETION_MSG;
-
-            // DB 값이 다르면 이후 자동 저장
-            if ((it.question.nextLocation ?? "").trim() !== COMPLETION_MSG) {
-              needPersistCompletion = true;
-              completionIdxKey = idx;
-              completionContentsId = it.question.contentsId ?? CONTENTS_ID;
-            }
+          const curKey = it.question.idx ?? i;
+          if (i === 0) {
+            nextDraft[curKey] = "";
+            nextSaved[curKey] = true; // 진행률에서 제외할 것이므로 true/false는 큰 영향 없음
           } else {
-            const v = (it.question.nextLocation ?? "").trim();
-            nextDraft[idx] = v;
-            nextSaved[idx] = v.length > 0;
+            const prev = normalized[i - 1];
+            const v = (prev?.question.nextLocation ?? "").trim();
+            nextDraft[curKey] = v;
+            nextSaved[curKey] = v.length > 0;
           }
         });
 
@@ -213,24 +199,30 @@ export default function PlacingInputPage() {
         setDraftMap(nextDraft);
         setSavedMap(nextSaved);
 
-        // 첫 미입력 노드로 초점 이동
-        const firstUnfilled = normalized.findIndex((it, i) =>
-          i === normalized.length - 1 // 마지막은 항상 채워진 것으로 간주
+        // 첫 미입력 노드로 초점 이동 (2번부터 검사)
+        const firstUnfilled = normalized.findIndex((_, i) =>
+          i === 0
             ? false
-            : (it.question.nextLocation ?? "").trim().length === 0
+            : (normalized[i - 1]?.question.nextLocation ?? "").trim().length ===
+              0
         );
         setCurrentIndex(firstUnfilled >= 0 ? firstUnfilled : 0);
 
-        // ★ 마지막 항목 완료 문구 자동 저장
-        if (needPersistCompletion && completionIdxKey != null) {
+        // ★ 마지막 퀴즈의 nextLocation은 종착지 문구로 자동/유지
+        if (
+          normalized.length > 0 &&
+          (normalized[lastIdx]?.question.nextLocation ?? "").trim() !==
+            COMPLETION_MSG
+        ) {
           try {
             const res2 = await fetch("/api/escape-room/quiz/updateLocation", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 user_id,
-                contentsId: completionContentsId ?? CONTENTS_ID,
-                idx: completionIdxKey,
+                contentsId:
+                  normalized[lastIdx].question.contentsId ?? CONTENTS_ID,
+                idx: normalized[lastIdx].question.idx ?? lastIdx,
                 nextLocation: COMPLETION_MSG,
               }),
             });
@@ -239,9 +231,10 @@ export default function PlacingInputPage() {
               throw new Error(payload?.error || "저장 실패");
 
             // 상태 반영
+            const lastKey = normalized[lastIdx].question.idx ?? lastIdx;
             setItems((prev) =>
               prev.map((it, i) =>
-                (it.question.idx ?? i) === completionIdxKey
+                (it.question.idx ?? i) === lastKey
                   ? {
                       ...it,
                       question: {
@@ -252,12 +245,9 @@ export default function PlacingInputPage() {
                   : it
               )
             );
-            setSavedMap((m) => ({ ...m, [completionIdxKey!]: true }));
-            setPlacedMap((m) => ({ ...m, [completionIdxKey!]: true }));
+            setPlacedMap((m) => ({ ...m, [lastKey]: true }));
           } catch (e) {
-            // 자동 저장 실패 시엔 화면은 완료 문구로 보이나, DB 반영만 실패
-            // 필요 시 토스트/에러 배너 추가 가능
-            console.error("자동 완료 저장 실패:", e);
+            console.error("마지막 종착지 자동 저장 실패:", e);
           }
         }
       } catch (e: any) {
@@ -280,9 +270,17 @@ export default function PlacingInputPage() {
     localStorage.setItem(LS_INDEX, JSON.stringify(currentIndex));
   }, [currentIndex]);
 
+  // 진행률: 2번~N번만 대상
   const total = items.length;
-  const savedCount = Object.values(savedMap).filter(Boolean).length;
-  const progressPct = total ? Math.round((savedCount / total) * 100) : 0;
+  const inputTargets = Math.max(total - 1, 0);
+  const savedCount = items.reduce((acc, it, i) => {
+    if (i === 0) return acc;
+    const key = it.question.idx ?? i;
+    return acc + (savedMap[key] ? 1 : 0);
+  }, 0);
+  const progressPct = inputTargets
+    ? Math.round((savedCount / inputTargets) * 100)
+    : 0;
 
   // 입력 변경
   const onChangeDraft = (idxKey: number, v: string) => {
@@ -293,33 +291,38 @@ export default function PlacingInputPage() {
     setErrorMap((m) => ({ ...m, [idxKey]: "" }));
   };
 
-  // 저장
-  const saveOne = async (idxKey: number) => {
-    const itemIdx = items.findIndex(
-      (it, i) => (it.question.idx ?? i) === idxKey
+  // 저장 대상 key 계산: (현재-1)
+  const getTargetPrevIdxKey = (curIdxKey: number) => {
+    const curIdx = items.findIndex(
+      (it, i) => (it.question.idx ?? i) === curIdxKey
     );
-    if (itemIdx < 0) return;
+    if (curIdx <= 0) return null;
+    const prevKey = items[curIdx - 1].question.idx ?? curIdx - 1;
+    return { prevKey, prevIdx: curIdx - 1, curIdx };
+  };
 
-    const isLast = itemIdx === items.length - 1;
-    const clean = (draftMap[idxKey] ?? "").trim();
+  // 저장: 현재 카드의 입력값을 (현재-1)의 nextLocation으로 저장
+  const saveOne = async (curIdxKey: number) => {
+    const ref = getTargetPrevIdxKey(curIdxKey);
+    if (!ref) return; // 1번은 저장 없음(고정)
+    const { prevKey, prevIdx, curIdx } = ref;
 
+    const clean = (draftMap[curIdxKey] ?? "").trim();
     if (!clean) {
       setErrorMap((m) => ({
         ...m,
-        [idxKey]: isLast
-          ? "종료 지점 위치를 입력하세요."
-          : `${itemIdx + 2}번 문제 위치를 입력하세요.`,
+        [curIdxKey]: `${curIdx + 1}번 퀴즈의 실제 위치를 입력하세요.`,
       }));
       return;
     }
 
-    setSavingMap((m) => ({ ...m, [idxKey]: true }));
-    setErrorMap((m) => ({ ...m, [idxKey]: "" }));
+    setSavingMap((m) => ({ ...m, [curIdxKey]: true }));
+    setErrorMap((m) => ({ ...m, [curIdxKey]: "" }));
 
     try {
       const user_id = localStorage.getItem("user_id") ?? undefined;
-      const itemObj = items[itemIdx];
-      const contentsId = itemObj.question.contentsId ?? CONTENTS_ID;
+      const targetObj = items[prevIdx]; // 저장 대상은 이전 퀴즈
+      const contentsId = targetObj.question.contentsId ?? 2;
 
       const res = await fetch("/api/escape-room/quiz/updateLocation", {
         method: "POST",
@@ -327,7 +330,7 @@ export default function PlacingInputPage() {
         body: JSON.stringify({
           user_id,
           contentsId,
-          idx: idxKey,
+          idx: prevKey,
           nextLocation: clean,
         }),
       });
@@ -336,31 +339,33 @@ export default function PlacingInputPage() {
         throw new Error(payload?.error || "저장 실패");
       }
 
-      // 상태 반영
+      // 상태 반영:
+      // (현재-1)의 nextLocation 업데이트
       setItems((prev) =>
         prev.map((it, i) =>
-          (it.question.idx ?? i) === idxKey
+          (it.question.idx ?? i) === prevKey
             ? { ...it, question: { ...it.question, nextLocation: clean } }
             : it
         )
       );
-      setSavedMap((m) => ({ ...m, [idxKey]: true }));
-      setPlacedMap((m) => ({ ...m, [idxKey]: true }));
+      // 현재 카드 저장 완료 플래그
+      setSavedMap((m) => ({ ...m, [curIdxKey]: true }));
+      setPlacedMap((m) => ({ ...m, [curIdxKey]: true }));
     } catch (e: any) {
       setErrorMap((m) => ({
         ...m,
-        [idxKey]: e?.message ?? "저장 오류가 발생했습니다.",
+        [curIdxKey]: e?.message ?? "저장 오류가 발생했습니다.",
       }));
     } finally {
-      setSavingMap((m) => ({ ...m, [idxKey]: false }));
+      setSavingMap((m) => ({ ...m, [curIdxKey]: false }));
     }
   };
 
   // 저장 후 다음으로 포커스/스크롤
-  const saveAndGoNext = async (idxKey: number) => {
-    await saveOne(idxKey);
+  const saveAndGoNext = async (curIdxKey: number) => {
+    await saveOne(curIdxKey);
     const curIdx = items.findIndex(
-      (it, i) => (it.question.idx ?? i) === idxKey
+      (it, i) => (it.question.idx ?? i) === curIdxKey
     );
     const nextIdx = curIdx + 1;
     if (nextIdx < items.length) {
@@ -444,7 +449,7 @@ export default function PlacingInputPage() {
     >
       <Header hanji={hanji} />
 
-      {/* 상단 진행 요약(저장 완료 진행률) */}
+      {/* 상단 진행 요약(저장 완료 진행률: 2번~N번) */}
       <section className="mx-auto max-w-3xl px-5 pt-6">
         <div
           className="rounded-2xl p-4 border"
@@ -455,7 +460,7 @@ export default function PlacingInputPage() {
             style={{ color: `${hanji.ink}B3` }}
           >
             <span>
-              총 {total}문항 · 저장 {savedCount}/{total}
+              총 {total}문항 · 저장 {savedCount}/{inputTargets}
             </span>
             <span>{progressPct}%</span>
           </div>
@@ -476,7 +481,7 @@ export default function PlacingInputPage() {
         <ol className="relative">
           {items.map((it, i) => {
             const idxKey = it.question.idx ?? i;
-            const isLast = i === items.length - 1;
+            const isFirst = i === 0;
             const draft = draftMap[idxKey] ?? "";
             const isSaving = savingMap[idxKey] ?? false;
             const isSaved = savedMap[idxKey] ?? false;
@@ -521,7 +526,18 @@ export default function PlacingInputPage() {
                     >
                       · 난이도: {it.question.difficulty}
                     </span>
-                    {placedMap[idxKey] ? (
+                    {isFirst ? (
+                      <span
+                        className="ml-auto text-xs rounded-md px-2 py-1"
+                        style={{
+                          background: "#eef2ff",
+                          color: "#3730a3",
+                          border: "1px solid #c7d2fe",
+                        }}
+                      >
+                        고정
+                      </span>
+                    ) : placedMap[idxKey] ? (
                       <span
                         className="ml-auto text-xs rounded-md px-2 py-1"
                         style={{
@@ -549,31 +565,34 @@ export default function PlacingInputPage() {
                       정답: {it.question.answer}
                     </p>
                   ) : null}
-                </div>
-
-                {/* 아래 화살표 */}
-                <div className="flex justify-center my-2">
-                  <ArrowDownIcon className="w-6 h-6" />
-                </div>
-
-                {/* 다음 힌트 위치 입력 노드 */}
-                <div
-                  className="rounded-2xl p-4 border shadow-sm"
-                  style={{ background: "#fff", borderColor: hanji.border }}
-                >
-                  <div className="flex items-start gap-2">
+                  <div className="flex items-start gap-2 mt-4">
                     <MapPinIcon className="w-5 h-5 mt-0.5" />
                     <div className="flex-1">
-                      <div className="text-sm font-semibold">
-                        {isLast
-                          ? "종료 지점(마지막)"
-                          : `${i + 2}번 문제 장소 힌트`}
+                      <div
+                        className="text-sm font-semibold"
+                        style={{ color: "#145a14" }}
+                      >
+                        {isFirst ? "시작 지점(고정)" : "퀴즈 위치 힌트 입력"}
                       </div>
-                      {isLast ? (
-                        <div className="mt-2 flex gap-2 flex-col sm:flex-row">
-                          <p className="text-orange-500">
-                            방탈출을 완료하셨습니다!
-                          </p>
+
+                      {isFirst ? (
+                        <div className="mt-2 flex items-center gap-2">
+                          <span
+                            className="text-xs rounded-md px-2 py-1"
+                            style={{
+                              background: "#eef2ff",
+                              color: "#3730a3",
+                              border: "1px solid #c7d2fe",
+                            }}
+                          >
+                            고정
+                          </span>
+                          <span
+                            className="text-sm"
+                            style={{ color: `${hanji.ink}80` }}
+                          >
+                            첫 번째 퀴즈 위치는 고정입니다.
+                          </span>
                         </div>
                       ) : (
                         <div className="mt-2 flex gap-2 flex-col sm:flex-row">
@@ -584,13 +603,7 @@ export default function PlacingInputPage() {
                             onChange={(e) =>
                               onChangeDraft(idxKey, e.target.value)
                             }
-                            placeholder={
-                              isLast
-                                ? "2층 안내데스크(마지막 지점)"
-                                : `${
-                                    i + 2
-                                  }번 문제 위치 예) 교탁 아래를 봐, 23번 사물함을 열어봐`
-                            }
+                            placeholder={`교탁 밑을 보세요, 칠판을 확인하세요`}
                             maxLength={80}
                             className="w-full rounded-xl px-4 py-3 outline-none"
                             style={{
@@ -605,25 +618,27 @@ export default function PlacingInputPage() {
                               onClick={() => saveOne(idxKey)}
                               disabled={isSaving || !draft.trim()}
                               className="rounded-xl px-4 py-3 font-semibold hover:opacity-90 disabled:opacity-50"
-                              style={{ background: hanji.ink, color: hanji.bg }}
+                              style={{
+                                background: hanji.ink,
+                                color: hanji.bg,
+                              }}
                             >
                               {isSaving ? "저장 중…" : "저장"}
                             </button>
-                            {!isLast && (
-                              <button
-                                type="button"
-                                onClick={() => saveAndGoNext(idxKey)}
-                                disabled={isSaving || !draft.trim()}
-                                className="rounded-xl px-4 py-3 font-semibold hover:opacity-90 disabled:opacity-50"
-                                style={{
-                                  background: "#fff",
-                                  border: `1px solid ${hanji.border}`,
-                                  color: hanji.ink,
-                                }}
-                              >
-                                저장 후 다음
-                              </button>
-                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => saveAndGoNext(idxKey)}
+                              disabled={isSaving || !draft.trim()}
+                              className="rounded-xl px-4 py-3 font-semibold hover:opacity-90 disabled:opacity-50"
+                              style={{
+                                background: "#fff",
+                                border: `1px solid ${hanji.border}`,
+                                color: hanji.ink,
+                              }}
+                            >
+                              저장 후 다음
+                            </button>
                           </div>
                         </div>
                       )}
@@ -637,7 +652,7 @@ export default function PlacingInputPage() {
                           >
                             {errMsg}
                           </span>
-                        ) : isLast ? null : isSaved ? (
+                        ) : !isFirst && isSaved ? (
                           <span
                             className="text-sm"
                             style={{ color: "#145a14" }}
@@ -651,7 +666,7 @@ export default function PlacingInputPage() {
                 </div>
 
                 {/* 다음 문제 카드로 이어지는 화살표 */}
-                {!isLast && (
+                {i < items.length - 1 && (
                   <div className="flex justify-center my-2">
                     <ArrowDownIcon className="w-6 h-6" />
                   </div>
@@ -688,10 +703,12 @@ export default function PlacingInputPage() {
         <div className="mx-auto max-w-3xl px-5 py-3 flex flex-wrap items-center gap-2">
           <button
             onClick={() => {
-              // 첫 미저장 노드로 점프
-              const firstUnfilled = items.findIndex(
-                (it, i) =>
-                  (draftMap[it.question.idx ?? i] ?? "").trim().length === 0
+              // 첫 미저장 노드로 점프 (2번부터 검사)
+              const firstUnfilled = items.findIndex((_, i) =>
+                i === 0
+                  ? false
+                  : (items[i - 1]?.question.nextLocation ?? "").trim()
+                      .length === 0
               );
               const targetIdx = firstUnfilled >= 0 ? firstUnfilled : 0;
               setCurrentIndex(targetIdx);
@@ -761,8 +778,7 @@ function Header({ hanji }: { hanji: Hanji }) {
               김홍도 QR 방탈출 제작하기
             </h1>
             <p className="text-xs" style={{ color: `${hanji.ink}B3` }}>
-              각 문제 아래에서 ‘다음 장소 힌트 위치’를 입력하고 저장하세요.
-              (마지막은 종료 지점)
+              각 문제 아래에서 ‘퀴즈 위치 힌트’를 입력하고 저장하세요.
             </p>
           </div>
         </div>
