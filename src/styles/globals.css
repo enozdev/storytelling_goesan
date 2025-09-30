@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body,
+#__next {
+  height: 100%;
+}
+
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-right: env(safe-area-inset-right);
+  --safe-bottom: env(safe-area-inset-bottom);
+  --safe-left: env(safe-area-inset-left);
+}
+
+/* 필요한 페이지만 이 클래스를 사용 */
+.fullscreen-container {
+  min-height: 100dvh;
+  min-height: 100svh;
+  min-height: 100vh;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  display: flex;
+  flex-direction: column;
+}
