@@ -67,7 +67,7 @@ export default function AiQuizWalkIndex() {
         {/* 카드 영역 */}
         <main className="space-y-10">
           {/* ① 퀴즈 생성 */}
-          <section
+          {/* <section
             className="
               rounded-3xl bg-white border border-[#E9E2D3] shadow-[0_10px_30px_-18px_rgba(0,0,0,.25)]
               p-5 flex flex-col justify-between min-h-[180px]
@@ -93,7 +93,7 @@ export default function AiQuizWalkIndex() {
                 시작하기
               </button>
             </div>
-          </section>
+          </section> */}
 
           {/* ② QR 부착 */}
           <section
