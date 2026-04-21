@@ -3,7 +3,9 @@ import { PrismaClient } from "@prisma/client";
 import formidable, { File as FormidableFile } from "formidable";
 import { IncomingMessage, ServerResponse } from "http";
 import fs from "fs";
+import os from "os";
 import path from "path";
+import { uploadFormidableFileToVercelBlob } from "@/lib/backend/vercelBlob";
 
 const prisma = new PrismaClient();
 
@@ -25,29 +27,11 @@ function randomUppercaseString(length: number = 6): string {
 }
 
 // 파일명 변경 함수
-function renameUploadedFile(file: FormidableFile, userId: string) {
-  const oldPath = file.filepath;
+function makeUploadedFileName(file: FormidableFile, userId: string) {
   const originalName = file.originalFilename || "unknown";
   const ext = path.extname(originalName);
   const newName = `${userId}_${Date.now()}${randomUppercaseString(20)}${ext}`;
-
-  const uploadBasePath = `./public/uploads/0/`;
-
-  if (!fs.existsSync(uploadBasePath)) {
-    fs.mkdirSync(uploadBasePath, { recursive: true });
-
-    // 디렉토리도 접근 가능하도록 퍼미션 설정
-    fs.chmodSync(uploadBasePath, 0o755);
-  }
-
-  const newPath = path.join(uploadBasePath, newName);
-
-  fs.renameSync(oldPath, newPath);
-
-  // 업로드된 파일 권한을 모두 읽을 수 있게 설정 (소유자: rw, 기타: r)
-  fs.chmodSync(newPath, 0o755);
-
-  return `${newName}`;
+  return newName;
 }
 
 export default async function handler(
@@ -67,8 +51,11 @@ export default async function handler(
     return;
   }
 
+  const uploadDir = path.join(os.tmpdir(), "uploads", "0");
+  fs.mkdirSync(uploadDir, { recursive: true });
+
   const form = formidable({
-    uploadDir: "./public/uploads/0",
+    uploadDir,
     keepExtensions: true,
     multiples: true,
     maxFileSize: 200 * 1024 * 1024, // 최대 200MB
@@ -147,16 +134,22 @@ export default async function handler(
 
     // 인덱스 가져오기
     try {
-      fileArray.forEach((file) => {
-        if (file) {
-          // Ensure file is not undefined
-          const contentId = parseInt(
-            !Array.isArray(fields.content_id) ? "0" : fields.content_id[0]
-          );
-          const newName = renameUploadedFile(file, userId);
-          renamedFiles.push(newName);
+      for (const file of fileArray) {
+        if (!file) continue;
+        const newName = makeUploadedFileName(file, userId);
+        const pathname = `uploads/${contentsId}/${newName}`;
+        const blob = await uploadFormidableFileToVercelBlob({
+          pathname,
+          file,
+          access: "public",
+        });
+        renamedFiles.push(blob.url);
+        try {
+          fs.unlinkSync(file.filepath);
+        } catch {
+          // ignore
         }
-      });
+      }
 
       const max_idx = await prisma.participate.findFirst({
         orderBy: {
