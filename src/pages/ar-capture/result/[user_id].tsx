@@ -50,9 +50,7 @@ export default function Result() {
         {videos.map((filename: string, idx: number) => (
           <video
             key={idx}
-            src={`/api/file_serving?file_data=${encodeURIComponent(
-              filename
-            )}&contents_id=0`}
+            src={`/api/file_serving?file_data=${filename}&contents_id=0`}
             controls
             width={320}
             style={{ marginBottom: 16 }}
