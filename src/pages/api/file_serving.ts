@@ -16,19 +16,7 @@ const mimeTypes: Record<string, string> = {
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const { file_data, contents_id } = req.query;
 
-  if (!file_data) {
-    res.status(400).send("요청 파라미터가 필요합니다.");
-    return;
-  }
-
-  // Vercel Blob 업로드 후에는 file_data에 URL이 저장될 수 있음
-  const fileData = Array.isArray(file_data) ? file_data[0] : file_data;
-  if (typeof fileData === "string" && /^https?:\/\//.test(fileData)) {
-    res.redirect(302, fileData);
-    return;
-  }
-
-  if (!contents_id) {
+  if (!file_data || !contents_id) {
     res.status(400).send("요청 파라미터가 필요합니다.");
     return;
   }
@@ -38,14 +26,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     "public",
     "uploads",
     String(contents_id),
-    String(fileData)
+    String(file_data)
   );
   const ext = path.extname(filePath).toLowerCase();
   const mimeType = mimeTypes[ext] || "application/octet-stream";
 
   if (!fs.existsSync(filePath)) {
     res.status(404).send("File not found");
-    return;
   }
 
   const stat = fs.statSync(filePath);
@@ -65,7 +52,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       "Accept-Ranges": "bytes",
       "Content-Length": chunkSize,
       "Content-Type": mimeType,
-      "Content-Disposition": `attachment; filename="${fileData}"`,
+      "Content-Disposition": `attachment; filename="${file_data}"`,
     });
 
     fileStream.pipe(res);
