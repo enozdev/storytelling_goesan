@@ -45,8 +45,8 @@ export default function Home() {
   // 실제 로그아웃 동작
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => {});
-    } catch {}
+      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => { });
+    } catch { }
     // 클라이언트 토큰/세션 제거
     localStorage.removeItem("accessToken");
     // 로그아웃 후 로그인 페이지로 이동
@@ -79,7 +79,7 @@ export default function Home() {
       <header className="relative z-10 text-center mb-6">
         <div className="flex justify-center items-center gap-3 text-green-800">
           <CpuChipIcon className="w-8 h-8" />
-          <h1 className="text-3xl font-extrabold">괴산 산막이 옛길 퀴즈</h1>
+          <h1 className="text-3xl font-extrabold">양주 산막이 옛길 퀴즈</h1>
         </div>
         <p className="text-lg text-gray-600 mt-2">
           AI와 함께하는 산막이 옛길 탐방 퀴즈

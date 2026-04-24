@@ -1,6 +1,6 @@
 # storytelling_goesan
 
-괴산형 스토리텔링 체험교육입니다.
+양주형 스토리텔링 체험교육입니다.
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
