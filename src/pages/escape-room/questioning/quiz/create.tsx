@@ -233,7 +233,7 @@ export default function NewQuestionPage() {
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="예: 괴산의 역사, 산막이 옛길의 유래 등"
+              placeholder="예: 양주의 역사, 산막이 옛길의 유래 등"
               className="w-full rounded-xl border border-[#e4d6ad] bg-white/95 px-4 py-3 text-[#5f513d] shadow-inner outline-none focus:ring-4 focus:ring-[#efe6ce]"
               inputMode="text"
               autoComplete="off"

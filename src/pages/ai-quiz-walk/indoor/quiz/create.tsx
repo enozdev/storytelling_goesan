@@ -80,11 +80,11 @@ export default function NewQuestionPage() {
 
   const suggestedChips = useMemo(
     () => [
-      "괴산의 역사",
-      "괴산의 지형과 산",
-      "괴산의 특산물",
-      "괴산의 축제",
-      "괴산의 문화유산",
+      "양주의 역사",
+      "양주의 지형과 산",
+      "양주의 특산물",
+      "양주의 축제",
+      "양주의 문화유산",
       "산막이 옛길의 유래",
     ],
     []
@@ -179,11 +179,10 @@ export default function NewQuestionPage() {
                   key={chip}
                   type="button"
                   onClick={() => setTopic(chip)}
-                  className={`m-1 px-3 py-2 rounded-full border text-sm min-h-10 active:scale-[0.98] transition ${
-                    topic === chip
-                      ? "bg-emerald-600 border-emerald-600 text-white shadow"
-                      : "bg-white hover:bg-slate-50"
-                  }`}
+                  className={`m-1 px-3 py-2 rounded-full border text-sm min-h-10 active:scale-[0.98] transition ${topic === chip
+                    ? "bg-emerald-600 border-emerald-600 text-white shadow"
+                    : "bg-white hover:bg-slate-50"
+                    }`}
                   aria-pressed={topic === chip}
                 >
                   {topic === chip ? "✓ " : "# "}
@@ -200,7 +199,7 @@ export default function NewQuestionPage() {
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="예: 괴산의 역사, 산막이 옛길의 유래 등"
+              placeholder="예: 양주의 역사, 산막이 옛길의 유래 등"
               className="w-full rounded-xl border px-4 py-3 text-slate-800 shadow-inner outline-none focus:ring-4 focus:ring-emerald-100"
               inputMode="text"
               autoComplete="off"
@@ -227,11 +226,10 @@ export default function NewQuestionPage() {
                       key={d.key}
                       type="button"
                       onClick={() => setDifficulty(d.key as Difficulty)}
-                      className={`flex-1 rounded-xl border px-3 py-3 text-sm min-h-12 ${
-                        difficulty === d.key
-                          ? "bg-emerald-600 text-white border-emerald-600"
-                          : "bg-white hover:bg-slate-50"
-                      }`}
+                      className={`flex-1 rounded-xl border px-3 py-3 text-sm min-h-12 ${difficulty === d.key
+                        ? "bg-emerald-600 text-white border-emerald-600"
+                        : "bg-white hover:bg-slate-50"
+                        }`}
                       aria-pressed={difficulty === d.key}
                     >
                       {d.label}
@@ -274,11 +272,10 @@ export default function NewQuestionPage() {
                 type="button"
                 onClick={onGenerate}
                 disabled={!canGenerate}
-                className={`inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-4 focus:ring-emerald-100 min-h-12 ${
-                  canGenerate
-                    ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
-                    : "bg-slate-200 text-slate-500 cursor-not-allowed"
-                }`}
+                className={`inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-4 focus:ring-emerald-100 min-h-12 ${canGenerate
+                  ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
+                  : "bg-slate-200 text-slate-500 cursor-not-allowed"
+                  }`}
                 aria-disabled={!canGenerate}
                 aria-label="문제 생성하기"
               >

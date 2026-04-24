@@ -49,8 +49,8 @@ export default function AiQuizWalkIndex() {
   // 실제 로그아웃 동작
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => {});
-    } catch {}
+      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => { });
+    } catch { }
     // 클라이언트 토큰/세션 제거
     localStorage.removeItem("accessToken");
     // 로그아웃 후 로그인 페이지로 이동
@@ -63,7 +63,7 @@ export default function AiQuizWalkIndex() {
         {/* 제목 영역 */}
         <header className="text-center space-y-4">
           <h1 className="text-4xl font-extrabold leading-tight text-green-700">
-            괴산 산막이 옛길 <br /> AI 퀴즈 산책
+            양주 산막이 옛길 <br /> AI 퀴즈 산책
           </h1>
           <p className="text-base text-gray-600">
             AI와 함께하는 몰입형 학습 경험
@@ -103,11 +103,10 @@ export default function AiQuizWalkIndex() {
             <div className="mt-4">
               <button
                 disabled={!isIndoorEnabled}
-                className={`${btnBase} ${
-                  isIndoorEnabled
-                    ? "bg-green-600 text-white hover:bg-green-700"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
+                className={`${btnBase} ${isIndoorEnabled
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
                 onClick={() =>
                   isIndoorEnabled && router.push("/ai-quiz-walk/indoor")
                 }

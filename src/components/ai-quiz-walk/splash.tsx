@@ -14,7 +14,7 @@ type Props = {
 export default function SplashApp({
   children,
   duration = 1500,
-  title = "괴산 산막이 옛길 AI퀴즈",
+  title = "양주 산막이 옛길 AI퀴즈",
   subtitle = "AI가 나만의 퀴즈를 만들어드려요",
   logoSrc = "/goesan_logo.png",
 }: Props) {

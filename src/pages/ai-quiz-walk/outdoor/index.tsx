@@ -38,8 +38,8 @@ export default function AiQuizWalkHome() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => {});
-    } catch {}
+      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => { });
+    } catch { }
     localStorage.removeItem("accessToken");
     router.push("/ai-quiz-walk/user/login");
   };
@@ -69,7 +69,7 @@ export default function AiQuizWalkHome() {
         <div className="mx-auto max-w-2xl flex items-center justify-center gap-2 text-amber-900">
           <MapPinIcon className="w-7 h-7 animate-compass" />
           <h1 className="text-2xl font-black md:text-3xl">
-            괴산 산막이 옛길 보물퀴즈
+            양주 산막이 옛길 보물퀴즈
           </h1>
         </div>
         <p className="text-sm md:text-base text-stone-600 mt-1">

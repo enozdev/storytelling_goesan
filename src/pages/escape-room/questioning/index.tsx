@@ -117,7 +117,7 @@ export default function Home() {
         <div className="flex justify-center items-center gap-3 text-[#5f513d]">
           <PencilIcon className="w-8 h-8 anim-float text-[#5f513d]" />
           <h1 className="text-3xl font-extrabold tracking-tight">
-            괴산 임꺽정 QR 방탈출
+            양주 임꺽정 QR 방탈출
           </h1>
         </div>
         <p className="text-lg text-[#5f513d]/80 mt-2">
