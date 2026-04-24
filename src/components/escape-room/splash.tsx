@@ -16,11 +16,11 @@ export default function SplashApp2({
   if (showSplash) {
     return (
       <div className="w-screen h-screen flex flex-col items-center justify-center bg-[#fdf9f2] text-[#4b3b2a]">
-        {/* 김홍도 캐릭터 (동그란 프로필 카드) */}
+        {/* 임꺽정 캐릭터 (동그란 프로필 카드) */}
         <div className="relative w-44 h-44 mb-6 animate-fadeInScale rounded-full overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.15)] ring-4 ring-[#e7dcc5]">
           <Image
-            src="/small_hongdo.png"
-            alt="김홍도 캐릭터"
+            src="/small_kkeokjeong.png"
+            alt="임꺽정 캐릭터"
             fill
             style={{ objectFit: "cover" }}
             priority
@@ -29,10 +29,10 @@ export default function SplashApp2({
 
         {/* 타이틀 */}
         <h1 className="text-3xl font-extrabold text-center leading-snug tracking-tight animate-fadeIn">
-          김홍도 QR 방탈출
+          임꺽정 QR 방탈출
         </h1>
         <p className="mt-2 text-base sm:text-lg text-[#4b3b2a]/80 animate-fadeIn delay-200">
-          단원과 함께 떠나는 전통 속 모험
+          임꺽정과 함께 떠나는 전통 속 모험
         </p>
 
         <style jsx global>{`

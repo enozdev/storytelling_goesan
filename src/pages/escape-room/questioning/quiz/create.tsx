@@ -103,12 +103,12 @@ export default function NewQuestionPage() {
   // 기존 suggestedChips 를 아래로 교체
   const suggestedChips = useMemo(
     () => [
-      "김홍도의 생애와 호(단원)",
-      "풍속화의 특징과 소재",
-      "씨름도 속 숨은 단서 찾기",
-      "서당 풍경과 아동 교육",
-      "장터·주막의 직업과 생활사",
-      "무동(춤)·음악과 민속놀이",
+      "임꺽정의 생애와 신분(백정 출신)",
+      "조선 중기 신분제와 사회 구조",
+      "의적 활동과 민중을 돕는 행동",
+      "탐관오리와 부패한 관리 구분하기",
+      "백성의 생활과 세금·생업 이야기",
+      "조선시대 의복·직업과 생활문화"
     ],
     []
   );
@@ -180,7 +180,7 @@ export default function NewQuestionPage() {
             </div>
             <div className="leading-tight">
               <h1 className="text-[18px] font-extrabold tracking-tight">
-                김홍도 QR 방탈출 · 문제 생성
+                임꺽정 QR 방탈출 · 문제 생성
               </h1>
               <p className="text-xs text-[#5f513d]/70">
                 주제 입력 → AI 생성 → 다음 화면에서 풀이
@@ -199,7 +199,7 @@ export default function NewQuestionPage() {
                 전통 속 수수께끼, 어떤 문제를 만들까요?
               </h2>
               <p className="text-[#5f513d]/80 mt-1">
-                주제를 입력하면, AI가 김홍도 테마에 맞는 문제를 만들어 드립니다.
+                주제를 입력하면, AI가 임꺽정 테마에 맞는 문제를 만들어 드립니다.
               </p>
             </div>
           </div>
@@ -213,10 +213,9 @@ export default function NewQuestionPage() {
                   type="button"
                   onClick={() => setTopic(chip)}
                   className={`m-1 px-3 py-2 rounded-full border text-sm min-h-10 active:scale-[0.98] transition
-                    ${
-                      topic === chip
-                        ? "bg-[#5f513d] border-[#5f513d] text-[#f8f4ea] shadow"
-                        : "bg-[#fff8db] border-[#e4d6ad] text-[#5f513d] hover:bg-[#fff2c4]"
+                    ${topic === chip
+                      ? "bg-[#5f513d] border-[#5f513d] text-[#f8f4ea] shadow"
+                      : "bg-[#fff8db] border-[#e4d6ad] text-[#5f513d] hover:bg-[#fff2c4]"
                     }`}
                   aria-pressed={topic === chip}
                 >
@@ -262,10 +261,9 @@ export default function NewQuestionPage() {
                       type="button"
                       onClick={() => setDifficulty(d.key as Difficulty)}
                       className={`flex-1 rounded-xl border px-3 py-3 text-sm min-h-12
-                        ${
-                          difficulty === d.key
-                            ? "bg-[#5f513d] text-[#f8f4ea] border-[#5f513d]"
-                            : "bg-[#fff8db] text-[#5f513d] border-[#e4d6ad] hover:bg-[#fff2c4]"
+                        ${difficulty === d.key
+                          ? "bg-[#5f513d] text-[#f8f4ea] border-[#5f513d]"
+                          : "bg-[#fff8db] text-[#5f513d] border-[#e4d6ad] hover:bg-[#fff2c4]"
                         }`}
                       aria-pressed={difficulty === d.key}
                     >
@@ -308,10 +306,9 @@ export default function NewQuestionPage() {
                 onClick={onGenerate}
                 disabled={!canGenerate}
                 className={`inline-flex w-full sm:w-auto items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-4 focus:ring-[#efe6ce] min-h-12
-                  ${
-                    canGenerate
-                      ? "bg-[#5f513d] text-[#f8f4ea] hover:bg-[#4d4231] active:scale-[0.99]"
-                      : "bg-[#efe6ce] text-[#8a7b62] cursor-not-allowed"
+                  ${canGenerate
+                    ? "bg-[#5f513d] text-[#f8f4ea] hover:bg-[#4d4231] active:scale-[0.99]"
+                    : "bg-[#efe6ce] text-[#8a7b62] cursor-not-allowed"
                   }`}
                 aria-disabled={!canGenerate}
                 aria-label="문제 생성하기"

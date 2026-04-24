@@ -75,7 +75,7 @@ export default function SavedListPage() {
           ></span>
           <div className="leading-tight">
             <h1 className="text-[18px] md:text-[20px] font-extrabold tracking-tight">
-              김홍도 QR 방탈출 · 저장된 문제
+              임꺽정 QR 방탈출 · 저장된 문제
             </h1>
             <p className="text-xs" style={{ color: `${hanji.ink}B3` }}>
               내가 만든 문제들을 확인하고 QR로 출력해요
@@ -94,7 +94,7 @@ export default function SavedListPage() {
       {Header}
       <main className="mx-auto max-w-4xl px-5 py-8">
         <QuizItems
-          title="단원 김홍도 · 저장된 문제"
+          title="의적 임꺽정 · 저장된 문제"
           items={data?.items ?? []}
           primaryLabel="저장된 문제 QR 보기"
         />

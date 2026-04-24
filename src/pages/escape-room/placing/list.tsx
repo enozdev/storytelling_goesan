@@ -369,7 +369,7 @@ function Header({ hanji, title }: { hanji: Hanji; title: string }) {
     >
       <div className="mx-auto max-w-3xl px-5 py-3">
         <h1 className="text-[18px] md:text-[20px] font-extrabold tracking-tight">
-          김홍도 QR 방탈출 · {title}
+          임꺽정 QR 방탈출 · {title}
         </h1>
         <p className="text-xs mt-0.5" style={{ color: `${hanji.ink}B3` }}>
           작성한 ‘다음 장소 힌트’ 순서대로 흐름을 확인하세요.
