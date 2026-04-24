@@ -56,7 +56,7 @@ export default function AiQuizWalkIndex() {
         {/* 제목 영역 */}
         <header className="text-center space-y-4">
           <h1 className="text-4xl font-extrabold leading-tight text-[#3F3629]">
-            괴산 김홍도 QR 방탈출
+            양주 임꺽정 QR 방탈출
           </h1>
           <p className="text-base text-[#6B604E]">
             AI와 QR로 즐기는 몰입형 학습 체험
@@ -81,7 +81,7 @@ export default function AiQuizWalkIndex() {
               <div className="flex-1">
                 <h2 className={`${titleBase}`}>퀴즈 생성</h2>
                 <p className={`${descBase} text-[#6B604E]`}>
-                  AI를 사용해서 김홍도와 관련된 퀴즈를 제작해보세요.
+                  AI를 사용해서 임꺽정 관련된 퀴즈를 제작해보세요.
                 </p>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function AiQuizWalkIndex() {
               <div className="flex-1">
                 <h2 className={`${titleBase} text-[#3F3629]`}>QR 부착</h2>
                 <p className={`${descBase} text-[#6B604E]`}>
-                  직접 김홍도 QR 방탈출을 제작해보세요!
+                  직접 임꺽정 QR 방탈출을 제작해보세요!
                 </p>
               </div>
             </div>

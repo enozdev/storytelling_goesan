@@ -7,7 +7,7 @@ import { type PropsWithChildren, useMemo } from "react";
 import { HanjiBackground } from "@/components/escape-room/ui/HanjiBackground";
 
 /** 대표 이미지 카드 **/
-function KHDCard({ src = "/placing_hongdo.png" }: { src?: string }) {
+function KHDCard({ src = "/placing_kkeokjeong.png" }: { src?: string }) {
   const altText =
     "조선시대 복장의 캐릭터가 교실 의자에 QR 종이를 붙이는 일러스트";
 
@@ -37,13 +37,13 @@ export default function PlacingHome() {
   return (
     <HanjiBackground>
       <Head>
-        <title>김홍도 QR 방탈출 만들기</title>
+        <title>임꺽정 QR 방탈출 만들기</title>
         <meta
           name="description"
-          content="QR을 활용한 교실 방탈출: 김홍도 캐릭터 일러스트와 함께 시작해보세요."
+          content="QR을 활용한 교실 방탈출: 임꺽정 캐릭터 일러스트와 함께 시작해보세요."
         />
-        <meta property="og:title" content="김홍도 QR 방탈출 만들기" />
-        <meta property="og:image" content="/kimhongdo2.png" />
+        <meta property="og:title" content="임꺽정 QR 방탈출 만들기" />
+        <meta property="og:image" content="/kkeokjeong2.png" />
       </Head>
 
       {/* 헤더: 타이틀 */}
@@ -51,7 +51,7 @@ export default function PlacingHome() {
         <div className="flex justify-center items-center gap-3 text-[#5f513d]">
           <PencilIcon className="w-8 h-8" />
           <h1 className="text-3xl font-extrabold tracking-tight">
-            김홍도 QR 방탈출 만들기
+            임꺽정 QR 방탈출 만들기
           </h1>
         </div>
         <div
@@ -62,7 +62,7 @@ export default function PlacingHome() {
 
       {/* 메인: 이미지 한 장 */}
       <main className="relative z-10 w-full flex-1 flex flex-col items-center justify-center px-4">
-        <KHDCard src="/placing_hongdo.png" />
+        <KHDCard src="/placing_kkeokjeong.png" />
         <p
           className={[
             "text-[18px] md:text-md font-medium text-[#5f513d] text-center",
@@ -76,7 +76,7 @@ export default function PlacingHome() {
           }}
         >
           QR을 교실 곳곳에 배치해 <br className="hidden sm:inline" />
-          <span className="font-semibold">김홍도 퀴즈 방탈출</span>을 만들어
+          <span className="font-semibold">임꺽정 퀴즈 방탈출</span>을 만들어
           보세요!
         </p>
       </main>

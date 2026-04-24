@@ -26,7 +26,7 @@ const CONTENTS: ContentItem[] = [
   {
     id: "sanmaki-ai-quiz",
     title: "산막이옛길 AI 퀴즈",
-    subtitle: "괴산 스토리텔링",
+    subtitle: "양주 스토리텔링",
     desc: "AI와 함께 퀴즈를 풀며 산막이옛길을 배우는 체험형 콘텐츠",
     href: "/ai-quiz-walk", // 실제 라우트에 맞게 수정
     icon: AcademicCapIcon,
@@ -37,9 +37,9 @@ const CONTENTS: ContentItem[] = [
     btnRing: "focus-visible:ring-emerald-600",
   },
   {
-    id: "hongdo-qr-escape",
-    title: "김홍도 QR 방탈출",
-    subtitle: "괴산 스토리텔링",
+    id: "kkeokjeong-qr-escape",
+    title: "임꺽정 QR 방탈출",
+    subtitle: "양주 스토리텔링",
     desc: "QR을 스캔해 미션을 해결하는 인터랙티브 방탈출",
     href: "/escape-room",
     icon: QrCodeIcon,
@@ -59,14 +59,14 @@ export default function AllContents() {
     <div className="min-h-screen bg-white text-[#4f4636]">
       <Head>
         <title>전체 콘텐츠 모음</title>
-        <meta name="description" content="괴산 스토리텔링 콘텐츠 선택 페이지" />
+        <meta name="description" content="스토리텔링 콘텐츠 선택 페이지" />
         <meta property="og:title" content="전체 콘텐츠 모음" />
       </Head>
 
       <header className="mx-auto max-w-screen-lg px-4 md:px-6 pt-8 md:pt-12 pb-4">
         <div className="flex items-center gap-2 text-[#6b604e] mb-2">
           <MapPinIcon className="h-5 w-5" />
-          <span className="text-sm font-semibold">괴산 스토리텔링</span>
+          <span className="text-sm font-semibold">스토리텔링</span>
         </div>
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[#3f3629]">
           전체 콘텐츠 모음

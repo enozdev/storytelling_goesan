@@ -7,7 +7,7 @@ import { type PropsWithChildren, useMemo } from "react";
 import { HanjiBackground } from "@/components/escape-room/ui/HanjiBackground";
 
 /** 대표 이미지 카드 **/
-function KHDCard({ src = "/placing_hongdo.png" }: { src?: string }) {
+function KHDCard({ src = "/placing_kkeokjeong.png" }: { src?: string }) {
   const altText =
     "조선시대 복장의 캐릭터가 교실 의자에 QR 종이를 붙이는 일러스트";
 
@@ -40,10 +40,10 @@ export default function PlacingHome() {
         <title>QR 방탈출</title>
         <meta
           name="description"
-          content="QR을 활용한 교실 방탈출: 김홍도 캐릭터 일러스트와 함께 시작해보세요."
+          content="QR을 활용한 교실 방탈출: 임꺽정 캐릭터 일러스트와 함께 시작해보세요."
         />
-        <meta property="og:title" content="김홍도 QR 방탈출 만들기" />
-        <meta property="og:image" content="/kimhongdo2.png" />
+        <meta property="og:title" content="임꺽정 QR 방탈출 만들기" />
+        <meta property="og:image" content="/kkeokjeong2.png" />
       </Head>
 
       {/* 헤더: 타이틀 */}
@@ -65,7 +65,7 @@ export default function PlacingHome() {
 
       {/* 메인: 이미지 한 장 */}
       <main className="relative z-10 w-full flex-1 flex flex-col items-center justify-center px-4">
-        <KHDCard src="/scan_hongdo.png" />
+        <KHDCard src="/scan_kkeokjeong.png" />
         <p
           className={[
             "text-[18px] md:text-md font-medium text-[#5f513d] text-center",

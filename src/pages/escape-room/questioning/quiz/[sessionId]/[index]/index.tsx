@@ -223,7 +223,7 @@ export default function QuizPagess() {
             </span>
             <div className="leading-tight">
               <h1 className="text-[18px] md:text-[20px] font-extrabold tracking-tight">
-                김홍도 QR 방탈출 · 문제 {idx + 1} / {maxCount}
+                임꺽정 QR 방탈출 · 문제 {idx + 1} / {maxCount}
               </h1>
               <p className="text-xs" style={{ color: `${hanji.ink}B3` }}>
                 주제: {item.question.topic} · 객관식
@@ -343,9 +343,8 @@ export default function QuizPagess() {
             <button
               disabled={!isSubmitEnabled}
               onClick={onSubmit}
-              className={`rounded-xl px-4 py-3 font-semibold min-h-12 transition ${
-                !isSubmitEnabled ? "cursor-not-allowed" : "active:scale-[0.99]"
-              }`}
+              className={`rounded-xl px-4 py-3 font-semibold min-h-12 transition ${!isSubmitEnabled ? "cursor-not-allowed" : "active:scale-[0.99]"
+                }`}
               style={{
                 background: isSubmitEnabled ? hanji.ink : hanji.dim,
                 color: isSubmitEnabled ? hanji.bg : "#8a7b62",
@@ -370,11 +369,10 @@ export default function QuizPagess() {
               <button
                 onClick={onRegenerate}
                 disabled={!submitted || regenerating}
-                className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm min-h-12 ${
-                  !submitted || regenerating
-                    ? "opacity-60 cursor-not-allowed"
-                    : "active:scale-[0.99]"
-                }`}
+                className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm min-h-12 ${!submitted || regenerating
+                  ? "opacity-60 cursor-not-allowed"
+                  : "active:scale-[0.99]"
+                  }`}
                 style={{
                   borderColor: hanji.border,
                   background: "#fff",

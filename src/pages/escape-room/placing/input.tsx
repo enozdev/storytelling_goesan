@@ -775,7 +775,7 @@ function Header({ hanji }: { hanji: Hanji }) {
           </span>
           <div className="leading-tight">
             <h1 className="text-[18px] md:text-[20px] font-extrabold tracking-tight">
-              김홍도 QR 방탈출 제작하기
+              임꺽정 QR 방탈출 제작하기
             </h1>
             <p className="text-xs" style={{ color: `${hanji.ink}B3` }}>
               각 문제 아래에서 ‘퀴즈 위치 힌트’를 입력하고 저장하세요.

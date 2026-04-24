@@ -44,7 +44,7 @@ function SpeechBubble({ children }: PropsWithChildren) {
 }
 
 /** 대표 이미지 **/
-function KHDCard({ src = "/kimhongdo2.png" }: { src?: string }) {
+function KHDCard({ src = "/kkeokjeong2.png" }: { src?: string }) {
   return (
     <div
       className="relative w-full max-w-5xl rounded-3xl overflow-hidden shadow-[0_10px_30px_-12px_rgba(0,0,0,.25)] border border-[#e4d6ad] bg-white"
@@ -57,7 +57,7 @@ function KHDCard({ src = "/kimhongdo2.png" }: { src?: string }) {
       <div className="relative w-full h-full">
         <Image
           src={src}
-          alt="김홍도(가로형) 일러스트"
+          alt="임꺽정(가로형) 일러스트"
           fill
           priority
           sizes="(max-width: 1280px) 70vw, 1280px"
@@ -88,8 +88,8 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => {});
-    } catch {}
+      await fetch("/api/auth/user/logout", { method: "POST" }).catch(() => { });
+    } catch { }
     localStorage.removeItem("accessToken");
     router.push("/escape-room/user/login");
   };
@@ -117,11 +117,11 @@ export default function Home() {
         <div className="flex justify-center items-center gap-3 text-[#5f513d]">
           <PencilIcon className="w-8 h-8 anim-float text-[#5f513d]" />
           <h1 className="text-3xl font-extrabold tracking-tight">
-            괴산 김홍도 QR 방탈출
+            괴산 임꺽정 QR 방탈출
           </h1>
         </div>
         <p className="text-lg text-[#5f513d]/80 mt-2">
-          단원 김홍도의 수수께끼를 AI와 함께
+          의적 임꺽정의 수수께끼를 AI와 함께
         </p>
 
         {/* 먹선 구분선 */}
@@ -133,7 +133,7 @@ export default function Home() {
 
       {/* 대표 카드 */}
       <main className="relative z-10 w-full flex-1 flex flex-col items-center justify-center px-4">
-        <KHDCard src="/kimhongdo2.png" />
+        <KHDCard src="/kkeokjeong2.png" />
       </main>
 
       {/* 하단 버튼 바 — 화면 하단 고정 */}
